@@ -1,0 +1,137 @@
+{
+  "errors": {
+    "user": {
+      "no_authorization": "Nu există autorizație pentru această operațiune.",
+      "no_token": "Nu sunteți autentificat sau valabilitatea token-ului a expirat. Vă rugăm să vă reautentificați.",
+      "not_found": "A survenit o problemă la interogarea bazei de utilizatori. Vă rugăm să reîncercați.",
+      "no_user": "Utilizatorul nu există.",
+      "update_failed": "Eroare în baza de date la actualizarea utilizatorului. Vă rugăm să reîncercați.",
+      "no_user_client": "A survenit o problemă la interogarea bazei de date. Utilizatorul sau clientul nu există. Vă rugăm să reîncercați.",
+      "check_failed": "Eroare în baza de date la verificarea utilizatorului. Vă rugăm să reîncercați.",
+      "registration_failed": "Eroare în baza de date la înregistrarea utilizatorului. Vă rugăm să reîncercați.",
+      "token_gen_failed": "Eroare de server la generarea unui token sau serverul este offline. Vă rugăm să reîncercați.",
+      "pass_email_validation": "Parola sau adresa de e-mail nu îndeplinesc cerințele de validare: ",
+      "email_validation": "Adresa de email nu este validă.",
+      "pass_check_failed": "Eroare la verificarea parolei în baza de utilizatori (eroare de criptare). Vă rugăm să reîncercați.",
+      "wrong_pass": "Parola este incorectă.",
+      "email_exists": "Această adresă de e-mail este deja înregistrată. Vă rugăm să vă autentificați.",
+      "pass_generate_fail": "Nu s-a putut genera o parolă securizată (eroare de criptare). Vă rugăm reîncercați.",
+      "reset_link_failed": "Eroare de server la generarea unui link de resetare sau serverul este offline. Vă rugăm să reîncercați.",
+      "invalid_link": "Link invalid.",
+      "reset_link_expired": "Valabilitatea link-ului de resetare a expirat."
+    },
+    "orders": {
+      "not_found": "A survenit o problemă la interogarea bazei de comenzi. Vă rugăm să reîncercați.",
+      "save_failed": "A survenit o problemă la salvarea comenzii în baza de comenzi. Vă rugăm să reîncercați.",
+      "complete_failed": "A survenit o problemă la finalizarea comenzii în baza de comenzi. Vă rugăm să reîncercați.",
+      "modify_failed": "A survenit o problemă la modificarea comenzii în baza de comenzi. Vă rugăm să reîncercați.",
+      "delete_failed": "A survenit o problemă la ștergerea comenzii în baza de comenzi. Vă rugăm să reîncercați."
+    },
+    "clients": {
+      "not_found": "A survenit o problemă la interogarea bazei de clienți. Vă rugăm să reîncercați.",
+      "no_client": "Clientul nu există.",
+      "save_failed": "A survenit o problemă la salvarea clientului. Vă rugăm să reîncercați.",
+      "no_delete": "Clientul are comenzi în așteptare sau nefacturate. Finalizați sau ștergeți comenzile clientului înainte de a încerca ștergerea acestuia.",
+      "modify_failed": "A survenit o problemă la modificarea clientului. Vă rugăm să reîncărcați pagina.",
+      "delete_failed": "A survenit o problemă la ștergerea clientului. Vă rugăm să reîncărcați pagina."
+    },
+    "invoicing": {
+      "not_found": "A survenit o problemă la interogarea bazei de facturi. Vă rugăm să reîncercați.",
+      "no_invoice": "Factura nu există.",
+      "issue_fail": "Factura nu a putut fi generata. Vă rugăm să reîncercați",
+      "send_failed": "A survenit o problemă la trimiterea mesajului. Vă rugăm să reîncercați.",
+      "update_failed": "Factura nu a putut fi actualizata, va rugam sa reincercati",
+      "cannot_delete_cashed": "Eroare server: factura este incasata.",
+      "cancel_failed": "A survenit o problemă la anularea facturii. Vă rugăm să reîncercați.",
+      "save_failed": "A survenit o problemă la salvarea facturii. Vă rugăm să reîncercați.",
+      "reversed_failed": "A survenit o problemă la stornarea facturii. Vă rugăm să reîncercați."
+    },
+    "notes": {
+      "not_found": "A survenit o problemă la interogarea bazei de note utilizator. Vă rugăm să reîncercați.",
+      "save_failed": "A survenit o problemă la salvarea notelor. Vă rugăm să reîncercați.",
+      "delete_failed": "A survenit o problemă la stergerea notelor. Vă rugăm să reîncercați."
+    },
+    "miscellaneous": {
+      "mime_type_invalid": "Format fișier invalid!"
+    }
+  },
+  "success": {
+    "user": {
+      "updated": "Utilizatorul a fost actualizat cu succes!",
+      "reset_link_sent": "Verificați adresa de email pentru link-ul de resetare",
+      "pass_changed": "Parola a fost schimbată cu succes!"
+    },
+    "orders": {
+      "added": "Comanda a fost adăugată cu succes!",
+      "completed": "Comanda a fost finalizată cu succes!",
+      "modified": "Comanda a fost modificată cu succes!",
+      "deleted": "Comanda a fost ștearsă cu succes!"
+    },
+    "clients": {
+      "added": "Clientul a fost adăugat cu succes!",
+      "modified": "Clientul a fost modificat cu succes!",
+      "deleted": "Clientul a fost șters cu succes!"
+    },
+    "invoicing": {
+      "issued": "Factura a fost emisa cu succes!",
+      "reversed_issued": "Factura storno a fost emisa!",
+      "sent": "Factura a fost trimisa cu succes. Veti primi pe adresa dvs. de email o copie a mesajului trimis.",
+      "modified": "Factura a fost modificata cu succes!",
+      "canceled": "Factura a fost anulata!",
+      "saved": "Factura fost incasata cu succes!",
+      "reversed": "Factura fost stornata cu succes!"
+    },
+    "PDF": {
+      "gen_failed": "A survenit o problemă la generarea fisierului PDF. Vă rugăm să reîncercați."
+    }
+  },
+  "database": {
+    "connection_failed": "A survenit o problemă la accesarea bazei de date. Vă rugăm să reîncercați."
+  },
+  "units": {
+    "2000cw/s": "caractere cu spații",
+    "1800cw/os": "caractere fără spații",
+    "word": "cuvânt",
+    "300w": "cuvinte",
+    "short": {
+      "2000cw/s": "2000ccs",
+      "1800cw/os": "1800cfs",
+      "word": "cuv.",
+      "300w": "300cuv."
+    }
+  },
+  "services": {
+    "translation": "traducere",
+    "proofreading": "corectură",
+    "postediting": "post-editare"
+  },
+  "invoice": {
+    "title": "Factura",
+    "series": "seria",
+    "number": "nr.",
+    "issuedDate": "Data emiterii",
+    "maturity": "Data scadentă",
+    "supplier": "Furnizor",
+    "client": "Client",
+    "registeredOffice": "Sediul",
+    "registrationNumber": "Număr de înregistrare",
+    "taxNumber": "Cod fiscal",
+    "bank": "Banca",
+    "iban": "IBAN",
+    "contact": "Contact",
+    "email": "Email",
+    "phone": "Telefon",
+    "clientBalance": "Sold client",
+    "billingUnit": "unitate de calcul",
+    "it": "Nr.",
+    "jobRef": "Serviciu/Referință",
+    "qty": "Cantitate",
+    "mu": "UM",
+    "rate": "Tarif unitar",
+    "amount": "Valoare",
+    "toPay": "De plată",
+    "remainder": "Rest",
+    "notes": "Note"
+  },
+  "signature": "Document generat cu ZenT-Freelance"
+}
