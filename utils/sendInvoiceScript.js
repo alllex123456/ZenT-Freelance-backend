@@ -35,11 +35,13 @@ exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
       url: `https://zent-freelance.herokuapp.com/uploads/statements/${req.t(
         'statement.title'
       )}[${user.id}][${client.name}].pdf`,
+      name: 'Factura.pdf',
     },
     {
       url: `https://zent-freelance.herokuapp.com/uploads/invoices/${req.t(
         'invoice.title'
       )}[${user.id}][${client.name}].pdf`,
+      name: 'Situatia.pdf',
     },
   ];
 
