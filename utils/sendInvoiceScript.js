@@ -26,7 +26,10 @@ exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
   sendSmtpEmail.cc = [{ name: user.name, email: user.email }];
   sendSmtpEmail.replyTo = { name: user.name, email: user.email };
   sendSmtpEmail.params = {
-    subject: 'Factura dvs. a fost emisa',
+    subject:
+      user.language === 'ro'
+        ? 'Factura dvs. a fost emisa'
+        : 'Your invoice is now available',
   };
   sendSmtpEmail.attachment = [
     {
