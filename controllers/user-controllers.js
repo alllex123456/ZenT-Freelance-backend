@@ -97,7 +97,7 @@ exports.signup = async (req, res, next) => {
 
   let token;
   try {
-    token = jwt.sign({ user }, 'zent-freelance-key', { expiresIn: '24h' });
+    token = jwt.sign({ user }, process.env.JWT_KEY, { expiresIn: '24h' });
   } catch (error) {
     return next(new HttpError(req.t('errors.user.token_gen_failed'), 500));
   }
@@ -149,7 +149,7 @@ exports.login = async (req, res, next) => {
 
   let token;
   try {
-    token = jwt.sign({ user }, 'zent-freelance-key', { expiresIn: '24h' });
+    token = jwt.sign({ user }, process.env.JWT_KEY, { expiresIn: '24h' });
   } catch (error) {
     return next(new HttpError(req.t('errors.user.token_gen_failed'), 500));
   }
@@ -216,7 +216,7 @@ exports.getRecoverPassword = async (req, res, next) => {
 
   let token;
   try {
-    token = jwt.sign({ email }, 'zent-freelance-key', { expiresIn: '1h' });
+    token = jwt.sign({ email }, process.env.JWT_KEY, { expiresIn: '1h' });
   } catch (error) {
     return next(new HttpError(req.t('errors.user.token_gen_failed'), 500));
   }
