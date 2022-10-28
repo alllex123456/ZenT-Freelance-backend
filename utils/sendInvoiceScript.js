@@ -30,18 +30,18 @@ exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
   sendSmtpEmail.params = {
     subject: 'Factura dvs. a fost emisa',
   };
-  // sendSmtpEmail.attachment = [
-  //   {
-  //     url: `https://zent-freelance.herokuapp.com/uploads/statements/${req.t(
-  //       'statement.title'
-  //     )}[${user.id}][${client.name}].pdf`,
-  //   },
-  //   {
-  //     url: `https://zent-freelance.herokuapp.com/uploads/invoices/${req.t(
-  //       'invoice.title'
-  //     )}[${user.id}][${client.name}].pdf`,
-  //   },
-  // ];
+  sendSmtpEmail.attachment = [
+    {
+      url: `https://zent-freelance.herokuapp.com/uploads/statements/${req.t(
+        'statement.title'
+      )}[${user.id}][${client.name}].pdf`,
+    },
+    {
+      url: `https://zent-freelance.herokuapp.com/uploads/invoices/${req.t(
+        'invoice.title'
+      )}[${user.id}][${client.name}].pdf`,
+    },
+  ];
 
   apiInstance.sendTransacEmail(sendSmtpEmail).then(
     function (data) {
