@@ -77,5 +77,5 @@ mongoose
   .connect(
     `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.vndt4.mongodb.net/${process.env.DATABASE}?retryWrites=true&w=majority`
   )
-  .then(() => app.listen(8000))
+  .then(() => app.listen(process.env.PORT || 8000))
   .catch((error) => console.log(error));
