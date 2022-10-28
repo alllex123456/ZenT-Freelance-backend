@@ -295,6 +295,11 @@ exports.sendInvoice = async (req, res, next) => {
     dueDate: invoice.dueDate,
   };
 
+  message.replace('{series}', invoice.series);
+  message.replace('{number}', invoice.number);
+  message.replace('{total}', invoice.totalInvoice);
+  message.replace('{date}', invoice.dueDate);
+
   StatementPDF(res, client, user, req.body.date, req, invoice.orders);
 
   try {

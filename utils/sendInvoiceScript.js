@@ -3,14 +3,6 @@ const SibApiV3Sdk = require('sib-api-v3-sdk');
 exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
   const { series, number, totalInvoice, dueDate, message } = body;
 
-  const messageBody = () => {
-    message.replace('{series}', series);
-    message.replace('{number}', number);
-    message.replace('{totalInvoice}', totalInvoice);
-    message.replace('{dueDate}', dueDate);
-    return message;
-  };
-
   SibApiV3Sdk.ApiClient.instance.authentications['api-key'].apiKey =
     process.env.SENDINBLUE_KEY;
 
@@ -20,8 +12,14 @@ exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
 
   sendSmtpEmail.subject = '{{params.subject}}';
   sendSmtpEmail.htmlContent = `<html><body>
-  <p>Stimate colaborator,</p>
-  <p>${messageBody()}</p>
+  <p>${message
+    .replace('{series}', invoice.series)
+    .replace('{number}', invoice.number)
+    .replace('{total}', `${invoice.totalInvoice} ${client.currency}`)
+    .replace(
+      '{date}',
+      new Date(invoice.dueDate).toLocaleDateString(user.language)
+    )}</p>
   </body></html>`;
   sendSmtpEmail.sender = { name: 'Meow', email: user.email };
   sendSmtpEmail.to = [{ email: setEmail || client.email, name: client.name }];
@@ -35,13 +33,13 @@ exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
       url: `https://zent-freelance.herokuapp.com/uploads/statements/${req.t(
         'statement.title'
       )}[${user.id}][${client.name}].pdf`,
-      name: 'Factura.pdf',
+      name: `${req.t('statement.title')}[${client.name}].pdf`,
     },
     {
       url: `https://zent-freelance.herokuapp.com/uploads/invoices/${req.t(
         'invoice.title'
       )}[${user.id}][${client.name}].pdf`,
-      name: 'Situatia.pdf',
+      name: `${req.t('invoice.title')}[${client.name}].pdf`,
     },
   ];
 

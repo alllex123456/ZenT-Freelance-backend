@@ -192,7 +192,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
       `${order.rate.toLocaleString(user.language)}/${
         translateUnits([order.unit], req.t).short
       }`,
-      order.total.toLocaleString(user.language),
+      order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
     ]);
   });
 
@@ -224,10 +224,12 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
     .fontSize(10)
     .text(
-      `${req.t('invoice.toPay')}: ${totalInvoice.toLocaleString(user.language, {
-        style: 'currency',
-        currency: client.currency,
-      })}`,
+      `${req.t('invoice.toPay')}: ${totalInvoice
+        .toFixed(client.decimalPoints)
+        .toLocaleString(user.language, {
+          style: 'currency',
+          currency: client.currency,
+        })}`,
       {
         align: 'right',
       }
@@ -237,13 +239,12 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
     .fontSize(10)
     .text(
-      `${req.t('invoice.remainder')}: ${invoiceRemainder.toLocaleString(
-        user.language,
-        {
+      `${req.t('invoice.remainder')}: ${invoiceRemainder
+        .toFixed(client.decimalPoints)
+        .toLocaleString(user.language, {
           style: 'currency',
           currency: client.currency,
-        }
-      )}`,
+        })}`,
       {
         align: 'right',
       }
