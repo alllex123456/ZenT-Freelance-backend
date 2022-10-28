@@ -12,7 +12,7 @@ module.exports = (req, res, next) => {
       throw new Error(req.t('errors.user.no_token'));
     }
 
-    const decodedToken = jwt.verify(token, 'zent-freelance-key');
+    const decodedToken = jwt.verify(token, process.env.JWT_KEY);
     req.userData = { userId: decodedToken.user._id };
 
     next();
