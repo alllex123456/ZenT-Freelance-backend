@@ -26,6 +26,11 @@ const app = express();
 app.use(bodyParser.json());
 app.use(middleware.handle(i18next));
 app.use('/uploads/avatars', express.static(path.join('uploads', 'avatars')));
+app.use('/uploads/invoices', express.static(path.join('uploads', 'invoices')));
+app.use(
+  '/uploads/statements',
+  express.static(path.join('uploads', 'statements'))
+);
 
 //CORS
 app.use((req, res, next) => {
