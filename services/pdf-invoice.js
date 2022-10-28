@@ -264,5 +264,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
 
   invoice.end();
 
-  invoice.pipe(res);
+  if (invoiceData._id) {
+    invoice.pipe(res);
+  }
 };

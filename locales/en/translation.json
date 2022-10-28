@@ -105,6 +105,9 @@
     "proofreading": "proofreading",
     "postediting": "post-editing"
   },
+  "statement": {
+    "title": "Statement"
+  },
   "invoice": {
     "title": "Invoice",
     "series": "series",

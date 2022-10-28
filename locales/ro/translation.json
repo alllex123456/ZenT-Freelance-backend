@@ -105,6 +105,9 @@
     "proofreading": "corectură",
     "postediting": "post-editare"
   },
+  "statement": {
+    "title": "Situație"
+  },
   "invoice": {
     "title": "Factura",
     "series": "seria",

@@ -1,29 +1,47 @@
 const fs = require('fs');
 
 const PDFDocument = require('pdfkit-table');
-const { measurementUnit } = require('../utils/generalFunc');
 
-exports.StatementPDF = (res, client, user, time) => {
+exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
   const completedOrders = client.orders.filter(
     (order) => order.status === 'completed'
   );
 
-  const orders = completedOrders.map((order, index) => [
-    index + 1,
-    `${order.service} / ${order.reference}`,
-    `${new Date(order.receivedDate).toLocaleDateString()} /
-        ${new Date(order.deliveredDate).toLocaleDateString()}`,
-    new Date(order.deadline).toLocaleDateString(user.language),
-    order.count.toLocaleString(user.language),
-    order.rate.toLocaleString(user.language),
-    order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
-    order.notes,
-  ]);
+  let orders;
 
-  const totalOrders = completedOrders.reduce(
-    (acc, val) => (acc += val.total),
-    0
-  );
+  if (Object.keys(req.body).length === 0) {
+    orders = completedOrders.map((order, index) => [
+      index + 1,
+      `${order.service} / ${order.reference}`,
+      `${new Date(order.receivedDate).toLocaleDateString()} /
+        ${new Date(order.deliveredDate).toLocaleDateString()}`,
+      new Date(order.deadline).toLocaleDateString(user.language),
+      order.count.toLocaleString(user.language),
+      order.rate.toLocaleString(user.language),
+      order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
+      order.notes,
+    ]);
+  } else {
+    orders = invoiceOrders.map((order, index) => [
+      index + 1,
+      `${order.service} / ${order.reference}`,
+      `${new Date(order.receivedDate).toLocaleDateString()} /
+        ${new Date(order.deliveredDate).toLocaleDateString()}`,
+      new Date(order.deadline).toLocaleDateString(user.language),
+      order.count.toLocaleString(user.language),
+      order.rate.toLocaleString(user.language),
+      order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
+      order.notes,
+    ]);
+  }
+
+  let totalOrders;
+
+  if (Object.keys(req.body).length === 0) {
+    totalOrders = completedOrders.reduce((acc, val) => (acc += val.total), 0);
+  } else {
+    totalOrders = invoiceOrders.reduce((acc, val) => (acc += val.total), 0);
+  }
 
   const statement = new PDFDocument({
     info: {
@@ -37,7 +55,9 @@ exports.StatementPDF = (res, client, user, time) => {
 
   statement.pipe(
     fs.createWriteStream(
-      `./uploads/statements/Statement[${user.id}][${client.name}].pdf`
+      `./uploads/statements/${req.t('statement.title')}[${user.id}][${
+        client.name
+      }].pdf`
     )
   );
 
@@ -104,5 +124,7 @@ exports.StatementPDF = (res, client, user, time) => {
 
   statement.end();
 
-  statement.pipe(res);
+  if (Object.keys(req.body).length === 0) {
+    statement.pipe(res);
+  }
 };

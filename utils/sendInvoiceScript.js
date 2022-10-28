@@ -1,6 +1,6 @@
 const SibApiV3Sdk = require('sib-api-v3-sdk');
 
-exports.sendInvoiceScript = (user, client, body, setEmail) => {
+exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
   const { series, number, totalInvoice, dueDate, message } = body;
 
   const messageBody = () => {
@@ -32,10 +32,14 @@ exports.sendInvoiceScript = (user, client, body, setEmail) => {
   };
   sendSmtpEmail.attachment = [
     {
-      url: `http://localhost:8000/uploads/invoices/Factura[${client.name}].pdf`,
+      url: `https://zent-freelance.herokuapp.com/uploads/statements/${req.t(
+        'statement.title'
+      )}[${user.id}][${client.name}].pdf`,
     },
     {
-      url: `http://localhost:8000/uploads/invoices/Factura[${client.name}].pdf`,
+      url: `https://zent-freelance.herokuapp.com/uploads/invoices/${req.t(
+        'invoice.title'
+      )}[${user.id}][${client.name}].pdf`,
     },
   ];
 

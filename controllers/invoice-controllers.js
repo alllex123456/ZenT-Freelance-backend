@@ -8,6 +8,7 @@ const Order = require('../models/order');
 const AddedItem = require('../models/added-item');
 
 const { sendInvoiceScript } = require('../utils/sendInvoiceScript');
+const { StatementPDF } = require('../services/pdf-statement');
 const { InvoicePDF } = require('../services/pdf-invoice');
 
 exports.getAllInvoices = async (req, res, next) => {
@@ -192,6 +193,25 @@ exports.createInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.invoicing.issue_fail'), 401));
   }
 
+  let pdfOrders;
+  try {
+    pdfOrders = await Order.find({ _id: { $in: orders } });
+  } catch (error) {
+    return next(new HttpError(req.t('errors.PDF.gen_failed'), 500));
+  }
+
+  InvoicePDF(
+    req,
+    res,
+    {
+      clientId: client,
+      userId: user,
+      orders: pdfOrders,
+      dueDate: newInvoice.dueDate,
+      invoiceRemainder: newInvoice.invoiceRemainder,
+    },
+    totalInvoice
+  );
   res.json({
     message: req.body.reverse
       ? req.t('success.invoicing.reversed_issued')
@@ -248,7 +268,7 @@ exports.sendInvoice = async (req, res, next) => {
 
   let invoice;
   try {
-    invoice = await Invoice.findById(invoiceId);
+    invoice = await Invoice.findById(invoiceId).populate('orders');
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
   }
@@ -275,8 +295,10 @@ exports.sendInvoice = async (req, res, next) => {
     dueDate: invoice.dueDate,
   };
 
+  StatementPDF(res, client, user, req.body.date, req, invoice.orders);
+
   try {
-    sendInvoiceScript(user, client, body, email);
+    sendInvoiceScript(user, client, body, email, req);
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
   }

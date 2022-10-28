@@ -76,7 +76,7 @@ exports.generateStatement = async (req, res, next) => {
     return next(new HttpError(req.t('errors.client.no_client'), 500));
   }
 
-  StatementPDF(res, client, user, req.headers.payload);
+  StatementPDF(res, client, user, req.headers.payload, req);
 };
 
 exports.modifyStatementOrder = async (req, res, next) => {
