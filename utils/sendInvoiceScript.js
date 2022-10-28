@@ -23,25 +23,25 @@ exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
   <p>Stimate colaborator,</p>
   <p>${messageBody()}</p>
   </body></html>`;
-  sendSmtpEmail.sender = { name: user.name, email: user.email };
+  sendSmtpEmail.sender = { name: 'Meow', email: user.email };
   sendSmtpEmail.to = [{ email: setEmail || client.email, name: client.name }];
   sendSmtpEmail.cc = [{ name: user.name, email: user.email }];
   sendSmtpEmail.replyTo = { name: user.name, email: user.email };
   sendSmtpEmail.params = {
     subject: 'Factura dvs. a fost emisa',
   };
-  sendSmtpEmail.attachment = [
-    {
-      url: `https://zent-freelance.herokuapp.com/uploads/statements/${req.t(
-        'statement.title'
-      )}[${user.id}][${client.name}].pdf`,
-    },
-    {
-      url: `https://zent-freelance.herokuapp.com/uploads/invoices/${req.t(
-        'invoice.title'
-      )}[${user.id}][${client.name}].pdf`,
-    },
-  ];
+  // sendSmtpEmail.attachment = [
+  //   {
+  //     url: `https://zent-freelance.herokuapp.com/uploads/statements/${req.t(
+  //       'statement.title'
+  //     )}[${user.id}][${client.name}].pdf`,
+  //   },
+  //   {
+  //     url: `https://zent-freelance.herokuapp.com/uploads/invoices/${req.t(
+  //       'invoice.title'
+  //     )}[${user.id}][${client.name}].pdf`,
+  //   },
+  // ];
 
   apiInstance.sendTransacEmail(sendSmtpEmail).then(
     function (data) {
