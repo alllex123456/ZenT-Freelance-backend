@@ -185,7 +185,7 @@ exports.completeOrder = async (req, res, next) => {
 
 exports.modifyOrder = async (req, res, next) => {
   const { orderId } = req.body;
-
+  console.log(req.headers);
   let order;
   try {
     order = await Order.findById(orderId);
