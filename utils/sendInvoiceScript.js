@@ -13,13 +13,10 @@ exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
   sendSmtpEmail.subject = '{{params.subject}}';
   sendSmtpEmail.htmlContent = `<html><body>
   <p>${message
-    .replace('{series}', invoice.series)
-    .replace('{number}', invoice.number)
-    .replace('{total}', `${invoice.totalInvoice} ${client.currency}`)
-    .replace(
-      '{date}',
-      new Date(invoice.dueDate).toLocaleDateString(user.language)
-    )}</p>
+    .replace('{series}', series)
+    .replace('{number}', number)
+    .replace('{total}', `${totalInvoice} ${client.currency}`)
+    .replace('{date}', new Date(dueDate).toLocaleDateString(user.language))}</p>
   </body></html>`;
   sendSmtpEmail.sender = { name: 'Meow', email: user.email };
   sendSmtpEmail.to = [{ email: setEmail || client.email, name: client.name }];
