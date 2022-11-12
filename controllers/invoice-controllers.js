@@ -297,7 +297,7 @@ exports.sendInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
   }
 
-  if (client.userId.toString() !== req.userData.userId) {
+  if (client.userId.toString() !== userId) {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
 
@@ -310,6 +310,7 @@ exports.sendInvoice = async (req, res, next) => {
   if (!invoice) {
     return next(new HttpError(req.t('errors.invoicing.no_invoice'), 404));
   }
+  console.log(res, client, user, req.body.date, req, invoice.orders);
 
   const body = {
     message,
@@ -327,16 +328,12 @@ exports.sendInvoice = async (req, res, next) => {
   try {
     StatementPDF(res, client, user, req.body.date, req, invoice.orders);
   } catch (error) {
-    console.log('failed to generate statement');
-    console.log(error);
     return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
   }
 
   try {
     sendInvoiceScript(user, client, body, email, req);
   } catch (error) {
-    console.log(error);
-    console.log('failed to send invoice');
     return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
   }
 
