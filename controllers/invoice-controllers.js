@@ -329,7 +329,7 @@ exports.sendInvoice = async (req, res, next) => {
   } catch (error) {
     console.log('failed to generate statement');
     console.log(error);
-    return;
+    return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
   }
 
   try {
