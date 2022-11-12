@@ -18,7 +18,7 @@ exports.sendInvoiceScript = (user, client, body, setEmail, req) => {
     .replace('{total}', `${totalInvoice} ${client.currency}`)
     .replace('{date}', new Date(dueDate).toLocaleDateString(user.language))}</p>
   </body></html>`;
-  sendSmtpEmail.sender = { name: 'Meow', email: user.email };
+  sendSmtpEmail.sender = { name: user.name, email: user.email };
   sendSmtpEmail.to = [{ email: setEmail || client.email, name: client.name }];
   sendSmtpEmail.cc = [{ name: user.name, email: user.email }];
   sendSmtpEmail.replyTo = { name: user.name, email: user.email };
