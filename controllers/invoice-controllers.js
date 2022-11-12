@@ -324,11 +324,19 @@ exports.sendInvoice = async (req, res, next) => {
   message.replace('{total}', invoice.totalInvoice);
   message.replace('{date}', invoice.dueDate);
 
-  StatementPDF(res, client, user, req.body.date, req, invoice.orders);
+  try {
+    StatementPDF(res, client, user, req.body.date, req, invoice.orders);
+  } catch (error) {
+    console.log('failed to generate statement');
+    console.log(error);
+    return;
+  }
 
   try {
     sendInvoiceScript(user, client, body, email, req);
   } catch (error) {
+    console.log(error);
+    console.log('failed to send invoice');
     return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
   }
 
