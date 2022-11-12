@@ -28,6 +28,9 @@ const clientSchema = new Schema(
     notes: { type: String, required: false },
     invoiceDue: { type: Number, required: false },
     orders: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Order' }],
+    addedItems: [
+      { type: mongoose.Types.ObjectId, required: true, ref: 'AddedItem' },
+    ],
     invoices: [
       { type: mongoose.Types.ObjectId, required: true, ref: 'Invoice' },
     ],

@@ -132,6 +132,8 @@
     "mu": "UM",
     "rate": "Tarif unitar",
     "amount": "Valoare",
+    "vat": "TVA",
+    "amountWithVAT": "Valoare + TVA",
     "toPay": "De plată",
     "remainder": "Rest",
     "notes": "Note"

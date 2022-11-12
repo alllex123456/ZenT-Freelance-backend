@@ -59,7 +59,7 @@ exports.getInvoice = async (req, res, next) => {
   let invoice;
   try {
     invoice = await Invoice.findById(invoiceId).populate(
-      'clientId orders addedItems'
+      'userId clientId orders addedItems'
     );
   } catch (error) {
     return next(new HttpError(req.t('errors.user.not_found'), 500));
@@ -146,26 +146,29 @@ exports.createInvoice = async (req, res, next) => {
     cashed: false,
   });
 
-  if (req.body.reverse) {
-    const addedItems = orders.filter((order) => order.addedItem);
+  const addedItems = orders.filter((order) => order.addedItem);
 
-    let newAddedItem;
-    addedItems.forEach(async (item) => {
-      newAddedItem = new AddedItem({
-        userId,
-        clientId,
-        invoiceId: newInvoice._id,
-        reference: item.reference,
-        count: item.count,
-        rate: item.rate,
-        unit: item.unit,
-        total: item.total,
-      });
-
-      await newAddedItem.save();
+  let newAddedItem;
+  addedItems.forEach(async (item) => {
+    newAddedItem = new AddedItem({
+      userId,
+      clientId,
+      invoiceId: newInvoice._id,
+      reference: item.reference,
+      discount: item.discount,
+      count: item.count,
+      rate: item.rate,
+      unit: item.unit,
+      total: item.total,
     });
-    newInvoice.addedItems.push(newAddedItem);
-  }
+
+    try {
+      await newAddedItem.save();
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  newInvoice.addedItems.push(newAddedItem);
 
   user.invoices.push(newInvoice);
   client.invoices.push(newInvoice);
@@ -183,7 +186,7 @@ exports.createInvoice = async (req, res, next) => {
     if (!req.body.reverse) {
       await Order.updateMany(
         {
-          _id: { $in: req.body.orders },
+          _id: { $in: req.body.orders.filter((order) => !order.addedItem) },
         },
         { $set: { status: 'invoiced', invoiceId: newInvoice._id } }
       );
@@ -193,25 +196,51 @@ exports.createInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.invoicing.issue_fail'), 401));
   }
 
-  let pdfOrders;
-  try {
-    pdfOrders = await Order.find({ _id: { $in: orders } });
-  } catch (error) {
-    return next(new HttpError(req.t('errors.PDF.gen_failed'), 500));
+  if (req.body.reverse) {
+    const reversedOrders = orders.filter((order) => !order.addedItem);
+    const addedItems = orders.filter((order) => order.addedItem);
+
+    InvoicePDF(
+      req,
+      res,
+      {
+        clientId: client,
+        userId: user,
+        orders: reversedOrders,
+        addedItems,
+        dueDate: newInvoice.dueDate,
+        invoiceRemainder: newInvoice.invoiceRemainder,
+      },
+      +totalInvoice
+    );
+  } else {
+    let pdfOrders;
+    let addedItems;
+    try {
+      pdfOrders = await Order.find({
+        _id: { $in: req.body.orders.filter((order) => !order.addedItem) },
+      });
+      addedItems = await AddedItem.find({
+        _id: { $in: req.body.addedItems?.filter((item) => item.addedItem) },
+      });
+    } catch (error) {
+      return next(new HttpError(req.t('errors.PDF.gen_failed'), 500));
+    }
+    InvoicePDF(
+      req,
+      res,
+      {
+        clientId: client,
+        userId: user,
+        orders: pdfOrders,
+        addedItems,
+        dueDate: newInvoice.dueDate,
+        invoiceRemainder: newInvoice.invoiceRemainder,
+      },
+      +totalInvoice
+    );
   }
 
-  InvoicePDF(
-    req,
-    res,
-    {
-      clientId: client,
-      userId: user,
-      orders: pdfOrders,
-      dueDate: newInvoice.dueDate,
-      invoiceRemainder: newInvoice.invoiceRemainder,
-    },
-    totalInvoice
-  );
   res.json({
     message: req.body.reverse
       ? req.t('success.invoicing.reversed_issued')
@@ -226,7 +255,7 @@ exports.generateInvoice = async (req, res, next) => {
   let invoice;
   try {
     invoice = await Invoice.findById(invoiceId).populate(
-      'orders clientId userId'
+      'orders addedItems clientId userId'
     );
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
@@ -236,13 +265,8 @@ exports.generateInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
 
-  const totalInvoice = invoice.orders.reduce(
-    (acc, val) => (acc += val.total),
-    0
-  );
-
   try {
-    InvoicePDF(req, res, invoice, totalInvoice);
+    InvoicePDF(req, res, invoice, invoice.totalInvoice);
   } catch (error) {
     return next(new HttpError(req.t('errors.PDF.gen_failed'), 500));
   }
@@ -314,8 +338,15 @@ exports.sendInvoice = async (req, res, next) => {
 };
 
 exports.modifyInvoice = async (req, res, next) => {
-  const { ordersEdited, ordersDeleted } = req.body;
+  const { invoiceOrders, ordersEdited, ordersDeleted } = req.body;
   const deletedIds = ordersDeleted.map((order) => order.id);
+
+  let user;
+  try {
+    user = await User.findById(req.userData.userId);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.user.not_found'), 500));
+  }
 
   let client;
   try {
@@ -324,24 +355,31 @@ exports.modifyInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.clients.not_found'), 500));
   }
 
+  let invoice;
+  try {
+    invoice = await Invoice.findById(req.body.invoiceId);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.invoice.not_found'), 500));
+  }
+
   client.remainder += req.body.remainder;
 
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    await client.save({ session });
-
     await User.updateOne(
       { _id: req.userData.userId },
-      { $pullAll: { orders: deletedIds } },
+      {
+        $pullAll: { orders: deletedIds, addedItems: deletedIds },
+      },
       { session }
     );
 
     await Client.updateOne(
       { _id: req.body.clientId },
       {
-        $pullAll: { orders: deletedIds },
+        $pullAll: { orders: deletedIds, addedItems: deletedIds },
       },
       { session }
     );
@@ -355,10 +393,31 @@ exports.modifyInvoice = async (req, res, next) => {
           totalInvoice: req.body.totalInvoice,
           invoiceRemainder: req.body.remainder,
         },
-        $pullAll: { orders: deletedIds },
+        $pullAll: { orders: deletedIds, addedItems: deletedIds },
       },
       { session }
     );
+
+    for (const order of invoiceOrders) {
+      if (order.addedItem || order.discount) {
+        const newAddedItem = new AddedItem({
+          userId: client.id,
+          clientId: client.id,
+          invoiceId: req.body.invoiceId,
+          addedItem: order.addedItem,
+          reference: order.reference,
+          discount: order.discount,
+          count: order.count,
+          rate: order.rate,
+          unit: order.unit,
+          total: order.total,
+        });
+        await newAddedItem.save({ session });
+        user.addedItems.push(newAddedItem);
+        client.addedItems.push(newAddedItem);
+        invoice.addedItems.push(newAddedItem);
+      }
+    }
 
     for (const order of ordersEdited) {
       await Order.updateOne(
@@ -376,9 +435,15 @@ exports.modifyInvoice = async (req, res, next) => {
     }
 
     await Order.deleteMany({ _id: { $in: deletedIds } }, { session });
+    await AddedItem.deleteMany({ _id: { $in: deletedIds } }, { session });
+
+    await client.save({ session });
+    await user.save({ session });
+    await invoice.save({ session });
 
     session.commitTransaction();
   } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.invoicing.update_failed'), 401));
   }
 

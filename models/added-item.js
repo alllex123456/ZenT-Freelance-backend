@@ -11,6 +11,8 @@ const addedItemSchema = new Schema(
       required: true,
       ref: 'Invoice',
     },
+    addedItem: { type: Boolean, required: false },
+    discount: { type: Boolean, required: false },
     reference: { type: String, required: false },
     count: { type: Number, required: true },
     rate: { type: Number, required: true },

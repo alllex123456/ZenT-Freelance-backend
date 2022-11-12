@@ -6,6 +6,7 @@ const Client = require('../models/client');
 const Invoice = require('../models/invoice');
 
 const HttpError = require('../models/http-error');
+const AddedItem = require('../models/added-item');
 
 const calculatedTotal = (unit, count, rate) => {
   let total;
@@ -28,8 +29,12 @@ exports.getOrders = async (req, res, next) => {
   const orderIds = JSON.parse(req.headers.payload);
 
   let orders;
+  let addedItems;
   try {
     orders = await Order.find({
+      _id: { $in: orderIds },
+    });
+    addedItems = await AddedItem.find({
       _id: { $in: orderIds },
     });
   } catch (error) {
@@ -37,7 +42,9 @@ exports.getOrders = async (req, res, next) => {
   }
 
   res.json({
-    message: orders.map((order) => order.toObject({ getters: true })),
+    message: orders
+      .concat(addedItems)
+      .map((order) => order.toObject({ getters: true })),
   });
 };
 

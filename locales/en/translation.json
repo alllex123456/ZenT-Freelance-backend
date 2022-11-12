@@ -132,6 +132,8 @@
     "mu": "MU",
     "rate": "Unit rate",
     "amount": "Amount",
+    "vat": "VAT",
+    "amountWithVAT": "Amount + VAT",
     "toPay": "Amount to pay",
     "remainder": "Remainder",
     "notes": "Notes"

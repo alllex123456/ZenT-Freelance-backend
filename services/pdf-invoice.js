@@ -11,6 +11,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     clientId: client,
     userId: user,
     orders,
+    addedItems,
     dueDate,
     invoiceRemainder,
   } = invoiceData;
@@ -33,8 +34,6 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     )
   );
 
-  // invoice.rect(25, 25, 560, 100);
-  // invoice.fill('#6daae8').stroke();
   let gradient = invoice.linearGradient(25, 25, 560, 100);
   gradient.stop(0.3, '#fff').stop(0.5, '#6daae8').stop(1, '#2e86de');
   invoice.rect(25, 25, 560, 100);
@@ -85,7 +84,8 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     .text(`${req.t('invoice.supplier')}: ${user.name}`, 25, 140, { width: 270 })
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
     .text(
-      `${req.t('invoice.registeredOffice')}: ${user.registeredOffice || ''}`
+      `${req.t('invoice.registeredOffice')}: ${user.registeredOffice || ''}`,
+      { width: 270 }
     )
     .text(
       `${req.t('invoice.registrationNumber')}: ${user.registrationNumber || ''}`
@@ -102,7 +102,10 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     })
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
     .text(
-      `${req.t('invoice.registeredOffice')}: ${client.registeredOffice || ''}`
+      `${req.t('invoice.registeredOffice')}: ${client.registeredOffice || ''}`,
+      {
+        width: 280,
+      }
     )
     .text(
       `${req.t('invoice.registrationNumber')}: ${
@@ -145,63 +148,201 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     .text(`${req.t('invoice.email')}: ${client.email || ''}`, 300)
     .text(`${req.t('invoice.phone')}: ${client.phone || ''}`);
 
-  const table = {
-    headers: [
-      {
-        label: req.t('invoice.it'),
-        headerColor: '#079992',
-        headerOpacity: 0.5,
-      },
-      {
-        label: req.t('invoice.jobRef'),
-        headerColor: '#079992',
-        headerOpacity: 0.5,
-      },
-      {
-        label: req.t('invoice.qty'),
-        headerColor: '#079992',
-        headerOpacity: 0.5,
-      },
-      {
-        label: req.t('invoice.mu'),
-        headerColor: '#079992',
-        headerOpacity: 0.5,
-      },
-      {
-        label: `${req.t('invoice.rate')}*`,
-        headerColor: '#079992',
-        headerOpacity: 0.5,
-      },
-      {
-        label: `${req.t('invoice.amount')} (${client.currency})`,
-        headerColor: '#079992',
-        headerOpacity: 0.5,
-      },
-    ],
+  let table;
+  if (user.VATpayer) {
+    table = {
+      headers: [
+        {
+          label: req.t('invoice.it'),
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: req.t('invoice.jobRef'),
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: req.t('invoice.qty'),
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: req.t('invoice.mu'),
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: `${req.t('invoice.rate')}*`,
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: `${req.t('invoice.amount')} (${client.currency})`,
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: `${req.t('invoice.vat')} ${user.VATrate}% (${
+            client.currency
+          })`,
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: `${req.t('invoice.amountWithVAT')} (${client.currency})`,
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+      ],
 
-    rows: [[0, req.t('invoice.clientBalance'), '', '', '', client.remainder]],
-  };
+      rows: [[0, req.t('invoice.clientBalance'), '', '', '', client.remainder]],
+    };
+  } else {
+    table = {
+      headers: [
+        {
+          label: req.t('invoice.it'),
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: req.t('invoice.jobRef'),
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: req.t('invoice.qty'),
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: req.t('invoice.mu'),
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: `${req.t('invoice.rate')}*`,
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+        {
+          label: `${req.t('invoice.amount')} (${client.currency})`,
+          headerColor: '#079992',
+          headerOpacity: 0.5,
+        },
+      ],
+
+      rows: [[0, req.t('invoice.clientBalance'), '', '', '', client.remainder]],
+    };
+  }
+
   orders.forEach((order, index) => {
-    table.rows.push([
-      index + 1,
-      `${translateServices([order.service], req.t).displayedValue} / ${
-        order.reference
-      }`,
-      `${order.count.toLocaleString(user.language)}`,
-      `${translateUnits([order.unit], req.t).displayedValue}`,
-      `${order.rate.toLocaleString(user.language)}/${
-        translateUnits([order.unit], req.t).short
-      }`,
-      order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
-    ]);
+    if (user.VATpayer) {
+      table.rows.push([
+        index + 1,
+        `${translateServices([order.service], req.t)?.displayedValue} / ${
+          order.reference
+        }`,
+        `${order.count.toLocaleString(user.language)}`,
+        `${translateUnits([order.unit], req.t).displayedValue}`,
+        `${order.rate.toLocaleString(user.language)}/${
+          translateUnits([order.unit], req.t).short
+        }`,
+        order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
+        ((order.total * user.VATrate) / 100)
+          .toFixed(client.decimalPoints)
+          .toLocaleString(user.language),
+        (order.total + (order.total * user.VATrate) / 100)
+          .toFixed(client.decimalPoints)
+          .toLocaleString(user.language),
+      ]);
+    } else {
+      table.rows.push([
+        index + 1,
+        `${translateServices([order.service], req.t)?.displayedValue} / ${
+          order.reference
+        }`,
+        `${order.count.toLocaleString(user.language)}`,
+        `${translateUnits([order.unit], req.t).displayedValue}`,
+        `${order.rate.toLocaleString(user.language)}/${
+          translateUnits([order.unit], req.t).short
+        }`,
+        order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
+      ]);
+    }
   });
+
+  if (addedItems?.length !== 0) {
+    addedItems.forEach((item, index) => {
+      if (user.VATpayer) {
+        table.rows.push([
+          index + 1,
+          `-/${item.reference}`,
+          `${item.count.toLocaleString(user.language)}`,
+          `${
+            item.unit !== '-'
+              ? translateUnits([item.unit], req.t).displayedValue
+              : '-'
+          }`,
+          `${item.rate.toLocaleString(user.language)}/${
+            item.unit ? translateUnits([item.unit], req.t).short : '-'
+          }`,
+          item.discount
+            ? -item.total
+                .toFixed(client.decimalPoints)
+                .toLocaleString(user.language)
+            : item.total
+                .toFixed(client.decimalPoints)
+                .toLocaleString(user.language),
+          item.discount
+            ? -((item.total * user.VATrate) / 100)
+                .toFixed(client.decimalPoints)
+                .toLocaleString(user.language)
+            : ((item.total * user.VATrate) / 100)
+                .toFixed(client.decimalPoints)
+                .toLocaleString(user.language),
+          item.discount
+            ? -(item.total + (item.total * user.VATrate) / 100)
+                .toFixed(client.decimalPoints)
+                .toLocaleString(user.language)
+            : (item.total + (item.total * user.VATrate) / 100)
+                .toFixed(client.decimalPoints)
+                .toLocaleString(user.language),
+        ]);
+      } else {
+        table.rows.push([
+          index + 1,
+          `-`,
+          `${item.count.toLocaleString(user.language)}`,
+          `${
+            item.unit !== '-'
+              ? translateUnits([item.unit], req.t).displayedValue
+              : '-'
+          }`,
+          `${item.rate.toLocaleString(user.language)}/${
+            translateUnits([item.unit], req.t).short
+          }`,
+          item.discount
+            ? -item.total
+                .toFixed(client.decimalPoints)
+                .toLocaleString(user.language)
+            : item.total
+                .toFixed(client.decimalPoints)
+                .toLocaleString(user.language),
+        ]);
+      }
+    });
+  }
 
   invoice.table(table, {
     width: 560,
     padding: 5,
     x: 25,
     y: 350,
-    columnsSize: [40, 170, 80, 90, 100, 80],
+    columnsSize: user.VATpayer
+      ? [40, 140, 60, 60, 80, 50, 50, 80]
+      : [40, 170, 80, 80, 90, 100],
     divider: {
       header: { disabled: false, width: 2, opacity: 1 },
       horizontal: { disabled: false, opacity: 0.2 },
@@ -222,14 +363,11 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
   invoice.moveDown();
   invoice
     .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
-    .fontSize(10)
+    .fontSize(12)
     .text(
       `${req.t('invoice.toPay')}: ${totalInvoice
         .toFixed(client.decimalPoints)
-        .toLocaleString(user.language, {
-          style: 'currency',
-          currency: client.currency,
-        })}`,
+        .toLocaleString(user.language)} ${client.currency}`,
       {
         align: 'right',
       }
@@ -241,10 +379,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     .text(
       `${req.t('invoice.remainder')}: ${invoiceRemainder
         .toFixed(client.decimalPoints)
-        .toLocaleString(user.language, {
-          style: 'currency',
-          currency: client.currency,
-        })}`,
+        .toLocaleString(user.language)} ${client.currency}`,
       {
         align: 'right',
       }

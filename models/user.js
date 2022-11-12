@@ -18,6 +18,8 @@ const userSchema = new Schema(
     registeredOffice: { type: String, required: false },
     registrationNumber: { type: String, required: false },
     taxNumber: { type: String, required: false },
+    VATpayer: { type: Boolean, required: false },
+    VATrate: { type: Number, required: false },
     bank: { type: String, required: false },
     iban: { type: String, required: false },
     invoiceSeries: { type: String, required: false },
@@ -27,6 +29,9 @@ const userSchema = new Schema(
     invoiceNotes: { type: String, required: false },
     clients: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Client' }],
     orders: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Order' }],
+    addedItems: [
+      { type: mongoose.Types.ObjectId, required: true, ref: 'AddedItem' },
+    ],
     invoices: [
       { type: mongoose.Types.ObjectId, required: true, ref: 'Invoice' },
     ],

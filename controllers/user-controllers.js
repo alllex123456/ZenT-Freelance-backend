@@ -18,7 +18,7 @@ exports.getUserData = async (req, res, next) => {
   try {
     user = await User.findById(userId, '-password');
   } catch (error) {
-    return next(new HttpError(reg.t('errors.user.not_found'), 500));
+    return next(new HttpError(req.t('errors.user.not_found'), 500));
   }
 
   if (!user) {
@@ -177,9 +177,7 @@ exports.updateUser = async (req, res, next) => {
   }
 
   for (const [key, value] of Object.entries(req.body)) {
-    if (value) {
-      user[key] = value;
-    }
+    user[key] = value;
   }
 
   try {
