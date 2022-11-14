@@ -35,6 +35,9 @@
       "modify_failed": "A survenit o problemă la modificarea clientului. Vă rugăm să reîncărcați pagina.",
       "delete_failed": "A survenit o problemă la ștergerea clientului. Vă rugăm să reîncărcați pagina."
     },
+    "statement": {
+      "send_failed": "A survenit o problemă la trimiterea mesajului. Vă rugăm să reîncercați."
+    },
     "invoicing": {
       "not_found": "A survenit o problemă la interogarea bazei de facturi. Vă rugăm să reîncercați.",
       "no_invoice": "Factura nu există.",
@@ -71,6 +74,9 @@
       "added": "Clientul a fost adăugat cu succes!",
       "modified": "Clientul a fost modificat cu succes!",
       "deleted": "Clientul a fost șters cu succes!"
+    },
+    "statement": {
+      "send": "Situația lucrărilor a fost trimisă cu succes."
     },
     "invoicing": {
       "issued": "Factura a fost emisa cu succes!",

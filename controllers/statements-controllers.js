@@ -109,20 +109,31 @@ exports.sendStatement = async (req, res, next) => {
     return next(new HttpError(req.t('errors.client.no_client'), 404));
   }
 
+  const currentStatementOrders = client.orders.filter(
+    (order) => order.status === 'completed'
+  );
+
   try {
-    StatementPDF(res, client, user, req.headers.payload, req, client.orders);
+    StatementPDF(
+      res,
+      client,
+      user,
+      req.headers.payload,
+      req,
+      currentStatementOrders
+    );
   } catch (error) {
-    return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
+    return next(new HttpError(req.t('errors.statement.send_failed'), 500));
   }
 
   try {
     sendStatementScript(user, client, message, email, req);
   } catch (error) {
-    return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
+    return next(new HttpError(req.t('errors.statement.send_failed'), 500));
   }
 
   res.json({
-    message: req.t('success.invoicing.sent'),
+    message: req.t('success.statement.sent'),
   });
 };
 

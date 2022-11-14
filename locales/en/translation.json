@@ -35,6 +35,9 @@
       "modify_failed": "There was a problem while editing the client. Please reload the page.",
       "delete_failed": "There was a problem while removing the client. Please reload the page."
     },
+    "statement": {
+      "send_failed": "There was a problem while sending the message. Please try again."
+    },
     "invoicing": {
       "not_found": "There was a problem while enquiring the database. Please try again.",
       "no_invoice": "Invoice does not exist.",
@@ -71,6 +74,9 @@
       "added": "Client successfully added!",
       "modified": "Client successfully edited!",
       "deleted": "CClient successfully removed!"
+    },
+    "statement": {
+      "send": "The statement has been successfully sent"
     },
     "invoicing": {
       "issued": "The invoice has been successfully issued!",
