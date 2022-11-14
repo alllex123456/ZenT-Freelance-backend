@@ -310,7 +310,6 @@ exports.sendInvoice = async (req, res, next) => {
   if (!invoice) {
     return next(new HttpError(req.t('errors.invoicing.no_invoice'), 404));
   }
-  console.log(res, client, user, req.body.date, req, invoice.orders);
 
   const body = {
     message,

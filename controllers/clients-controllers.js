@@ -89,7 +89,7 @@ exports.modifyClient = async (req, res, next) => {
   }
 
   if (req.file) {
-    fs.unlink('uploads/avatars/' + client.avatar, (err) => console.log(err));
+    // fs.unlink('uploads/avatars/' + client.avatar, (err) => console.log(err));
     client.avatar = req.file.filename;
   }
 

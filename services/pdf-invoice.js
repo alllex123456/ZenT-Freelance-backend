@@ -50,7 +50,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     .text(
       `${req.t('invoice.series')} ${user.invoiceSeries}/${req.t(
         'invoice.number'
-      )} ${user.invoiceStartNumber}`,
+      )} ${invoiceData.number}`,
       {
         align: 'right',
       }
@@ -244,18 +244,23 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
         `${translateServices([order.service], req.t)?.displayedValue} / ${
           order.reference
         }`,
-        `${order.count.toLocaleString(user.language)}`,
+        `${order.count.toLocaleString(user.language, {
+          maximumFractionDigits: client.decimalPoints,
+        })}`,
         `${translateUnits([order.unit], req.t).displayedValue}`,
-        `${order.rate.toLocaleString(user.language)}/${
-          translateUnits([order.unit], req.t).short
-        }`,
-        order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
-        ((order.total * user.VATrate) / 100)
-          .toFixed(client.decimalPoints)
-          .toLocaleString(user.language),
-        (order.total + (order.total * user.VATrate) / 100)
-          .toFixed(client.decimalPoints)
-          .toLocaleString(user.language),
+        `${order.rate.toLocaleString(user.language, {
+          maximumFractionDigits: client.decimalPoints,
+        })}/${translateUnits([order.unit], req.t).short}`,
+        order.total.toLocaleString(user.language, {
+          maximumFractionDigits: client.decimalPoints,
+        }),
+        ((order.total * user.VATrate) / 100).toLocaleString(user.language, {
+          maximumFractionDigits: client.decimalPoints,
+        }),
+        (order.total + (order.total * user.VATrate) / 100).toLocaleString(
+          user.language,
+          { maximumFractionDigits: client.decimalPoints }
+        ),
       ]);
     } else {
       table.rows.push([
@@ -263,12 +268,16 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
         `${translateServices([order.service], req.t)?.displayedValue} / ${
           order.reference
         }`,
-        `${order.count.toLocaleString(user.language)}`,
+        `${order.count.toLocaleString(user.language, {
+          maximumFractionDigits: client.decimalPoints,
+        })}`,
         `${translateUnits([order.unit], req.t).displayedValue}`,
-        `${order.rate.toLocaleString(user.language)}/${
-          translateUnits([order.unit], req.t).short
-        }`,
-        order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
+        `${order.rate.toLocaleString(user.language, {
+          maximumFractionDigits: client.decimalPoints,
+        })}/${translateUnits([order.unit], req.t).short}`,
+        order.total.toLocaleString(user.language, {
+          maximumFractionDigits: client.decimalPoints,
+        }),
       ]);
     }
   });
@@ -279,57 +288,65 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
         table.rows.push([
           index + 1,
           `-/${item.reference}`,
-          `${item.count.toLocaleString(user.language)}`,
+          `${item.count.toLocaleString(user.language, {
+            maximumFractionDigits: client.decimalPoints,
+          })}`,
           `${
             item.unit !== '-'
               ? translateUnits([item.unit], req.t).displayedValue
               : '-'
           }`,
-          `${item.rate.toLocaleString(user.language)}/${
-            item.unit ? translateUnits([item.unit], req.t).short : '-'
-          }`,
+          `${item.rate.toLocaleString(user.language, {
+            maximumFractionDigits: client.decimalPoints,
+          })}/${item.unit ? translateUnits([item.unit], req.t).short : '-'}`,
           item.discount
-            ? -item.total
-                .toFixed(client.decimalPoints)
-                .toLocaleString(user.language)
-            : item.total
-                .toFixed(client.decimalPoints)
-                .toLocaleString(user.language),
+            ? -item.total.toLocaleString(user.language, {
+                maximumFractionDigits: client.decimalPoints,
+              })
+            : item.total.toLocaleString(user.language, {
+                maximumFractionDigits: client.decimalPoints,
+              }),
           item.discount
-            ? -((item.total * user.VATrate) / 100)
-                .toFixed(client.decimalPoints)
-                .toLocaleString(user.language)
-            : ((item.total * user.VATrate) / 100)
-                .toFixed(client.decimalPoints)
-                .toLocaleString(user.language),
+            ? -((item.total * user.VATrate) / 100).toLocaleString(
+                user.language,
+                { maximumFractionDigits: client.decimalPoints }
+              )
+            : ((item.total * user.VATrate) / 100).toLocaleString(
+                user.language,
+                { maximumFractionDigits: client.decimalPoints }
+              ),
           item.discount
-            ? -(item.total + (item.total * user.VATrate) / 100)
-                .toFixed(client.decimalPoints)
-                .toLocaleString(user.language)
-            : (item.total + (item.total * user.VATrate) / 100)
-                .toFixed(client.decimalPoints)
-                .toLocaleString(user.language),
+            ? -(item.total + (item.total * user.VATrate) / 100).toLocaleString(
+                user.language,
+                { maximumFractionDigits: client.decimalPoints }
+              )
+            : (item.total + (item.total * user.VATrate) / 100).toLocaleString(
+                user.language,
+                { maximumFractionDigits: client.decimalPoints }
+              ),
         ]);
       } else {
         table.rows.push([
           index + 1,
           `-`,
-          `${item.count.toLocaleString(user.language)}`,
+          `${item.count.toLocaleString(user.language, {
+            maximumFractionDigits: client.decimalPoints,
+          })}`,
           `${
             item.unit !== '-'
               ? translateUnits([item.unit], req.t).displayedValue
               : '-'
           }`,
-          `${item.rate.toLocaleString(user.language)}/${
-            translateUnits([item.unit], req.t).short
-          }`,
+          `${item.rate.toLocaleString(user.language, {
+            maximumFractionDigits: client.decimalPoints,
+          })}/${translateUnits([item.unit], req.t).short}`,
           item.discount
-            ? -item.total
-                .toFixed(client.decimalPoints)
-                .toLocaleString(user.language)
-            : item.total
-                .toFixed(client.decimalPoints)
-                .toLocaleString(user.language),
+            ? -item.total.toLocaleString(user.language, {
+                maximumFractionDigits: client.decimalPoints,
+              })
+            : item.total.toLocaleString(user.language, {
+                maximumFractionDigits: client.decimalPoints,
+              }),
         ]);
       }
     });
@@ -365,9 +382,9 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
     .fontSize(12)
     .text(
-      `${req.t('invoice.toPay')}: ${totalInvoice
-        .toFixed(client.decimalPoints)
-        .toLocaleString(user.language)} ${client.currency}`,
+      `${req.t('invoice.toPay')}: ${totalInvoice.toLocaleString(user.language, {
+        maximumFractionDigits: client.decimalPoints,
+      })} ${client.currency}`,
       {
         align: 'right',
       }
@@ -377,9 +394,12 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
     .fontSize(10)
     .text(
-      `${req.t('invoice.remainder')}: ${invoiceRemainder
-        .toFixed(client.decimalPoints)
-        .toLocaleString(user.language)} ${client.currency}`,
+      `${req.t('invoice.remainder')}: ${invoiceRemainder.toLocaleString(
+        user.language,
+        {
+          maximumFractionDigits: client.decimalPoints,
+        }
+      )} ${client.currency}`,
       {
         align: 'right',
       }

@@ -3,6 +3,7 @@ const Order = require('../models/order');
 const User = require('../models/user');
 const Client = require('../models/client');
 const { StatementPDF } = require('../services/pdf-statement');
+const { sendStatementScript } = require('../utils/sendStatementScript');
 
 exports.getAllStatements = async (req, res, next) => {
   const { userId } = req.userData;
@@ -77,6 +78,52 @@ exports.generateStatement = async (req, res, next) => {
   }
 
   StatementPDF(res, client, user, req.headers.payload, req);
+};
+
+exports.sendStatement = async (req, res, next) => {
+  const { userId } = req.userData;
+  const { clientId, email, message } = req.body;
+
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.user.not_found'), 500));
+  }
+
+  let client;
+  try {
+    client = await Client.findById(clientId).populate('orders');
+  } catch (error) {
+    return next(new HttpError(req.t('errors.client.not_found'), 500));
+  }
+
+  if (client.userId.toString() !== userId) {
+    return next(new HttpError(req.t('errors.user.no_authorization'), 401));
+  }
+
+  if (!user) {
+    return next(new HttpError(req.t('errors.user.no_user'), 404));
+  }
+  if (!client) {
+    return next(new HttpError(req.t('errors.client.no_client'), 404));
+  }
+
+  try {
+    StatementPDF(res, client, user, req.headers.payload, req, client.orders);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
+  }
+
+  try {
+    sendStatementScript(user, client, message, email, req);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
+  }
+
+  res.json({
+    message: req.t('success.invoicing.sent'),
+  });
 };
 
 exports.modifyStatementOrder = async (req, res, next) => {

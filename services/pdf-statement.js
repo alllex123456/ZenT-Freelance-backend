@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { translateServices } = require('../utils/translateUnits');
 
 const PDFDocument = require('pdfkit-table');
 
@@ -12,25 +13,45 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
   if (Object.keys(req.body).length === 0) {
     orders = completedOrders.map((order, index) => [
       index + 1,
-      `${order.service} / ${order.reference}`,
+      `${translateServices([order.service], req.t)?.displayedValue} / ${
+        order.reference
+      }`,
       `${new Date(order.receivedDate).toLocaleDateString()} /
-        ${new Date(order.deliveredDate).toLocaleDateString()}`,
+        ${
+          order.deliveredDate
+            ? new Date(order.deliveredDate).toLocaleDateString()
+            : new Date(order.receivedDate).toLocaleDateString()
+        }`,
       new Date(order.deadline).toLocaleDateString(user.language),
-      order.count.toLocaleString(user.language),
-      order.rate.toLocaleString(user.language),
-      order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
+      order.count.toLocaleString(user.language, {
+        maximumFractionDigits: client.decimalPoints,
+      }),
+      order.rate.toLocaleString(user.language, {
+        maximumFractionDigits: client.decimalPoints,
+      }),
+      order.total.toLocaleString(user.language, {
+        maximumFractionDigits: client.decimalPoints,
+      }),
       order.notes,
     ]);
   } else {
     orders = invoiceOrders.map((order, index) => [
       index + 1,
-      `${order.service} / ${order.reference}`,
+      `${translateServices([order.service], req.t)?.displayedValue} / ${
+        order.reference
+      }`,
       `${new Date(order.receivedDate).toLocaleDateString()} /
         ${new Date(order.deliveredDate).toLocaleDateString()}`,
       new Date(order.deadline).toLocaleDateString(user.language),
-      order.count.toLocaleString(user.language),
-      order.rate.toLocaleString(user.language),
-      order.total.toFixed(client.decimalPoints).toLocaleString(user.language),
+      order.count.toLocaleString(user.language, {
+        maximumFractionDigits: client.decimalPoints,
+      }),
+      order.rate.toLocaleString(user.language, {
+        maximumFractionDigits: client.decimalPoints,
+      }),
+      order.total.toLocaleString(user.language, {
+        maximumFractionDigits: client.decimalPoints,
+      }),
       order.notes,
     ]);
   }
@@ -45,7 +66,9 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
 
   const statement = new PDFDocument({
     info: {
-      Title: `Situație ${client.name} la ${new Date().toLocaleString()}`,
+      Title: `${req.t('statement.title')} ${
+        client.name
+      } la ${new Date().toLocaleString()}`,
     },
     size: 'A4',
     font: 'services/fonts/Titillium/TitilliumWeb-Regular.ttf',
@@ -61,13 +84,14 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     )
   );
 
-  statement.rect(20, 20, 560, 70);
+  statement.rect(20, 20, 450, 70);
   statement.fill('#589ee5').stroke();
+  statement.image(`uploads/avatars/${client.id}`, 480, 20, { width: 80 });
   statement
     .fill('#fff')
     .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
     .fontSize(14)
-    .text('SITUATIE LUCRARI LA ZI', 25, 25)
+    .text(req.t('statement.title').toUpperCase(), 25, 25)
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
     .fontSize(8)
     .text(`Cod client: ${client.id}`)
@@ -78,14 +102,15 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
 
   const table = {
     headers: [
-      'Nr.',
-      'Tip Serviciu/Referinta client',
-      'Primit/predat',
-      'Termen',
-      'Cantitate',
-      `Tarif (${client.currency}/unitate)`,
-      `Total (${client.currency})`,
-      'Note',
+      req.t('statement.it'),
+      req.t('statement.jobRef'),
+      req.t('statement.receivedDelivered'),
+      req.t('statement.deadline'),
+      req.t('statement.qty'),
+      `${req.t('statement.rate')} (${client.currency})`,
+      `${req.t('statement.amount')} (${client.currency})`,
+      req.t('statement.notes'),
+      ,
     ],
 
     rows: orders,
@@ -98,10 +123,10 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     '',
     '',
     '',
-    'Total situatie:',
-    `${totalOrders
-      .toFixed(client.decimalPoints)
-      .toLocaleString(user.language)} ${client.currency}`,
+    req.t('statement.total'),
+    `${totalOrders.toLocaleString(user.language, {
+      maximumFractionDigits: client.decimalPoints,
+    })} ${client.currency}`,
   ]);
   table.rows.push([
     '',
@@ -110,17 +135,19 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     '',
     '',
     '',
-    'In sold client:',
-    `${client.remainder.toLocaleString(user.language)} ${client.currency}`,
+    req.t('statement.previousBalance'),
+    `${client.remainder.toLocaleString(user.language, {
+      maximumFractionDigits: client.decimalPoints,
+    })} ${client.currency}`,
   ]);
 
   statement.table(table, {
     x: 20,
     width: 560,
-    columnSize: [20, 100, 60, 30, 50, 50, 50, 50],
+    columnsSize: [20, 100, 80, 60, 50, 50, 50, 120],
   });
 
-  statement.text('Document generat cu ZenT Freelance');
+  statement.text(req.t('signature'));
 
   statement.end();
 

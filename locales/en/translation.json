@@ -106,7 +106,21 @@
     "postediting": "post-editing"
   },
   "statement": {
-    "title": "Statement"
+    "title": "Statement",
+    "clientCode": "Client code",
+    "clientName": "Client name",
+    "generatedAt": "Generated at",
+    "it": "It.",
+    "jobRef": "Job/Reference",
+    "deadline": "Deadline",
+    "receivedDelivered": "Received/Delivered",
+    "qty": "Quantity",
+    "mu": "MU",
+    "rate": "Unit rate",
+    "amount": "Amount",
+    "notes": "Notes",
+    "total": "Total",
+    "previousBalance": "Previous balance"
   },
   "invoice": {
     "title": "Invoice",

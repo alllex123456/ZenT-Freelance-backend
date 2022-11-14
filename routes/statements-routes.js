@@ -7,6 +7,7 @@ const {
   modifyStatementOrder,
   deleteStatementOrder,
   generateStatement,
+  sendStatement,
 } = require('../controllers/statements-controllers');
 
 const router = express.Router();
@@ -14,8 +15,11 @@ const router = express.Router();
 router.use(authGuard);
 router.get('/', getAllStatements);
 router.get('/client/:clientId', getClientOrders);
+router.get('/pdf/:clientId', generateStatement);
+
+router.post('/send-statement', sendStatement);
+
 router.patch('/modify-order', modifyStatementOrder);
 router.delete('/delete-order', deleteStatementOrder);
-router.get('/pdf/:clientId', generateStatement);
 
 module.exports = router;

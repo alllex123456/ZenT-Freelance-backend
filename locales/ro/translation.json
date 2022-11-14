@@ -102,11 +102,25 @@
   },
   "services": {
     "translation": "traducere",
-    "proofreading": "corectură",
+    "proofreading": "corectura",
     "postediting": "post-editare"
   },
   "statement": {
-    "title": "Situatie"
+    "title": "Situatie",
+    "clientCode": "Cod client",
+    "clientName": "Nume client",
+    "generatedAt": "Generat la",
+    "it": "Nr.",
+    "jobRef": "Serviciu/Referinta",
+    "deadline": "Termen",
+    "receivedDelivered": "Primit/predat",
+    "qty": "Cantitate",
+    "mu": "UM",
+    "rate": "Tarif unitar",
+    "amount": "Valoare",
+    "notes": "Note",
+    "total": "Total",
+    "previousBalance": "Sold anterior"
   },
   "invoice": {
     "title": "Factura",
