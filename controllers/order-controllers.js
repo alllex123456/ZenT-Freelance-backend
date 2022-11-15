@@ -8,6 +8,8 @@ const Invoice = require('../models/invoice');
 const HttpError = require('../models/http-error');
 const AddedItem = require('../models/added-item');
 
+const { localISOTime } = require('../utils/ISO-offset');
+
 const calculatedTotal = (unit, count, rate) => {
   let total;
   if (unit === '2000cw/s') {
@@ -118,8 +120,8 @@ exports.addOrder = async (req, res, next) => {
     userId: req.userData.userId,
     clientId,
     service,
-    receivedDate,
-    deadline,
+    receivedDate: localISOTime(new Date(receivedDate)),
+    deadline: localISOTime(new Date(receivedDate)),
     rate,
     unit,
     currency,

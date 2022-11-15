@@ -104,7 +104,7 @@ exports.signup = async (req, res, next) => {
 
   await new SibApiV3Sdk.TransactionalEmailsApi().sendTransacEmail({
     subject:
-      language === 'RO'
+      language === 'ro'
         ? 'Confirmarea înregistrării în sistemul ZenT-Freelance'
         : 'Confirmation of your ZenT-Freelance account',
     sender: { email: 'alextanase454@gmail.com', name: 'ZenT-Freelance' },
