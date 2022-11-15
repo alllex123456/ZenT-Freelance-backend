@@ -121,7 +121,7 @@ exports.addOrder = async (req, res, next) => {
     clientId,
     service,
     receivedDate: localISOTime(new Date(receivedDate)),
-    deadline: localISOTime(new Date(receivedDate)),
+    deadline: localISOTime(new Date(deadline)),
     rate,
     unit,
     currency,
