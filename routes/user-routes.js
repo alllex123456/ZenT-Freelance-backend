@@ -53,6 +53,7 @@ router.post(
 
 router.use(authGuard);
 router.get('/', getUserData);
+router.get('/sign-s3');
 router.post('/update', fileUploadImages.single('avatar'), updateUser);
 
 module.exports = router;
