@@ -296,7 +296,7 @@ exports.signS3 = (req, res, next) => {
   const fileName = `avatar-${userId}`;
   const fileType = req.query['file-type'];
   const s3Params = {
-    Bucket: S3_BUCKET,
+    Bucket: process.env.S3_BUCKET,
     Key: fileName,
     Expires: 60,
     ContentType: fileType,
@@ -310,7 +310,7 @@ exports.signS3 = (req, res, next) => {
     }
     const returnData = {
       signedRequest: data,
-      url: `https://${S3_BUCKET}.s3.amazonaws.com/${fileName}`,
+      url: `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${fileName}`,
     };
     res.write(JSON.stringify(returnData));
     res.end();
