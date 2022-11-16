@@ -11,6 +11,7 @@ const {
   getUserData,
   getRecoverPassword,
   postRecoverPassword,
+  signS3,
 } = require('../controllers/user-controllers');
 
 router.post(
@@ -53,7 +54,7 @@ router.post(
 
 router.use(authGuard);
 router.get('/', getUserData);
-router.get('/sign-s3');
+router.get('/sign-s3', signS3);
 router.post('/update', fileUploadImages.single('avatar'), updateUser);
 
 module.exports = router;
