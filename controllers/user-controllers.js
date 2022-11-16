@@ -1,4 +1,5 @@
 const fs = require('fs');
+const aws = require('aws-sdk');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const SibApiV3Sdk = require('sib-api-v3-sdk');
