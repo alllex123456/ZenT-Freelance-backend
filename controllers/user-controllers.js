@@ -292,7 +292,7 @@ exports.postRecoverPassword = async (req, res, next) => {
 
 exports.signS3 = (req, res, next) => {
   const { userId } = req.userData;
-
+  aws.config.region = 'eu-west-3';
   const s3 = new aws.S3();
   const fileName = `avatar-${userId}`;
   const fileType = req.query['file-type'];

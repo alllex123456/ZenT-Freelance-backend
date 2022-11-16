@@ -1,5 +1,5 @@
 const express = require('express');
-const aws = require('aws-sdk');
+
 const dotenv = require('dotenv').config();
 const fs = require('fs');
 const path = require('path');
@@ -8,7 +8,6 @@ const mongoose = require('mongoose');
 const HttpError = require('./models/http-error');
 
 // aws bucket
-aws.config.region = 'eu-west-3';
 
 // i18NEXT
 const i18next = require('i18next');
