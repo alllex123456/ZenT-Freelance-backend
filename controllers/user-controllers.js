@@ -1,5 +1,5 @@
 const fs = require('fs');
-const aws = require('aws-sdk');
+
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const SibApiV3Sdk = require('sib-api-v3-sdk');
@@ -88,6 +88,8 @@ exports.signup = async (req, res, next) => {
     orders: [],
     invoices: [],
     notes: [],
+    VATrate: 0,
+    VATpayer: false,
   });
 
   try {
@@ -288,32 +290,4 @@ exports.postRecoverPassword = async (req, res, next) => {
   }
 
   res.json({ message: req.t('success.user.pass_changed') });
-};
-
-exports.signS3 = (req, res, next) => {
-  const { userId } = req.userData;
-  aws.config.region = 'eu-west-3';
-  const s3 = new aws.S3();
-  const fileName = `avatar-${userId}`;
-  const fileType = req.query['file-type'];
-  const s3Params = {
-    Bucket: process.env.S3_BUCKET,
-    Key: fileName,
-    Expires: 60,
-    ContentType: fileType,
-    ACL: 'public-read',
-  };
-
-  s3.getSignedUrl('putObject', s3Params, (err, data) => {
-    if (err) {
-      console.log(err);
-      return res.end();
-    }
-    const returnData = {
-      signedRequest: data,
-      url: `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${fileName}`,
-    };
-    res.write(JSON.stringify(returnData));
-    res.end();
-  });
 };

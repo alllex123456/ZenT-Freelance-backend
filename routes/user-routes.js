@@ -11,8 +11,8 @@ const {
   getUserData,
   getRecoverPassword,
   postRecoverPassword,
-  signS3,
 } = require('../controllers/user-controllers');
+const { signS3 } = require('../middleware/aws-s3');
 
 router.post(
   '/signup',
