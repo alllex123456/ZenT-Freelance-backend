@@ -41,6 +41,7 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
     'Access-Control-Allow-Headers',
+    'Access-Control-Allow-Origin',
     'Origin, Content-Type, X-Requested-With, Accept, Authorization, Payload'
   );
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
