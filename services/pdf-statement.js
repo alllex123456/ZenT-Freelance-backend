@@ -84,9 +84,9 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     )
   );
 
-  statement.rect(20, 20, 450, 70);
+  statement.rect(20, 20, 560, 70);
   statement.fill('#589ee5').stroke();
-  statement.image(`uploads/avatars/${client.id}`, 480, 20, { width: 80 });
+
   statement
     .fill('#fff')
     .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
@@ -144,7 +144,7 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
   statement.table(table, {
     x: 20,
     width: 560,
-    columnsSize: [20, 100, 80, 60, 50, 50, 50, 120],
+    columnsSize: [20, 130, 80, 60, 50, 50, 50, 120],
   });
 
   statement.text(req.t('signature'));

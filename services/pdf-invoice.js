@@ -44,7 +44,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     .fontSize(24)
     .text(req.t('invoice.title').toUpperCase(), 50, 30, {
       align: 'right',
-      characterSpacing: 2,
+      characterSpacing: 1,
     })
     .fontSize(10)
     .text(
@@ -77,7 +77,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     );
 
   invoice.font('services/fonts/Titillium/TitilliumWeb-Regular.ttf');
-  invoice.fill('black');
+  invoice.fill('#2f3640');
   invoice
     .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
     .fontSize(10)
@@ -127,7 +127,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     });
   invoice.moveDown(0.3);
   invoice
-    .fill('#000')
+    .fill('#2f3640')
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
     .text(`${req.t('invoice.email')}: ${user.email || ''}`, 25)
     .text(`${req.t('invoice.phone')}: ${user.phone || ''}`);
@@ -143,7 +143,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     });
   invoice.moveDown(0.3);
   invoice
-    .fill('#000')
+    .fill('#2f3640')
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
     .text(`${req.t('invoice.email')}: ${client.email || ''}`, 300)
     .text(`${req.t('invoice.phone')}: ${client.phone || ''}`);
@@ -328,7 +328,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
       } else {
         table.rows.push([
           index + 1,
-          `-`,
+          `-/${item.reference}`,
           `${item.count.toLocaleString(user.language, {
             maximumFractionDigits: client.decimalPoints,
           })}`,
@@ -407,12 +407,10 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
 
   invoice.moveDown(3);
 
-  invoice.rect(invoice.x, invoice.y, 560, 20).stroke();
+  invoice.moveTo(20, invoice.y).lineTo(580, invoice.y).stroke();
   invoice
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
     .text(`${req.t('invoice.notes')}: ${user.invoiceNotes || ''}`);
-
-  invoice.moveDown(1);
 
   invoice.moveDown(2);
 

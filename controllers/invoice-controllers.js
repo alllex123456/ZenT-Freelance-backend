@@ -163,12 +163,14 @@ exports.createInvoice = async (req, res, next) => {
     });
 
     try {
+      newInvoice.addedItems.push(newAddedItem);
+      user.addedItems.push(newAddedItem);
+      client.addedItems.push(newAddedItem);
       await newAddedItem.save();
     } catch (error) {
       console.log(error);
     }
   });
-  newInvoice.addedItems.push(newAddedItem);
 
   user.invoices.push(newInvoice);
   client.invoices.push(newInvoice);
