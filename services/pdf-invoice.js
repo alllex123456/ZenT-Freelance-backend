@@ -352,6 +352,26 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     });
   }
 
+  user.VATpayer
+    ? table.rows.push([
+        '',
+        req.t('invoice.deducted'),
+        '1',
+        '-',
+        '-',
+        -invoiceRemainder,
+        -((invoiceRemainder * user.VATrate) / 100),
+        -(invoiceRemainder + (invoiceRemainder * user.VATrate) / 100),
+      ])
+    : table.rows.push([
+        '',
+        req.t('invoice.deducted'),
+        '1',
+        '-',
+        '-',
+        -invoiceRemainder,
+      ]);
+
   invoice.table(table, {
     width: 560,
     padding: 5,

@@ -156,6 +156,7 @@
     "amountWithVAT": "Valoare + TVA",
     "toPay": "De plată",
     "remainder": "Rest",
+    "deducted": "Deducere",
     "notes": "Note"
   },
   "signature": "Document generat cu ZenT-Freelance"

@@ -156,6 +156,7 @@
     "amountWithVAT": "Amount + VAT",
     "toPay": "Amount to pay",
     "remainder": "Remainder",
+    "deducted": "Deducted",
     "notes": "Notes"
   },
   "signature": "Document generated with ZenT-Freelance"
