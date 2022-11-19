@@ -12,13 +12,23 @@ exports.sendStatementScript = (user, client, body, setEmail, req) => {
 
   sendSmtpEmail.subject = '{{params.subject}}';
   sendSmtpEmail.htmlContent = `<html><body>
-  <p>${message}</p>
+  <p>${message || ''}</p>
+  <a href="{{params.link}}">link</a>
   </body></html>`;
   sendSmtpEmail.sender = { name: user.name, email: user.email };
   sendSmtpEmail.to = [{ email: setEmail || client.email, name: client.name }];
   sendSmtpEmail.cc = [{ name: user.name, email: user.email }];
   sendSmtpEmail.replyTo = { name: user.name, email: user.email };
   sendSmtpEmail.params = {
+    link:
+      'https://zent-freelance.herokuapp.com/uploads/statements/' +
+      req.t('statement.title') +
+      '[' +
+      user.id +
+      ']' +
+      '[' +
+      client.name +
+      '].pdf',
     subject:
       user.language === 'ro'
         ? 'Situatia lucrarilor la zi'
@@ -32,7 +42,7 @@ exports.sendStatementScript = (user, client, body, setEmail, req) => {
       name: `${req.t('statement.title')}[${client.name}].pdf`,
     },
   ];
-
+  console.log(sendSmtpEmail.attachment);
   apiInstance.sendTransacEmail(sendSmtpEmail).then(
     function (data) {
       console.log(
