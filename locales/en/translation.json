@@ -76,7 +76,7 @@
       "deleted": "CClient successfully removed!"
     },
     "statement": {
-      "send": "The statement has been successfully sent"
+      "sent": "The statement has been successfully sent"
     },
     "invoicing": {
       "issued": "The invoice has been successfully issued!",

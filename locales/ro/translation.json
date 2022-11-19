@@ -76,7 +76,7 @@
       "deleted": "Clientul a fost șters cu succes!"
     },
     "statement": {
-      "send": "Situația lucrărilor a fost trimisă cu succes."
+      "sent": "Situația lucrărilor a fost trimisă cu succes."
     },
     "invoicing": {
       "issued": "Factura a fost emisa cu succes!",

@@ -328,11 +328,6 @@ exports.sendInvoice = async (req, res, next) => {
 
   try {
     StatementPDF(res, client, user, req.body.date, req, invoice.orders);
-  } catch (error) {
-    return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
-  }
-
-  try {
     sendInvoiceScript(user, client, body, email, req);
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
