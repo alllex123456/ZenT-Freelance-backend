@@ -129,6 +129,7 @@ exports.sendStatement = async (req, res, next) => {
   try {
     sendStatement(user, client, req, email);
   } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.statement.send_failed'), 500));
   }
 

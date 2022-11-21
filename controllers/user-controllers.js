@@ -65,7 +65,7 @@ exports.signup = async (req, res, next) => {
     totalInvoice = '{total}'
   ) => {
     return language === 'ro'
-      ? `Stimate client, vi s-a emis factura seria ${invoiceSeries} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura, împreună cu situația lucrărilor facturate, se regăsesc atașate acestui mesaj. Vă mulțumim!`
+      ? `Stimate client, vi s-a emis factura seria ${invoiceSeries} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura și situația lucrărilor facturate se regăsesc atașate acestui mesaj. Vă mulțumim!`
       : `Dear Client, please find attached your invoice series ${invoiceSeries} no. ${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. The detailed work statement is also attached to this message. Thank you!`;
   };
 

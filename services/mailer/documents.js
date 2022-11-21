@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 let transporter = nodemailer.createTransport({
   host: 'smtp.office365.com',
   port: 587,
-  secure: true,
+  secure: false,
   auth: {
     user: 'admin@zent-freelance.com',
     pass: 'andaluzia231178',
@@ -12,21 +12,20 @@ let transporter = nodemailer.createTransport({
 
 exports.sendStatement = (user, recipient, req, setEmail) => {
   transporter.sendMail({
-    from: `${user.name} <${user.email}>`,
+    from: `${user.name} <admin@zent-freelance.com>`,
     to: `<${setEmail || recipient.email}>`,
     subject:
       user.language === 'ro'
         ? 'Situatia lucrarilor la zi'
         : 'Updated statement of work',
     attachments: {
-      fileName: '',
-      path: `./uploads/statements/${req.t('statement.title')}[${user.id}][${
-        client.name
+      fileName: `${req.t('statement.title')}[${recipient.name}].pdf`,
+      path: `./uploads/statements/${req.t('statement.title')}[${user._id}][${
+        recipient.name
       }].pdf`,
-      name: `${req.t('statement.title')}[${client.name}].pdf`,
     },
     html:
-      recipient.language === 'ro'
+      user.language === 'ro'
         ? `<html><body> <p>Stimate client,</p> <p>Regăsiți în atașament situația lucrărilor predate la zi. </p> <p>Vă mulțumim.</p> </body></html>`
         : `<html><body> <p>Dear Client,</p> <p>Please find attached our detailed work statement up to date. </p> <p>Thank you.</p> </body></html>`,
   });
@@ -34,25 +33,28 @@ exports.sendStatement = (user, recipient, req, setEmail) => {
 
 exports.sendInvoice = (user, recipient, body, req, setEmail) => {
   transporter.sendMail({
-    from: `${user.name} <${user.email}>`,
+    from: `${user.name} <admin@zent-freelance.com>`,
     to: `<${recipient.email}>`,
     subject:
       user.language === 'ro'
-        ? 'Situatia lucrarilor la zi'
-        : 'Updated statement of work',
+        ? 'Factură emisă'
+        : 'Your invoice is now available',
     attachments: {
       fileName: '',
       path: `./uploads/invoices/${req.t('invoice.title')}[${user.id}][${
-        client.name
+        recipient.name
       }].pdf`,
-      name: `${req.t('invoice.title')}[${client.name}].pdf`,
+      name: `${req.t('invoice.title')}[${recipient.name}].pdf`,
     },
     html: `<html><body>
-  <p>${message
-    .replace('{series}', series)
-    .replace('{number}', number)
-    .replace('{total}', `${totalInvoice} ${client.currency}`)
-    .replace('{date}', new Date(dueDate).toLocaleDateString(user.language))}</p>
+  <p>${body.message
+    .replace('{series}', body.series)
+    .replace('{number}', body.number)
+    .replace('{total}', `${body.totalInvoice} ${recipient.currency}`)
+    .replace(
+      '{date}',
+      new Date(body.dueDate).toLocaleDateString(user.language)
+    )}</p>
   </body></html>`,
   });
 };
