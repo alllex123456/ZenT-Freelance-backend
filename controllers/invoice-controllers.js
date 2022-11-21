@@ -7,9 +7,9 @@ const User = require('../models/user');
 const Order = require('../models/order');
 const AddedItem = require('../models/added-item');
 
-const { sendInvoiceScript } = require('../utils/sendInvoiceScript');
 const { StatementPDF } = require('../services/pdf-statement');
 const { InvoicePDF } = require('../services/pdf-invoice');
+const { sendInvoice } = require('../services/mailer/documents');
 
 exports.getAllInvoices = async (req, res, next) => {
   let user;
@@ -328,7 +328,7 @@ exports.sendInvoice = async (req, res, next) => {
 
   try {
     StatementPDF(res, client, user, req.body.date, req, invoice.orders);
-    sendInvoiceScript(user, client, body, email, req);
+    sendInvoice(user, client, body, req, email);
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
   }

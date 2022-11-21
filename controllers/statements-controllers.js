@@ -3,7 +3,7 @@ const Order = require('../models/order');
 const User = require('../models/user');
 const Client = require('../models/client');
 const { StatementPDF } = require('../services/pdf-statement');
-const { sendStatementScript } = require('../utils/sendStatementScript');
+const { sendStatement } = require('../services/mailer/documents');
 
 exports.getAllStatements = async (req, res, next) => {
   const { userId } = req.userData;
@@ -127,7 +127,7 @@ exports.sendStatement = async (req, res, next) => {
   }
 
   try {
-    sendStatementScript(user, client, message, email, req);
+    sendStatement(user, client, req, email);
   } catch (error) {
     return next(new HttpError(req.t('errors.statement.send_failed'), 500));
   }
