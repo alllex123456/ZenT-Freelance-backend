@@ -31,18 +31,26 @@ exports.sendStatement = (user, recipient, req, setEmail) => {
 exports.sendInvoice = (user, recipient, body, req, setEmail) => {
   transporter.sendMail({
     from: `${user.name} <admin@zent-freelance.com>`,
-    to: `<${recipient.email}>`,
+    to: `<${setEmail || recipient.email}>`,
+    cc: `${req.t('mail.cc')} <${user.email}>`,
     subject:
       user.language === 'ro'
         ? 'Factură emisă'
         : 'Your invoice is now available',
-    attachments: {
-      fileName: '',
-      path: `./uploads/invoices/${req.t('invoice.title')}[${user.id}][${
-        recipient.name
-      }].pdf`,
-      name: `${req.t('invoice.title')}[${recipient.name}].pdf`,
-    },
+    attachments: [
+      {
+        filename: `${req.t('statement.title')}[${recipient.name}].pdf`,
+        path: `./uploads/statements/${req.t('statement.title')}[${user.id}][${
+          recipient.name
+        }].pdf`,
+      },
+      {
+        filename: `${req.t('invoice.title')}[${recipient.name}].pdf`,
+        path: `./uploads/invoices/${req.t('invoice.title')}[${user.id}][${
+          recipient.name
+        }].pdf`,
+      },
+    ],
     html: `<html><body>
   <p>${body.message
     .replace('{series}', body.series)

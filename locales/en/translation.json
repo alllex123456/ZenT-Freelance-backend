@@ -159,5 +159,8 @@
     "deducted": "Deducted",
     "notes": "Notes"
   },
+  "mail": {
+    "cc": "--copie mesaj--"
+  },
   "signature": "Document generated with ZenT-Freelance"
 }

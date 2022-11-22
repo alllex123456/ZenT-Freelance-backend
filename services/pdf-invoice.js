@@ -414,18 +414,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
   invoice.moveDown();
   invoice
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
-    .fontSize(10)
-    .text(
-      `${req.t('invoice.remainder')}: ${invoiceRemainder.toLocaleString(
-        user.language,
-        {
-          maximumFractionDigits: client.decimalPoints,
-        }
-      )} ${client.currency}`,
-      {
-        align: 'right',
-      }
-    );
+    .fontSize(10);
 
   invoice.moveDown(3);
 

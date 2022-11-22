@@ -215,6 +215,8 @@ exports.createInvoice = async (req, res, next) => {
       {
         clientId: client,
         userId: user,
+        number: newInvoice.number,
+        issuedDate: newInvoice.issuedDate,
         orders: reversedOrders,
         addedItems,
         dueDate: newInvoice.dueDate,
@@ -241,6 +243,8 @@ exports.createInvoice = async (req, res, next) => {
       {
         clientId: client,
         userId: user,
+        number: newInvoice.number,
+        issuedDate: newInvoice.issuedDate,
         orders: pdfOrders,
         addedItems,
         dueDate: newInvoice.dueDate,
