@@ -1,13 +1,10 @@
 const nodemailer = require('nodemailer');
+const AWS = require('aws-sdk');
+
+AWS.config.update({ region: 'eu-west-3' });
 
 let transporter = nodemailer.createTransport({
-  host: 'smtp.office365.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: 'admin@zent-freelance.com',
-    pass: 'andaluzia231178',
-  },
+  SES: new AWS.SES(),
 });
 
 exports.sendStatement = (user, recipient, req, setEmail) => {
@@ -19,7 +16,7 @@ exports.sendStatement = (user, recipient, req, setEmail) => {
         ? 'Situatia lucrarilor la zi'
         : 'Updated statement of work',
     attachments: {
-      fileName: `${req.t('statement.title')}[${recipient.name}].pdf`,
+      filename: `${req.t('statement.title')}[${recipient.name}].pdf`,
       path: `./uploads/statements/${req.t('statement.title')}[${user._id}][${
         recipient.name
       }].pdf`,

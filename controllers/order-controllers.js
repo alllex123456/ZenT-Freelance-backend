@@ -24,7 +24,7 @@ const calculatedTotal = (unit, count, rate) => {
   if (unit === '1800cw/os') {
     total = (count / 1800) * rate;
   }
-  return total.toFixed(2);
+  return total;
 };
 
 exports.getOrders = async (req, res, next) => {
@@ -116,6 +116,16 @@ exports.addOrder = async (req, res, next) => {
     notes,
   } = req.body;
 
+  let user, client;
+  try {
+    user = await User.findById(req.userData.userId);
+    client = await Client.findById(clientId);
+  } catch (error) {}
+
+  if (!user || !client) {
+    return next(new HttpError(req.t('errors.user.no_user_client'), 500));
+  }
+
   const newOrder = new Order({
     userId: req.userData.userId,
     clientId,
@@ -129,18 +139,8 @@ exports.addOrder = async (req, res, next) => {
     notes,
     status: req.body.addToStatement ? 'completed' : 'queue',
     reference: ref || '-',
-    total: calculatedTotal(unit, count, rate),
+    total: calculatedTotal(unit, count, rate).toFixed(client.decimalPoints),
   });
-
-  let user, client;
-  try {
-    user = await User.findById(req.userData.userId);
-    client = await Client.findById(clientId);
-  } catch (error) {}
-
-  if (!user || !client) {
-    return next(new HttpError(req.t('errors.user.no_user_client'), 500));
-  }
 
   user.orders.push(newOrder);
   client.orders.push(newOrder);
@@ -171,6 +171,13 @@ exports.completeOrder = async (req, res, next) => {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
 
+  let client;
+  try {
+    client = await Client.find({ _id: order.clientId });
+  } catch (error) {
+    return next(new HttpError(req.t('errors.client.not_found'), 500));
+  }
+
   if (order.userId.toString() !== req.userData.userId) {
     return next(new HttpError(req.t('errors.orders.no_authorization'), 401));
   }
@@ -180,7 +187,11 @@ exports.completeOrder = async (req, res, next) => {
   order.rate = req.body.rate;
   order.count = req.body.count;
   order.notes = req.body.notes;
-  order.total = calculatedTotal(order.unit, req.body.count, req.body.rate);
+  order.total = calculatedTotal(
+    order.unit,
+    req.body.count,
+    req.body.rate
+  ).toFixed(client.decimalPoints);
   order.deliveredDate = req.body.deliveredDate;
 
   try {
@@ -202,6 +213,13 @@ exports.modifyOrder = async (req, res, next) => {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
 
+  let client;
+  try {
+    client = await Client.find({ _id: order.clientId });
+  } catch (error) {
+    return next(new HttpError(req.t('errors.client.not_found'), 500));
+  }
+
   if (order.userId.toString() !== req.userData.userId) {
     return next(new HttpError(req.t('errors.orders.no_authorization'), 401));
   }
@@ -212,7 +230,11 @@ exports.modifyOrder = async (req, res, next) => {
     }
   }
 
-  order.total = calculatedTotal(order.unit, req.body.count, req.body.rate);
+  order.total = calculatedTotal(
+    order.unit,
+    req.body.count,
+    req.body.rate
+  ).toFixed(client.decimalPoints);
 
   try {
     await order.save();

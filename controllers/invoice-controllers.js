@@ -6,6 +6,7 @@ const Client = require('../models/client');
 const User = require('../models/user');
 const Order = require('../models/order');
 const AddedItem = require('../models/added-item');
+const Statement = require('../models/statement');
 
 const { StatementPDF } = require('../services/pdf-statement');
 const { InvoicePDF } = require('../services/pdf-invoice');
@@ -146,31 +147,15 @@ exports.createInvoice = async (req, res, next) => {
     cashed: false,
   });
 
-  const addedItems = orders.filter((order) => order.addedItem);
-
-  let newAddedItem;
-  addedItems.forEach(async (item) => {
-    newAddedItem = new AddedItem({
-      userId,
-      clientId,
-      invoiceId: newInvoice._id,
-      reference: item.reference,
-      discount: item.discount,
-      count: item.count,
-      rate: item.rate,
-      unit: item.unit,
-      total: item.total,
-    });
-
-    try {
-      newInvoice.addedItems.push(newAddedItem);
-      user.addedItems.push(newAddedItem);
-      client.addedItems.push(newAddedItem);
-      await newAddedItem.save();
-    } catch (error) {
-      console.log(error);
-    }
+  const newStatement = new Statement({
+    userId,
+    clientId,
+    invoiceId: newInvoice._id,
+    orders: orders.filter((order) => !order.addedItem),
+    clientBalance,
   });
+
+  const addedItems = orders.filter((order) => order.addedItem);
 
   user.invoices.push(newInvoice);
   client.invoices.push(newInvoice);
@@ -182,9 +167,30 @@ exports.createInvoice = async (req, res, next) => {
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
+
+    addedItems.forEach(async (item) => {
+      const newAddedItem = new AddedItem({
+        userId,
+        clientId,
+        invoiceId: newInvoice._id,
+        reference: item.reference,
+        discount: item.discount,
+        count: item.count,
+        rate: item.rate,
+        unit: item.unit,
+        total: item.total,
+      });
+
+      newInvoice.addedItems.push(newAddedItem);
+      user.addedItems.push(newAddedItem);
+      client.addedItems.push(newAddedItem);
+      await newAddedItem.save();
+    });
+
     await user.save({ session });
     await client.save({ session });
     await newInvoice.save({ session });
+    await newStatement.save({ session });
     if (!req.body.reverse) {
       await Order.updateMany(
         {
@@ -195,6 +201,7 @@ exports.createInvoice = async (req, res, next) => {
     }
     session.commitTransaction();
   } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.invoicing.issue_fail'), 401));
   }
 

@@ -52,7 +52,7 @@ exports.getClientOrders = async (req, res, next) => {
 };
 
 exports.generateStatement = async (req, res, next) => {
-  const { clientId } = req.params;
+  const { clientId, invoiceId } = req.params;
   const { userId } = req.userData;
 
   let client;
@@ -77,7 +77,17 @@ exports.generateStatement = async (req, res, next) => {
     return next(new HttpError(req.t('errors.client.no_client'), 500));
   }
 
-  StatementPDF(res, client, user, req.headers.payload, req);
+  if (invoiceId) {
+    let invoiceOrders;
+    try {
+      invoiceOrders = await Order.find({ invoiceId });
+    } catch (error) {
+      return next(new HttpError(req.t('errors.order.not_found'), 500));
+    }
+    StatementPDF(res, client, user, req.headers.payload, req, invoiceOrders);
+  } else {
+    StatementPDF(res, client, user, req.headers.payload, req);
+  }
 };
 
 exports.sendStatement = async (req, res, next) => {

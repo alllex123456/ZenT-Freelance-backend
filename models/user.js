@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 const userSchema = new Schema(
   {
     subscription: { type: String, required: true },
+    expiresAt: { type: Date, required: false },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     alias: { type: String, required: false },
