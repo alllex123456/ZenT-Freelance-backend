@@ -154,7 +154,7 @@
     "amount": "Valoare",
     "vat": "TVA",
     "amountWithVAT": "Valoare + TVA",
-    "toPay": "De plată",
+    "toPay": "Total de plată",
     "remainder": "Rest",
     "deducted": "Deducere",
     "notes": "Note"

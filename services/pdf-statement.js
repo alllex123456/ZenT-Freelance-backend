@@ -16,11 +16,11 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
       `${translateServices([order.service], req.t)?.displayedValue} / ${
         order.reference
       }`,
-      `${new Date(order.receivedDate).toLocaleDateString()} /
+      `${new Date(order.receivedDate).toLocaleDateString(user.language)} /
         ${
           order.deliveredDate
-            ? new Date(order.deliveredDate).toLocaleDateString()
-            : new Date(order.receivedDate).toLocaleDateString()
+            ? new Date(order.deliveredDate).toLocaleDateString(user.language)
+            : new Date(order.deadline).toLocaleDateString(user.language)
         }`,
       new Date(order.deadline).toLocaleDateString(user.language),
       order.count.toLocaleString(user.language, {
@@ -40,10 +40,10 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
       `${translateServices([order.service], req.t)?.displayedValue} / ${
         order.reference
       }`,
-      `${new Date(order.receivedDate).toLocaleDateString()} /
-        ${new Date(
-          order.deliveredDate || order.deadline
-        ).toLocaleDateString()}`,
+      `${new Date(order.receivedDate).toLocaleDateString(user.language)} /
+        ${new Date(order.deliveredDate || order.deadline).toLocaleDateString(
+          user.language
+        )}`,
       new Date(order.deadline).toLocaleDateString(user.language),
       order.count.toLocaleString(user.language, {
         maximumFractionDigits: client.decimalPoints,
@@ -98,7 +98,7 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     .fontSize(8)
     .text(`Cod client: ${client.id}`)
     .text(`Nume client: ${client.name}`)
-    .text(`Generat la: ${new Date(time).toLocaleString(user.language)}`);
+    .text(`Generat la: ${new Date(time).toLocaleDateString(user.language)}`);
 
   statement.moveDown(3);
 

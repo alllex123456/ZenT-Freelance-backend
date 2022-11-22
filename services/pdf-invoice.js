@@ -58,9 +58,9 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
   invoice
     .fontSize(10)
     .text(
-      `${req.t('invoice.issuedDate')}: ${new Date().toLocaleDateString(
-        user.language
-      )}`,
+      `${req.t('invoice.issuedDate')}: ${new Date(
+        invoiceData.issuedDate
+      ).toLocaleDateString(user.language)}`,
       {
         align: 'right',
       }
@@ -233,7 +233,9 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
         },
       ],
 
-      rows: [[0, req.t('invoice.clientBalance'), '', '', '', client.remainder]],
+      rows: [
+        [0, req.t('invoice.clientBalance'), '', '', '', invoice.clientBalance],
+      ],
     };
   }
 

@@ -154,7 +154,7 @@
     "amount": "Amount",
     "vat": "VAT",
     "amountWithVAT": "Amount + VAT",
-    "toPay": "Amount to pay",
+    "toPay": "Total to pay",
     "remainder": "Remainder",
     "deducted": "Deducted",
     "notes": "Notes"
