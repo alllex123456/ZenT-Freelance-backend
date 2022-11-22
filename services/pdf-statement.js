@@ -41,7 +41,9 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
         order.reference
       }`,
       `${new Date(order.receivedDate).toLocaleDateString()} /
-        ${new Date(order.deliveredDate).toLocaleDateString()}`,
+        ${new Date(
+          order.deliveredDate || order.deadline
+        ).toLocaleDateString()}`,
       new Date(order.deadline).toLocaleDateString(user.language),
       order.count.toLocaleString(user.language, {
         maximumFractionDigits: client.decimalPoints,
@@ -66,9 +68,9 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
 
   const statement = new PDFDocument({
     info: {
-      Title: `${req.t('statement.title')} ${
-        client.name
-      } la ${new Date().toLocaleString()}`,
+      Title: `${req.t('statement.title')} ${client.name} la ${new Date(
+        time
+      ).toLocaleDateString(user.language)}`,
     },
     size: 'A4',
     font: 'services/fonts/Titillium/TitilliumWeb-Regular.ttf',

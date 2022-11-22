@@ -52,8 +52,9 @@ exports.getClientOrders = async (req, res, next) => {
 };
 
 exports.generateStatement = async (req, res, next) => {
-  const { clientId, invoiceId } = req.params;
+  const { clientId } = req.params;
   const { userId } = req.userData;
+  const { invoiceId } = req.body;
 
   let client;
   try {
@@ -84,15 +85,15 @@ exports.generateStatement = async (req, res, next) => {
     } catch (error) {
       return next(new HttpError(req.t('errors.order.not_found'), 500));
     }
-    StatementPDF(res, client, user, req.headers.payload, req, invoiceOrders);
+    StatementPDF(res, client, user, req.headers.Payload, req, invoiceOrders);
   } else {
-    StatementPDF(res, client, user, req.headers.payload, req);
+    StatementPDF(res, client, user, req.headers.Payload, req);
   }
 };
 
 exports.sendStatement = async (req, res, next) => {
   const { userId } = req.userData;
-  const { clientId, email, message } = req.body;
+  const { clientId, email, message, date } = req.body;
 
   let user;
   try {
@@ -124,14 +125,7 @@ exports.sendStatement = async (req, res, next) => {
   );
 
   try {
-    StatementPDF(
-      res,
-      client,
-      user,
-      req.headers.payload,
-      req,
-      currentStatementOrders
-    );
+    StatementPDF(res, client, user, date, req, currentStatementOrders);
   } catch (error) {
     return next(new HttpError(req.t('errors.statement.send_failed'), 500));
   }
