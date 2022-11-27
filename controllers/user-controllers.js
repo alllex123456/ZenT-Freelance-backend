@@ -28,7 +28,7 @@ exports.getUserData = async (req, res, next) => {
 
 exports.signup = async (req, res, next) => {
   const { email, password, language, preferredCurrency, name } = req.body;
-
+  return;
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(

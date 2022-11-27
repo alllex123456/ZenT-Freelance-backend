@@ -54,7 +54,7 @@ exports.getClientOrders = async (req, res, next) => {
 exports.generateStatement = async (req, res, next) => {
   const { clientId } = req.params;
   const { userId } = req.userData;
-  const { invoiceId } = req.body;
+  const { invoiceId } = req.headers;
 
   let client;
   try {
