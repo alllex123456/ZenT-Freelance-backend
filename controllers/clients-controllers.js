@@ -58,6 +58,10 @@ exports.addClient = async (req, res, next) => {
     invoices: [],
     remainder: 0,
     decimalPoints: 0,
+    contacts: {
+      primary: { name: '', email: '', phone: '', mobile: '' },
+      secondary: { name: '', email: '', phone: '', mobile: '' },
+    },
   });
   user.clients.push(newClient);
 
@@ -86,11 +90,6 @@ exports.modifyClient = async (req, res, next) => {
 
   if (client.userId.toString() !== req.userData.userId) {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
-  }
-
-  if (req.file) {
-    // fs.unlink('uploads/avatars/' + client.avatar, (err) => console.log(err));
-    client.avatar = req.file.filename;
   }
 
   for (const [key, value] of Object.entries(req.body)) {

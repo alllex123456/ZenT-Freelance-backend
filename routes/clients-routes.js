@@ -18,7 +18,7 @@ router.get('/:clientId/sign-s3', signS3);
 router.get('/client/:clientId', getClient);
 
 router.post('/add-client', addClient);
-router.patch('/modify-client', fileUploadImages.single('avatar'), modifyClient);
+router.patch('/modify-client', modifyClient);
 router.delete('/delete-client/:clientId', deleteClient);
 
 module.exports = router;

@@ -108,6 +108,7 @@ exports.addOrder = async (req, res, next) => {
     clientId,
     ref,
     receivedDate,
+    deliveredDate,
     deadline,
     rate,
     unit,
@@ -131,6 +132,8 @@ exports.addOrder = async (req, res, next) => {
     clientId,
     service,
     receivedDate,
+    deliveredDate: req.body.addToStatement ? deliveredDate : new Date(),
+    reference: ref || '-',
     deadline,
     rate,
     unit,
@@ -153,6 +156,7 @@ exports.addOrder = async (req, res, next) => {
     await client.save({ session });
     session.commitTransaction();
   } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.orders.save_failed'), 500));
   }
 

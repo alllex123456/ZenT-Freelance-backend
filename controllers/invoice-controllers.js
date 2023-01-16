@@ -28,7 +28,7 @@ exports.getAllInvoices = async (req, res, next) => {
   let invoices;
   try {
     invoices = await Invoice.find({ _id: { $in: user.invoices } }).populate(
-      'clientId'
+      'clientId userId orders'
     );
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
@@ -73,6 +73,8 @@ exports.createInvoice = async (req, res, next) => {
   const { userId } = req.userData;
   const {
     clientId,
+    series,
+    number,
     orders,
     dueDate,
     issuedDate,
@@ -136,8 +138,8 @@ exports.createInvoice = async (req, res, next) => {
   const newInvoice = new Invoice({
     userId,
     clientId,
-    series: user.invoiceSeries,
-    number: user.invoiceStartNumber,
+    series,
+    number,
     orders: orders.filter((order) => !order.addedItem),
     dueDate,
     issuedDate,
@@ -162,7 +164,7 @@ exports.createInvoice = async (req, res, next) => {
   if (!req.body.reverse) client.remainder = +invoiceRemainder;
   if (req.body.reverse && req.body.totalInvoice < 0)
     client.remainder += totalInvoice;
-  user.invoiceStartNumber += 1;
+  user.invoiceStartNumber = number + 1;
 
   try {
     const session = await mongoose.startSession();
