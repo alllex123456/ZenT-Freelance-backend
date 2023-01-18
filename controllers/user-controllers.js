@@ -28,7 +28,17 @@ exports.getUserData = async (req, res, next) => {
 
 exports.signup = async (req, res, next) => {
   const { email, password, language, preferredCurrency, name } = req.body;
-  return;
+
+  //////////////BLOCK OTHER USERS
+  if (email !== 'alextanase454@gmail.com')
+    return next(
+      new HttpError(
+        'This software is not yet available. Please contact admin@zent-freelance.com for additional info.',
+        422
+      )
+    );
+  //////////////BLOCK OTHER USERS
+
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return next(

@@ -16,9 +16,9 @@ const authGuard = require('../middleware/auth-guard');
 router.use(authGuard);
 
 router.get('/', getAllInvoices);
-router.get('/:invoiceId', getInvoice);
 router.get('/client/:clientId', getClientInvoices);
 router.get('/pdf/:invoiceId', generateInvoice);
+router.get('/:invoiceId', getInvoice);
 
 router.post('/send-invoice', sendInvoice);
 router.post('/:clientId', createInvoice);

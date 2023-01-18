@@ -10,7 +10,7 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
 
   let orders;
 
-  if (req.headers.invoiceid || req.headers.listedorders.length === 0) {
+  if (req.headers.invoiceid || req.headers.listedorders?.length === 0) {
     orders = completedOrders.map((order, index) => [
       index + 1,
       `${translateServices([order.service], req.t)?.displayedValue} / ${
@@ -60,7 +60,7 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
 
   let totalOrders;
 
-  if (req.headers.invoiceid || req.headers.listedorders.length === 0) {
+  if (req.headers.invoiceid || req.headers.listedorders?.length === 0) {
     totalOrders = completedOrders.reduce((acc, val) => (acc += val.total), 0);
   } else {
     totalOrders = invoiceOrders.reduce((acc, val) => (acc += val.total), 0);

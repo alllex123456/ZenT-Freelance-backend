@@ -280,6 +280,7 @@ exports.generateInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
 
+  res.json({ message: 'ok' });
   try {
     InvoicePDF(req, res, invoice, invoice.totalInvoice);
   } catch (error) {
