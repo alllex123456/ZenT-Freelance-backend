@@ -26,3 +26,15 @@ exports.convertCurrency = async (req, res, next) => {
   const convertedAmount = await responseData.json();
   res.json({ message: convertedAmount });
 };
+
+exports.getClientInfo = async (req, res, next) => {
+  const { taxNumber } = req.params;
+
+  const responseData = await fetch(
+    `https://infocui.ro/system/api/data/?key=${process.env.INFOCUI_KEY}&cui=${taxNumber}`
+  );
+
+  const clientData = await responseData.json();
+
+  res.hson({ message: clientData });
+};
