@@ -6,7 +6,7 @@ const {
   modifyClient,
   deleteClient,
 } = require('../controllers/clients-controllers');
-const { fileUploadImages } = require('../middleware/file-upload');
+
 const authGuard = require('../middleware/auth-guard');
 const { signS3 } = require('../middleware/aws-s3');
 const router = express.Router();

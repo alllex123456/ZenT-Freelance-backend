@@ -6,7 +6,7 @@ const {
   translateUnits,
 } = require('../utils/translateUnits');
 
-exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
+exports.InvoicePDF = (req, res, invoiceData, totalInvoice, type) => {
   const {
     clientId: client,
     userId: user,
@@ -15,6 +15,28 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     dueDate,
     invoiceRemainder,
   } = invoiceData;
+
+  if (!req) {
+    const translationObject = require(`../locales/${client.language}/translation.json`);
+    req = {
+      t: (args) => {
+        const argsArray = args.split('.');
+        const argsCount = argsArray.length;
+
+        if (argsCount === 1) {
+          return translationObject[`${args}`];
+        }
+        if (argsCount === 2) {
+          return translationObject[`${argsArray[0]}`][`${argsArray[1]}`];
+        }
+        if (argsCount === 3) {
+          return translationObject[`${argsArray[0]}`][`${argsArray[1]}`][
+            `${argsArray[2]}`
+          ];
+        }
+      },
+    };
+  }
 
   const invoice = new PDFDocument({
     info: {
@@ -30,7 +52,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
     fs.createWriteStream(
       `./uploads/invoices/${req.t('invoice.title')}[${user.id}][${
         client.name
-      }].pdf`
+      }]${type ? type : ''}.pdf`
     )
   );
 
@@ -429,7 +451,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice) => {
 
   invoice.end();
 
-  if (invoiceData._id) {
+  if (res && invoiceData._id) {
     invoice.pipe(res);
   }
 };

@@ -37,6 +37,7 @@ const userSchema = new Schema(
       { type: mongoose.Types.ObjectId, required: true, ref: 'Invoice' },
     ],
     notes: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Note' }],
+    timeZone: { type: String, required: true },
   },
   { timestamps: true }
 );

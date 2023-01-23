@@ -96,7 +96,6 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     .text(req.t('statement.title').toUpperCase(), 25, 25)
     .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
     .fontSize(8)
-    .text(`Cod client: ${client.id}`)
     .text(`Nume client: ${client.name}`)
     .text(`Generat la: ${new Date(time).toLocaleDateString(user.language)}`);
 

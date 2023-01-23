@@ -27,7 +27,8 @@ exports.getUserData = async (req, res, next) => {
 };
 
 exports.signup = async (req, res, next) => {
-  const { email, password, language, preferredCurrency, name } = req.body;
+  const { timeZone, email, password, language, preferredCurrency, name } =
+    req.body;
 
   //////////////BLOCK OTHER USERS
   if (email !== 'alextanase454@gmail.com')
@@ -76,11 +77,12 @@ exports.signup = async (req, res, next) => {
   ) => {
     return language === 'ro'
       ? `Stimate client, vi s-a emis factura seria ${invoiceSeries} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura și situația lucrărilor facturate se regăsesc atașate acestui mesaj. Vă mulțumim!`
-      : `Dear Client, please find attached your invoice series ${invoiceSeries} no. ${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. The detailed work statement is also attached to this message. Thank you!`;
+      : `Esteemed Client, please find attached your invoice series ${invoiceSeries} no. ${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. The detailed work statement is also attached to this message. Thank you!`;
   };
 
   const user = new User({
     subscription: 'free',
+    timeZone,
     email,
     password: hashedPassword,
     alias: name,

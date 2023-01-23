@@ -87,10 +87,12 @@ exports.generateStatement = async (req, res, next) => {
       return next(new HttpError(req.t('errors.order.not_found'), 500));
     }
     StatementPDF(res, client, user, req.headers.payload, req, invoiceOrders);
-  } else if (listedOrders) {
+  } else if (req.headers.listedorders) {
     let selectedOrders;
     try {
-      selectedOrders = await Order.find({ _id: { $in: listedOrders } });
+      selectedOrders = await Order.find({
+        _id: { $in: listedOrders },
+      });
     } catch (error) {
       return next(new HttpError(req.t('errors.order.not_found'), 500));
     }

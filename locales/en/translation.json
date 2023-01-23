@@ -145,7 +145,7 @@
     "email": "Email",
     "phone": "Phone",
     "clientBalance": "Client balance",
-    "billingUnit": "billing unit",
+    "billingUnit": "measurement unit",
     "it": "It.",
     "jobRef": "Job/Reference",
     "qty": "Quantity",

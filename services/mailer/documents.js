@@ -8,6 +8,8 @@ let transporter = nodemailer.createTransport({
 });
 
 exports.sendStatement = (user, recipient, req, setEmail) => {
+  if (!recipient.email || !user.email) return;
+
   transporter.sendMail({
     from: `${user.name} <admin@zent-freelance.com>`,
     to: `<${setEmail || recipient.email}>`,
@@ -29,6 +31,8 @@ exports.sendStatement = (user, recipient, req, setEmail) => {
 };
 
 exports.sendInvoice = (user, recipient, body, req, setEmail) => {
+  if (!recipient.email || !user.email) return;
+
   transporter.sendMail({
     from: `${user.name} <admin@zent-freelance.com>`,
     to: `<${setEmail || recipient.email}>`,

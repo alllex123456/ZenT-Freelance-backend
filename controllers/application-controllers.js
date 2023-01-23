@@ -36,5 +36,5 @@ exports.getClientInfo = async (req, res, next) => {
 
   const clientData = await responseData.json();
 
-  res.hson({ message: clientData });
+  res.json({ message: clientData });
 };
