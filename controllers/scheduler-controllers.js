@@ -8,6 +8,8 @@ const invoiceOutstanding = (users) => {
   if (!users || users.length === 0) return;
 
   users.forEach((user) => {
+    if (!user.invoices || user.invoices.length === 0) return;
+
     // offset local user time
     const date = new Date().toLocaleString('en-US', user.timeZone);
     const tzoffset = new Date(date).getTimezoneOffset() * 60000;
