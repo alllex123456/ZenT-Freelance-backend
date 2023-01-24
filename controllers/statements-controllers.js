@@ -104,7 +104,7 @@ exports.generateStatement = async (req, res, next) => {
 
 exports.sendStatement = async (req, res, next) => {
   const { userId } = req.userData;
-  const { clientId, email, message, date } = req.body;
+  const { clientId, orders: orderIds, email, message, date } = req.body;
 
   let user;
   try {
@@ -131,12 +131,15 @@ exports.sendStatement = async (req, res, next) => {
     return next(new HttpError(req.t('errors.client.no_client'), 404));
   }
 
-  const currentStatementOrders = client.orders.filter(
-    (order) => order.status === 'completed'
-  );
+  let orders;
+  try {
+    orders = await Order.find({ _id: { $in: orderIds } });
+  } catch (error) {
+    return next(new HttpError(req.t('errors.orders.not_found'), 500));
+  }
 
   try {
-    StatementPDF(res, client, user, date, req, currentStatementOrders);
+    StatementPDF(res, client, user, date, req, orders);
   } catch (error) {
     return next(new HttpError(req.t('errors.statement.send_failed'), 500));
   }
@@ -144,7 +147,6 @@ exports.sendStatement = async (req, res, next) => {
   try {
     sendStatement(user, client, req, email);
   } catch (error) {
-    console.log(error);
     return next(new HttpError(req.t('errors.statement.send_failed'), 500));
   }
 
