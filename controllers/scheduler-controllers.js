@@ -88,6 +88,7 @@ const invoiceOutstanding = (users) => {
 };
 
 const getUsers = async (callbackFn) => {
+  console.log('starting');
   let users;
   try {
     users = await User.find().populate({
@@ -104,6 +105,7 @@ module.exports = () => {
   cron.schedule(
     `* * * * *`,
     () => {
+      console.log('launched');
       getUsers(invoiceOutstanding);
     },
     {
