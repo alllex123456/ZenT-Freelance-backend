@@ -8,6 +8,7 @@ const invoiceOutstanding = (users) => {
   if (!users || users.length === 0) return;
 
   users.forEach((user) => {
+    console.log(user);
     if (!user.invoices || user.invoices.length === 0) return;
 
     // offset local user time
