@@ -1,5 +1,3 @@
-#! /app/.heroku/node/bin/node
-
 const { InvoicePDF } = require('../services/pdf-invoice');
 const User = require('../models/user');
 const { isTomorrow } = require('date-fns');
