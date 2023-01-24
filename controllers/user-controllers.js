@@ -75,9 +75,17 @@ exports.signup = async (req, res, next) => {
     dueDate = '{date}',
     totalInvoice = '{total}'
   ) => {
-    return language === 'ro'
-      ? `Stimate client, vi s-a emis factura seria ${invoiceSeries} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura și situația lucrărilor facturate se regăsesc atașate acestui mesaj. Vă mulțumim!`
-      : `Esteemed Client, please find attached your invoice series ${invoiceSeries} no. ${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. The detailed work statement is also attached to this message. Thank you!`;
+    return {
+      ro: `Stimate client, vi s-a emis factura seria ${invoiceSeries} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura și situația lucrărilor facturate se regăsesc atașate acestui mesaj. Vă mulțumim!`,
+      en: `Dear Client, please find attached your invoice series ${invoiceSeries} no. ${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. The detailed work statement is also attached to this message. Thank you!`,
+    };
+  };
+
+  const statementTemplate = () => {
+    return {
+      ro: `<html><body> <p>Stimate client,</p> <p>Regăsiți în atașament situația lucrărilor predate la zi. </p> <p>Vă mulțumim.</p> </body></html>`,
+      en: `<html><body> <p>Dear Client,</p> <p>Please find attached our detailed work statement up to date. </p> <p>Thank you.</p> </body></html>`,
+    };
   };
 
   const user = new User({
@@ -93,6 +101,7 @@ exports.signup = async (req, res, next) => {
     invoiceStartNumber: 1,
     invoiceDefaultDue: 5,
     invoiceTemplate: invoiceTemplate(),
+    statementTemplate: statementTemplate(),
     clients: [],
     orders: [],
     invoices: [],

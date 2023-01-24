@@ -26,7 +26,14 @@ const userSchema = new Schema(
     invoiceSeries: { type: String, required: false },
     invoiceStartNumber: { type: Number, required: false },
     invoiceDefaultDue: { type: Number, required: false },
-    invoiceTemplate: { type: String, required: false },
+    invoiceEmailMessage: {
+      ro: { type: String, required: false },
+      en: { type: String, required: false },
+    },
+    statementEmailMessage: {
+      ro: { type: String, required: false },
+      en: { type: String, required: false },
+    },
     invoiceNotes: { type: String, required: false },
     clients: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Client' }],
     orders: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Order' }],

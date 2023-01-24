@@ -23,10 +23,7 @@ exports.sendStatement = (user, recipient, req, setEmail) => {
         recipient.name
       }].pdf`,
     },
-    html:
-      user.language === 'ro'
-        ? `<html><body> <p>Stimate client,</p> <p>Regăsiți în atașament situația lucrărilor predate la zi. </p> <p>Vă mulțumim.</p> </body></html>`
-        : `<html><body> <p>Dear Client,</p> <p>Please find attached our detailed work statement up to date. </p> <p>Thank you.</p> </body></html>`,
+    html: user.statementEmailMessage[`${recipient.language}`],
   });
 };
 
