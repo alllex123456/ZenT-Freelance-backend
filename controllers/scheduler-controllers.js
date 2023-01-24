@@ -102,7 +102,7 @@ const getUsers = async (callbackFn) => {
 
 module.exports = () => {
   cron.schedule(
-    `00 07 * * *`,
+    `00 08 * * *`,
     () => {
       getUsers(invoiceOutstanding);
     },
