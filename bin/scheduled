@@ -5,8 +5,6 @@ const User = require('../models/user');
 const { isTomorrow } = require('date-fns');
 const { invoiceOutstandingMail } = require('../services/mailer/reminders');
 
-console.log('opened');
-
 const invoiceOutstanding = (users) => {
   if (!users || users.length === 0) return;
 
@@ -101,10 +99,9 @@ const getUsers = async (callbackFn) => {
         path: 'clientId userId orders',
       },
     });
+    console.log(users);
+    callbackFn(users);
   } catch (error) {}
-  console.log('working');
-  console.log(users);
-  callbackFn(users);
 };
 
 getUsers(invoiceOutstanding);
