@@ -1,7 +1,6 @@
-#! /app/.heroku/node/bin/node
-
 const { InvoicePDF } = require('../services/pdf-invoice');
 const User = require('../models/user');
+const cron = require('node-cron');
 const { isTomorrow } = require('date-fns');
 const { invoiceOutstandingMail } = require('../services/mailer/reminders');
 
@@ -18,7 +17,6 @@ const invoiceOutstanding = (users) => {
 
     user.invoices.forEach((invoice) => {
       if (isTomorrow(new Date(invoice.dueDate))) {
-        console.log(invoice);
         InvoicePDF(null, null, invoice, invoice.totalInvoice, 'duetomorrow');
         invoiceOutstandingMail(
           user,
@@ -90,7 +88,6 @@ const invoiceOutstanding = (users) => {
 };
 
 const getUsers = async (callbackFn) => {
-  console.log('entered get users');
   let users;
   try {
     users = await User.find().populate({
@@ -100,8 +97,18 @@ const getUsers = async (callbackFn) => {
       },
     });
   } catch (error) {}
-  console.log(users);
   callbackFn(users);
 };
 
-await getUsers(invoiceOutstanding);
+module.exports = () => {
+  cron.schedule(
+    `* * * * *`,
+    () => {
+      getUsers(invoiceOutstanding);
+    },
+    {
+      scheduled: true,
+      timezone: 'Europe/Bucharest',
+    }
+  );
+};
