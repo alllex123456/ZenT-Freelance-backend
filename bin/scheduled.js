@@ -16,6 +16,7 @@ const invoiceOutstanding = (users) => {
 
     user.invoices.forEach((invoice) => {
       if (isTomorrow(new Date(invoice.dueDate))) {
+        console.log(invoice);
         InvoicePDF(null, null, invoice, invoice.totalInvoice, 'duetomorrow');
         invoiceOutstandingMail(
           user,
@@ -96,6 +97,8 @@ const getUsers = async (callbackFn) => {
       },
     });
   } catch (error) {}
+  console.log('working');
+  console.log(users);
   callbackFn(users);
 };
 
