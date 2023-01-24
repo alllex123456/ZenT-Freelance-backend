@@ -92,6 +92,7 @@ const invoiceOutstanding = (users) => {
 };
 
 const getUsers = async (callbackFn) => {
+  console.log('entered get users');
   let users;
   try {
     users = await User.find().populate({
@@ -107,4 +108,3 @@ const getUsers = async (callbackFn) => {
 };
 
 getUsers(invoiceOutstanding);
-process.exit();
