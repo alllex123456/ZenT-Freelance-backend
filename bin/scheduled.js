@@ -1,6 +1,5 @@
 const { InvoicePDF } = require('../services/pdf-invoice');
 const User = require('../models/user');
-const cron = require('node-cron');
 const { isTomorrow } = require('date-fns');
 const { invoiceOutstandingMail } = require('../services/mailer/reminders');
 
@@ -100,15 +99,4 @@ const getUsers = async (callbackFn) => {
   callbackFn(users);
 };
 
-module.exports = () => {
-  cron.schedule(
-    `00 07 * * *`,
-    () => {
-      getUsers(invoiceOutstanding);
-    },
-    {
-      scheduled: true,
-      timezone: 'Europe/Bucharest',
-    }
-  );
-};
+getUsers(invoiceOutstanding);
