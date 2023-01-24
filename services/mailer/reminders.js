@@ -8,7 +8,6 @@ let transporter = nodemailer.createTransport({
 });
 
 exports.invoiceOutstandingMail = (user, recipient, req, invoice, type) => {
-  return;
   if (!recipient.email || !user.email) return;
 
   if (!req) {

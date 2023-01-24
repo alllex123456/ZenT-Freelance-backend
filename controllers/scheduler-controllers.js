@@ -8,7 +8,6 @@ const invoiceOutstanding = (users) => {
   if (!users || users.length === 0) return;
 
   users.forEach((user) => {
-    console.log(user);
     if (!user.invoices || user.invoices.length === 0) return;
 
     // offset local user time
@@ -18,7 +17,6 @@ const invoiceOutstanding = (users) => {
 
     user.invoices.forEach((invoice) => {
       if (isTomorrow(new Date(invoice.dueDate))) {
-        console.log(invoice);
         InvoicePDF(null, null, invoice, invoice.totalInvoice, 'duetomorrow');
         invoiceOutstandingMail(
           user,
