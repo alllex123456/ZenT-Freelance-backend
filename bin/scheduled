@@ -99,9 +99,9 @@ const getUsers = async (callbackFn) => {
         path: 'clientId userId orders',
       },
     });
-    console.log(users);
-    callbackFn(users);
   } catch (error) {}
+  console.log(users);
+  callbackFn(users);
 };
 
-getUsers(invoiceOutstanding);
+await getUsers(invoiceOutstanding);
