@@ -5,6 +5,8 @@ const User = require('../models/user');
 const { isTomorrow } = require('date-fns');
 const { invoiceOutstandingMail } = require('../services/mailer/reminders');
 
+console.log('opened');
+
 const invoiceOutstanding = (users) => {
   if (!users || users.length === 0) return;
 
