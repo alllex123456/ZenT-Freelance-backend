@@ -180,11 +180,6 @@ exports.updateUser = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.no_user'), 404));
   }
 
-  if (req.file) {
-    fs.unlink('uploads/avatars/' + user.avatar, (err) => console.log(err));
-    user.avatar = req.file.filename;
-  }
-
   for (const [key, value] of Object.entries(req.body)) {
     user[key] = value;
   }
@@ -198,7 +193,6 @@ exports.updateUser = async (req, res, next) => {
 
   res.json({
     confirmation: req.t('success.user.updated'),
-    message: req.file,
   });
 };
 
