@@ -28,7 +28,7 @@ exports.getAllInvoices = async (req, res, next) => {
   let invoices;
   try {
     invoices = await Invoice.find({ _id: { $in: user.invoices } }).populate(
-      'clientId userId orders'
+      'clientId userId orders addedItems'
     );
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
