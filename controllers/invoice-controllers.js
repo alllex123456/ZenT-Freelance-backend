@@ -72,6 +72,8 @@ exports.getInvoice = async (req, res, next) => {
 exports.createInvoice = async (req, res, next) => {
   const { userId } = req.userData;
   const {
+    VATpayer,
+    VATrate,
     clientId,
     series,
     number,
@@ -81,6 +83,7 @@ exports.createInvoice = async (req, res, next) => {
     totalInvoice,
     invoiceRemainder,
     clientBalance,
+    notes,
   } = req.body;
 
   let user;
@@ -136,6 +139,8 @@ exports.createInvoice = async (req, res, next) => {
   }
 
   const newInvoice = new Invoice({
+    VATpayer,
+    VATrate,
     userId,
     clientId,
     series,
@@ -147,6 +152,7 @@ exports.createInvoice = async (req, res, next) => {
     invoiceRemainder: req.body.reverse ? 0 : invoiceRemainder,
     clientBalance,
     cashed: false,
+    notes,
   });
 
   const newStatement = new Statement({
@@ -243,6 +249,8 @@ exports.createInvoice = async (req, res, next) => {
       req,
       res,
       {
+        VATpayer,
+        VATrate,
         clientId: client,
         userId: user,
         number: newInvoice.number,

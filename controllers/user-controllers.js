@@ -83,8 +83,8 @@ exports.signup = async (req, res, next) => {
 
   const statementTemplate = () => {
     return {
-      ro: `<html><body> <p>Stimate client,</p> <p>Regăsiți în atașament situația lucrărilor predate la zi. </p> <p>Vă mulțumim.</p> </body></html>`,
-      en: `<html><body> <p>Dear Client,</p> <p>Please find attached our detailed work statement up to date. </p> <p>Thank you.</p> </body></html>`,
+      ro: 'Stimate client, regăsiți în atașament situația lucrărilor predate la zi. Vă mulțumim.',
+      en: 'Dear Client, please find attached our detailed work statement up to date. Thank you.',
     };
   };
 
@@ -100,8 +100,8 @@ exports.signup = async (req, res, next) => {
     invoiceSeries: '',
     invoiceStartNumber: 1,
     invoiceDefaultDue: 5,
-    invoiceTemplate: invoiceTemplate(),
-    statementTemplate: statementTemplate(),
+    invoiceEmailMessage: invoiceTemplate(),
+    statementEmailMessage: statementTemplate(),
     clients: [],
     orders: [],
     invoices: [],
@@ -181,13 +181,24 @@ exports.updateUser = async (req, res, next) => {
   }
 
   for (const [key, value] of Object.entries(req.body)) {
-    user[key] = value;
+    if (key === 'invoiceEmailMessage') {
+      user['invoiceEmailMessage'] = {
+        ...user['invoiceEmailMessage'],
+        [user.language]: value,
+      };
+    } else if (key === 'statementEmailMessage') {
+      user['statementEmailMessage'] = {
+        ...user['statementEmailMessage'],
+        [user.language]: value,
+      };
+    } else {
+      user[key] = value;
+    }
   }
 
   try {
     await user.save();
   } catch (error) {
-    console.log(error);
     return next(new HttpError(req.t('errors.user.update_failed'), 500));
   }
 
