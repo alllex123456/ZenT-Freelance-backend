@@ -93,7 +93,7 @@ const getUsers = async (callbackFn) => {
     users = await User.find().populate({
       path: 'invoices',
       populate: {
-        path: 'clientId userId orders',
+        path: 'clientId userId orders addedItems',
       },
     });
   } catch (error) {}
@@ -102,7 +102,7 @@ const getUsers = async (callbackFn) => {
 
 module.exports = () => {
   cron.schedule(
-    `00 07 * * *`,
+    `35 10 * * *`,
     () => {
       getUsers(invoiceOutstanding);
     },

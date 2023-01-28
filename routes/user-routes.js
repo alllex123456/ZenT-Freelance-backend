@@ -1,6 +1,5 @@
 const express = require('express');
 const { check } = require('express-validator');
-const { fileUploadImages } = require('../middleware/file-upload');
 const authGuard = require('../middleware/auth-guard');
 const router = express.Router();
 
@@ -55,6 +54,6 @@ router.post(
 router.use(authGuard);
 router.get('/', getUserData);
 router.get('/sign-s3', signS3);
-router.post('/update', fileUploadImages.single('avatar'), updateUser);
+router.post('/update', updateUser);
 
 module.exports = router;

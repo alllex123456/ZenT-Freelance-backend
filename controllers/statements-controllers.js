@@ -106,7 +106,6 @@ exports.sendStatement = async (req, res, next) => {
   const { userId } = req.userData;
   const { clientId, orders: orderIds, email, message, date } = req.body;
 
-  //comment
   let user;
   try {
     user = await User.findById(userId);
