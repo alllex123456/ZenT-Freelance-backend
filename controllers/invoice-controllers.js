@@ -153,6 +153,8 @@ exports.createInvoice = async (req, res, next) => {
     clientBalance,
     cashed: false,
     notes,
+    reversing: req.body.reverse,
+    reversedInvoice: req.body.reversedInvoice,
   });
 
   const newStatement = new Statement({
@@ -209,60 +211,60 @@ exports.createInvoice = async (req, res, next) => {
     }
     session.commitTransaction();
   } catch (error) {
-    console.log(error);
     return next(new HttpError(req.t('errors.invoicing.issue_fail'), 401));
   }
 
-  if (req.body.reverse) {
-    const reversedOrders = orders.filter((order) => !order.addedItem);
-    const addedItems = orders.filter((order) => order.addedItem);
+  // if (req.body.reverse) {
+  //   const reversedOrders = orders.filter((order) => !order.addedItem);
+  //   const addedItems = orders.filter((order) => order.addedItem);
 
-    InvoicePDF(
-      req,
-      res,
-      {
-        clientId: client,
-        userId: user,
-        number: newInvoice.number,
-        issuedDate: newInvoice.issuedDate,
-        orders: reversedOrders,
-        addedItems,
-        dueDate: newInvoice.dueDate,
-        invoiceRemainder: newInvoice.invoiceRemainder,
-      },
-      +totalInvoice
-    );
-  } else {
-    let pdfOrders;
-    let addedItems;
-    try {
-      pdfOrders = await Order.find({
-        _id: { $in: req.body.orders.filter((order) => !order.addedItem) },
-      });
-      addedItems = await AddedItem.find({
-        _id: { $in: req.body.addedItems?.filter((item) => item.addedItem) },
-      });
-    } catch (error) {
-      return next(new HttpError(req.t('errors.PDF.gen_failed'), 500));
-    }
-    InvoicePDF(
-      req,
-      res,
-      {
-        VATpayer,
-        VATrate,
-        clientId: client,
-        userId: user,
-        number: newInvoice.number,
-        issuedDate: newInvoice.issuedDate,
-        orders: pdfOrders,
-        addedItems,
-        dueDate: newInvoice.dueDate,
-        invoiceRemainder: newInvoice.invoiceRemainder,
-      },
-      +totalInvoice
-    );
-  }
+  //   InvoicePDF(
+  //     req,
+  //     res,
+  //     {
+  //       reverse: true,
+  //       clientId: client,
+  //       userId: user,
+  //       number: newInvoice.number,
+  //       issuedDate: newInvoice.issuedDate,
+  //       orders: reversedOrders,
+  //       addedItems,
+  //       dueDate: newInvoice.dueDate,
+  //       invoiceRemainder: newInvoice.invoiceRemainder,
+  //     },
+  //     +totalInvoice
+  //   );
+  // } else {
+  //   let pdfOrders;
+  //   let addedItems;
+  //   try {
+  //     pdfOrders = await Order.find({
+  //       _id: { $in: req.body.orders.filter((order) => !order.addedItem) },
+  //     });
+  //     addedItems = await AddedItem.find({
+  //       _id: { $in: req.body.addedItems?.filter((item) => item.addedItem) },
+  //     });
+  //   } catch (error) {
+  //     return next(new HttpError(req.t('errors.PDF.gen_failed'), 500));
+  //   }
+  //   InvoicePDF(
+  //     req,
+  //     res,
+  //     {
+  //       VATpayer,
+  //       VATrate,
+  //       clientId: client,
+  //       userId: user,
+  //       number: newInvoice.number,
+  //       issuedDate: newInvoice.issuedDate,
+  //       orders: pdfOrders,
+  //       addedItems,
+  //       dueDate: newInvoice.dueDate,
+  //       invoiceRemainder: newInvoice.invoiceRemainder,
+  //     },
+  //     +totalInvoice
+  //   );
+  // }
 
   res.json({
     message: req.body.reverse
@@ -278,7 +280,7 @@ exports.generateInvoice = async (req, res, next) => {
   let invoice;
   try {
     invoice = await Invoice.findById(invoiceId).populate(
-      'orders addedItems clientId userId'
+      'orders addedItems clientId userId reversedInvoice'
     );
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));

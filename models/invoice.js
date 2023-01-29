@@ -33,6 +33,12 @@ const invoiceSchema = new Schema(
     issuedDate: { type: Date, required: true },
     dueDate: { type: Date, required: true },
     notes: { type: String, required: false },
+    reversing: { type: Boolean, required: false },
+    reversedInvoice: {
+      type: mongoose.Types.ObjectId,
+      required: false,
+      ref: 'Invoice',
+    },
   },
   { timestamps: true }
 );

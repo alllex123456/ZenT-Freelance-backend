@@ -157,7 +157,8 @@
     "toPay": "Total to pay",
     "remainder": "Remainder",
     "deducted": "Deducted",
-    "notes": "Notes"
+    "notes": "Notes",
+    "reverseHeading": "reversing invoice"
   },
   "mail": {
     "cc": "--copie mesaj--"

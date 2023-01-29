@@ -16,6 +16,8 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice, type) => {
     addedItems,
     dueDate,
     invoiceRemainder,
+    reversing,
+    reversedInvoice,
   } = invoiceData;
 
   if (!req) {
@@ -60,7 +62,7 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice, type) => {
 
   let gradient = invoice.linearGradient(25, 25, 560, 100);
   gradient.stop(0.3, '#fff').stop(0.5, '#6daae8').stop(1, '#2e86de');
-  invoice.rect(25, 25, 560, 100);
+  invoice.rect(25, 25, 560, 110);
   invoice.fill(gradient);
   invoice
     .fill('#fff')
@@ -75,6 +77,15 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice, type) => {
       `${req.t('invoice.series')} ${user.invoiceSeries}/${req.t(
         'invoice.number'
       )} ${invoiceData.number}`,
+      {
+        align: 'right',
+      }
+    )
+    .fontSize(8)
+    .text(
+      `${reversing ? req.t('invoice.reverseHeading') : ''} ${
+        reversedInvoice.series
+      }/${reversedInvoice.number}`,
       {
         align: 'right',
       }

@@ -157,7 +157,8 @@
     "toPay": "Total de plată",
     "remainder": "Rest",
     "deducted": "Deducere",
-    "notes": "Note"
+    "notes": "Note",
+    "reverseHeading": "storno factura"
   },
   "mail": {
     "cc": "--message copy--"
