@@ -234,12 +234,6 @@ exports.modifyOrder = async (req, res, next) => {
     }
   }
 
-  order.total = calculatedTotal(
-    order.unit,
-    req.body.count,
-    req.body.rate
-  ).toFixed(client.decimalPoints);
-
   try {
     await order.save();
   } catch (error) {

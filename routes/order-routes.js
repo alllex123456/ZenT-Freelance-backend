@@ -11,7 +11,6 @@ const {
   deleteOrder,
   getOrder,
   getClientCompletedOrders,
-  cleanUpOrders,
 } = require('../controllers/order-controllers');
 
 router.use(authGuard);
