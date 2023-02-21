@@ -13,7 +13,7 @@ const userSchema = new Schema(
     avatar: { type: String, required: false },
     name: { type: String, required: false },
     language: { type: String, required: false },
-    preferredCurrency: { type: String, required: true },
+    currency: { type: String, required: true },
     theme: { type: String, required: false },
     phone: { type: String, required: false },
     registeredOffice: { type: String, required: false },

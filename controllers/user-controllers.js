@@ -27,8 +27,7 @@ exports.getUserData = async (req, res, next) => {
 };
 
 exports.signup = async (req, res, next) => {
-  const { timeZone, email, password, language, preferredCurrency, name } =
-    req.body;
+  const { timeZone, email, password, language, currency, name } = req.body;
 
   //////////////BLOCK OTHER USERS
   if (email !== 'alextanase454@gmail.com')
@@ -95,7 +94,7 @@ exports.signup = async (req, res, next) => {
     password: hashedPassword,
     alias: name,
     language,
-    preferredCurrency,
+    currency,
     theme: 'default',
     invoiceSeries: '',
     invoiceStartNumber: 1,
@@ -199,6 +198,7 @@ exports.updateUser = async (req, res, next) => {
   try {
     await user.save();
   } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.user.update_failed'), 500));
   }
 
