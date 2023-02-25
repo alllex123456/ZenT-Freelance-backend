@@ -11,12 +11,14 @@ const {
   deleteOrder,
   getOrder,
   getClientCompletedOrders,
+  getCompletedOrders,
 } = require('../controllers/order-controllers');
 
 router.use(authGuard);
 
 router.get('/', getOrders);
 router.get('/get-pending', getQueueList);
+router.get('/get-completed', getCompletedOrders);
 router.get('/get-completed/:clientId', getClientCompletedOrders);
 router.get('/:orderId', getOrder);
 

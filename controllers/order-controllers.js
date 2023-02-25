@@ -85,6 +85,36 @@ exports.getQueueList = async (req, res, next) => {
   });
 };
 
+exports.getCompletedOrders = async (req, res, next) => {
+  const { userId } = req.userData;
+
+  let completedOrders;
+  try {
+    completedOrders = await Order.find({
+      userId,
+      status: 'completed',
+    }).populate('clientId');
+  } catch (error) {
+    return next(new HttpError(req.t('errors.orders.not_found'), 500));
+  }
+
+  let invoicedOrders;
+  try {
+    invoicedOrders = await Order.find({
+      userId,
+      status: 'invoiced',
+    }).populate('clientId');
+  } catch (error) {
+    return next(new HttpError(req.t('errors.orders.not_found'), 500));
+  }
+
+  res.json({
+    message: completedOrders
+      .concat(invoicedOrders)
+      .map((order) => order.toObject({ getters: true })),
+  });
+};
+
 exports.getOrder = async (req, res, next) => {
   const { orderId } = req.params;
 

@@ -198,12 +198,11 @@ exports.updateUser = async (req, res, next) => {
   try {
     await user.save();
   } catch (error) {
-    console.log(error);
     return next(new HttpError(req.t('errors.user.update_failed'), 500));
   }
 
   res.json({
-    confirmation: req.t('success.user.updated'),
+    message: req.t('success.user.updated'),
   });
 };
 

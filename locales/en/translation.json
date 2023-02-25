@@ -54,6 +54,11 @@
       "save_failed": "There was a problem while saving the notes. Please try again.",
       "delete_failed": "There was a problem while removing the notes. Please try again."
     },
+    "notifications:": {
+      "not_found": "There was a problem while enquiring the notifications. Please try again.",
+      "save_failed": "There was a problem while saving the notification. Please try again.",
+      "delete_failed": "There was a problem while removing the notification. Please try again."
+    },
     "miscellaneous": {
       "mime_type_invalid": "Invalid file type!"
     }
