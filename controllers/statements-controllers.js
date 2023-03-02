@@ -10,7 +10,7 @@ exports.getAllStatements = async (req, res, next) => {
 
   let clients;
   try {
-    clients = await Client.find({ userId }).populate('orders');
+    clients = await Client.find({ userId }).populate('orders invoices');
   } catch (error) {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
