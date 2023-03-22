@@ -27,6 +27,12 @@
       "modify_failed": "There was a problem while editing the order in the database. Please try again.",
       "delete_failed": "There was a problem while deleting the order in the database. Please try again."
     },
+    "items": {
+      "not_found": "There was a problem while enquiring the database. Please try again.",
+      "save_failed": "There was a problem while saving the item in the database. Please try again.",
+      "modify_failed": "There was a problem while editing the item in the database. Please try again.",
+      "delete_failed": "There was a problem while deleting the item in the database. Please try again."
+    },
     "clients": {
       "not_found": "There was a problem while enquiring the database. Please try again.",
       "no_client": "The client does not exist.",
@@ -75,6 +81,13 @@
       "modified": "Order successfully edited!",
       "deleted": "Order successfully removed!"
     },
+
+    "items": {
+      "added": "Item successfully added!",
+      "modified": "Item successfully edited!",
+      "deleted": "Item successfully removed!"
+    },
+
     "clients": {
       "added": "Client successfully added!",
       "modified": "Client successfully edited!",
@@ -85,6 +98,7 @@
     },
     "invoicing": {
       "issued": "The invoice has been successfully issued!",
+      "cashed": "The invoice has been successfully cashed!",
       "reversed_issued": "The invoice has been reversed!",
       "sent": "Invoice successfully sent. You will get a copy of the message on your e-mail.",
       "modified": "Invoice successfully edited!",
@@ -149,10 +163,12 @@
     "contact": "Contact",
     "email": "Email",
     "phone": "Phone",
+    "items": "Items",
     "clientBalance": "Client balance",
     "billingUnit": "measurement unit",
     "it": "It.",
     "jobRef": "Job/Reference",
+    "description": "Description",
     "qty": "Quantity",
     "mu": "MU",
     "rate": "Unit rate",
@@ -162,8 +178,12 @@
     "toPay": "Total to pay",
     "remainder": "Remainder",
     "deducted": "Deducted",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
     "notes": "Notes",
-    "reverseHeading": "reversing invoice"
+    "reverseHeading": "reversing invoice",
+    "paymentInfo": "Payment methods",
+    "bankAccounts": "Bank accounts"
   },
   "mail": {
     "cc": "--copie mesaj--"

@@ -8,7 +8,7 @@ exports.getAllNotifications = async (req, res, next) => {
   try {
     notifications = await Notification.find();
   } catch (error) {
-    return next(new HttpError(req.t('errors.notifications.not_found'), 500));
+    return next(new HttpError(req.t('errors.notifications.not_found'), 404));
   }
 
   res.json({ notifications });
@@ -22,9 +22,19 @@ exports.markRead = async (req, res, next) => {
       $push: { read: userId },
     });
   } catch (error) {
-    console.log(error);
     return next(new HttpError('Failed to mark as read', 500));
   }
+
+  let notifications;
+  try {
+    notifications = await Notification.find();
+  } catch (error) {
+    return next(new HttpError(req.t('errors.notifications.not_found'), 404));
+  }
+
+  
+
+  res.json({ notifications });
 };
 
 exports.addNotification = async (req, res, next) => {

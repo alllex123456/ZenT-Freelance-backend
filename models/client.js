@@ -44,6 +44,7 @@ const clientSchema = new Schema(
     },
     notes: { type: String, required: false },
     invoiceDue: { type: Number, required: false },
+    invoiceNotes: { type: String, required: false },
     orders: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Order' }],
     addedItems: [
       { type: mongoose.Types.ObjectId, required: true, ref: 'AddedItem' },
@@ -51,7 +52,7 @@ const clientSchema = new Schema(
     invoices: [
       { type: mongoose.Types.ObjectId, required: true, ref: 'Invoice' },
     ],
-    remainder: { type: Number, required: true },
+    balance: { type: Number, required: true },
   },
   { timestamps: true }
 );

@@ -9,10 +9,14 @@ const invoiceSchema = new Schema(
     clientId: { type: mongoose.Types.ObjectId, required: true, ref: 'Client' },
     cashed: { type: Boolean, required: true },
     reversed: { type: Boolean, required: false },
-    cashedAmount: { type: Number, required: false },
-    dateCashed: { type: Date, required: false },
+    payment: {
+      cashedAmount: { type: Number, required: false },
+      dateCashed: { type: Date, required: false },
+      receipt: { type: String, required: false },
+    },
     series: { type: String, required: false },
     number: { type: Number, required: true },
+    detailedOrders: { type: Boolean, required: false },
     orders: [
       {
         type: mongoose.Types.ObjectId,
@@ -27,9 +31,6 @@ const invoiceSchema = new Schema(
         ref: 'AddedItem',
       },
     ],
-    totalInvoice: { type: Number, required: true },
-    invoiceRemainder: { type: Number, required: true },
-    clientBalance: { type: Number, required: true },
     issuedDate: { type: Date, required: true },
     dueDate: { type: Date, required: true },
     notes: { type: String, required: false },

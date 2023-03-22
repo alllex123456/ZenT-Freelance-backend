@@ -1,3 +1,5 @@
+const fetch = require('node-fetch');
+
 exports.measurementUnit = (subject) =>
   subject.unit === '2000cw/s'
     ? '2000 caractere cu spatii'
@@ -24,3 +26,10 @@ exports.quantity = (subject) =>
     : client.unit === '300w'
     ? 'cuvinte'
     : '1800 caractere fara spatii;';
+
+exports.fetchImage = async (src) => {
+  const response = await fetch(src);
+  const image = await response.buffer();
+
+  return image;
+};

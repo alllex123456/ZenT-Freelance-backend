@@ -5,24 +5,26 @@ const Schema = mongoose.Schema;
 
 const userSchema = new Schema(
   {
-    subscription: { type: String, required: true },
-    expiresAt: { type: Date, required: false },
+    subscription: {
+      package: { type: String, required: true },
+      expiresAt: { type: Date, required: false },
+    },
+    theme: { type: String, required: false },
+    timeZone: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     alias: { type: String, required: false },
-    avatar: { type: String, required: false },
-    name: { type: String, required: false },
     language: { type: String, required: false },
     currency: { type: String, required: true },
-    theme: { type: String, required: false },
+    avatar: { type: String, required: false },
+    name: { type: String, required: false },
     phone: { type: String, required: false },
     registeredOffice: { type: String, required: false },
     registrationNumber: { type: String, required: false },
     taxNumber: { type: String, required: false },
     VATpayer: { type: Boolean, required: false },
     VATrate: { type: Number, required: false },
-    bank: { type: String, required: false },
-    iban: { type: String, required: false },
+    invoiceNotes: { type: String, required: false },
     invoiceSeries: { type: String, required: false },
     invoiceStartNumber: { type: Number, required: false },
     invoiceDefaultDue: { type: Number, required: false },
@@ -34,7 +36,6 @@ const userSchema = new Schema(
       ro: { type: String, required: false },
       en: { type: String, required: false },
     },
-    invoiceNotes: { type: String, required: false },
     clients: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Client' }],
     orders: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Order' }],
     addedItems: [
@@ -44,7 +45,7 @@ const userSchema = new Schema(
       { type: mongoose.Types.ObjectId, required: true, ref: 'Invoice' },
     ],
     notes: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Note' }],
-    timeZone: { type: String, required: true },
+    bankAccounts: { type: Array, required: false },
   },
   { timestamps: true }
 );

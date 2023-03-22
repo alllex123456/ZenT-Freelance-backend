@@ -88,14 +88,26 @@ exports.signup = async (req, res, next) => {
   };
 
   const user = new User({
-    subscription: 'free',
+    subscription: {
+      package: 'free',
+      expiresAt: '',
+    },
+    theme: 'default',
     timeZone,
     email,
     password: hashedPassword,
     alias: name,
     language,
     currency,
-    theme: 'default',
+    avatar: '',
+    name: '',
+    phone: '',
+    registeredOffice: '',
+    registrationNumber: '',
+    taxNumber: '',
+    VATpayer: false,
+    VATrate: 0,
+    invoiceNotes: '',
     invoiceSeries: '',
     invoiceStartNumber: 1,
     invoiceDefaultDue: 5,
@@ -103,10 +115,14 @@ exports.signup = async (req, res, next) => {
     statementEmailMessage: statementTemplate(),
     clients: [],
     orders: [],
+    addedItems: [],
     invoices: [],
     notes: [],
-    VATrate: 0,
-    VATpayer: false,
+    bankAccounts: [
+      { bank: '', iban: '', swift: '' },
+      { bank: '', iban: '', swift: '' },
+      { bank: '', iban: '', swift: '' },
+    ],
   });
 
   try {
@@ -168,6 +184,8 @@ exports.login = async (req, res, next) => {
 exports.updateUser = async (req, res, next) => {
   const { userId } = req.userData;
 
+  if (req.body.email && req.body.email.length === 0) return;
+
   let user;
   try {
     user = await User.findById(userId);
@@ -202,8 +220,56 @@ exports.updateUser = async (req, res, next) => {
   }
 
   res.json({
-    message: req.t('success.user.updated'),
+    confirmation: req.t('success.user.updated'),
   });
+};
+
+exports.changePassword = async (req, res, next) => {
+  const { userId } = req.userData;
+  const { alias, currentPassword, newPassword } = req.body;
+
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.user.not_found'), 401));
+  }
+
+  if (!user) {
+    return next(new HttpError(req.t('errors.user.no_user'), 401));
+  }
+
+  user.alias = alias;
+
+  if (currentPassword && newPassword && currentPassword === newPassword) {
+    let isValidPassword = false;
+    let hashedPassword;
+    try {
+      isValidPassword = await bcrypt.compare(currentPassword, user.password);
+    } catch (error) {
+      return next(new HttpError(req.t('errors.user.pass_check_failed'), 500));
+    }
+
+    if (!isValidPassword) {
+      return next(new HttpError(req.t('errors.user.wrong_pass'), 401));
+    }
+
+    try {
+      hashedPassword = await bcrypt.hash(newPassword, 12);
+    } catch (error) {
+      return next(new HttpError(req.t('errors.user.pass_gen_failed'), 500));
+    }
+
+    user.password = hashedPassword;
+  }
+
+  try {
+    await user.save();
+  } catch (error) {
+    return next(new HttpError(req.t('errors.user.update_failed'), 500));
+  }
+
+  res.json({ confirmation: req.t('success.user.updated') });
 };
 
 exports.getRecoverPassword = async (req, res, next) => {
@@ -216,7 +282,7 @@ exports.getRecoverPassword = async (req, res, next) => {
 
   let user;
   try {
-    user = await User.find({ email });
+    user = await User.findOne({ email });
   } catch (error) {
     return next(new HttpError(req.t('errors.user.not_found'), 401));
   }

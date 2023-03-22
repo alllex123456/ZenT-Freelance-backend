@@ -3,6 +3,11 @@ const { translateServices } = require('../utils/translateUnits');
 
 const PDFDocument = require('pdfkit-table');
 
+const margin = 20;
+const textDarkPrimary = '#757575';
+const textDarkSecondary = '#006e1e';
+const divider = '#2ecc71';
+
 exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
   const completedOrders = client.orders.filter(
     (order) => order.status === 'completed'
@@ -16,20 +21,20 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
       `${translateServices([order.service], req.t)?.displayedValue} / ${
         order.reference
       }`,
-      `${new Date(order.receivedDate).toLocaleDateString(user.language)} /
+      `${new Date(order.receivedDate).toLocaleDateString(client.language)} /
         ${
           order.deliveredDate
-            ? new Date(order.deliveredDate).toLocaleDateString(user.language)
-            : new Date(order.deadline).toLocaleDateString(user.language)
+            ? new Date(order.deliveredDate).toLocaleDateString(client.language)
+            : new Date(order.deadline).toLocaleDateString(client.language)
         }`,
-      new Date(order.deadline).toLocaleDateString(user.language),
-      order.count.toLocaleString(user.language, {
+      new Date(order.deadline).toLocaleDateString(client.language),
+      order.count.toLocaleString(client.language, {
         maximumFractionDigits: client.decimalPoints,
       }),
-      order.rate.toLocaleString(user.language, {
+      order.rate.toLocaleString(client.language, {
         maximumFractionDigits: client.decimalPoints,
       }),
-      order.total.toLocaleString(user.language, {
+      order.total.toLocaleString(client.language, {
         maximumFractionDigits: client.decimalPoints,
       }),
       order.notes,
@@ -40,18 +45,18 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
       `${translateServices([order.service], req.t)?.displayedValue} / ${
         order.reference
       }`,
-      `${new Date(order.receivedDate).toLocaleDateString(user.language)} /
+      `${new Date(order.receivedDate).toLocaleDateString(client.language)} /
         ${new Date(order.deliveredDate || order.deadline).toLocaleDateString(
-          user.language
+          client.language
         )}`,
-      new Date(order.deadline).toLocaleDateString(user.language),
-      order.count.toLocaleString(user.language, {
+      new Date(order.deadline).toLocaleDateString(client.language),
+      order.count.toLocaleString(client.language, {
         maximumFractionDigits: client.decimalPoints,
       }),
-      order.rate.toLocaleString(user.language, {
+      order.rate.toLocaleString(client.language, {
         maximumFractionDigits: client.decimalPoints,
       }),
-      order.total.toLocaleString(user.language, {
+      order.total.toLocaleString(client.language, {
         maximumFractionDigits: client.decimalPoints,
       }),
       order.notes,
@@ -70,11 +75,11 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     info: {
       Title: `${req.t('statement.title')} ${client.name} la ${new Date(
         time
-      ).toLocaleDateString(user.language)}`,
+      ).toLocaleDateString(client.language)}`,
     },
     size: 'A4',
-    font: 'services/fonts/Titillium/TitilliumWeb-Regular.ttf',
-    margin: 20,
+    font: 'services/fonts/Ubuntu/Ubuntu-Regular.ttf',
+    margin,
     bufferPages: true,
   });
 
@@ -86,18 +91,23 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     )
   );
 
-  statement.rect(20, 20, 560, 70);
-  statement.fill('#589ee5').stroke();
+  statement
+    .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+    .fontSize(14)
+    .fillColor(textDarkPrimary)
+    .text(req.t('statement.title').toUpperCase())
+    .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
+    .fontSize(8)
+    .fillColor(textDarkSecondary)
+    .text(`Nume client: ${client.name}`)
+    .text(`Generat la: ${new Date(time).toLocaleDateString(client.language)}`);
+
+  statement.moveDown(3);
 
   statement
-    .fill('#fff')
-    .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
-    .fontSize(14)
-    .text(req.t('statement.title').toUpperCase(), 25, 25)
-    .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
-    .fontSize(8)
-    .text(`Nume client: ${client.name}`)
-    .text(`Generat la: ${new Date(time).toLocaleDateString(user.language)}`);
+    .moveTo(margin, statement.y)
+    .lineTo(575, statement.y)
+    .stroke(divider);
 
   statement.moveDown(3);
 
@@ -125,7 +135,7 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     '',
     '',
     req.t('statement.total'),
-    `${totalOrders.toLocaleString(user.language, {
+    `${totalOrders.toLocaleString(client.language, {
       maximumFractionDigits: client.decimalPoints,
     })} ${client.currency}`,
   ]);
@@ -137,15 +147,30 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     '',
     '',
     req.t('statement.previousBalance'),
-    `${client.remainder.toLocaleString(user.language, {
+    `${client.remainder.toLocaleString(client.language, {
       maximumFractionDigits: client.decimalPoints,
     })} ${client.currency}`,
   ]);
 
   statement.table(table, {
     x: 20,
-    width: 560,
-    columnsSize: [20, 130, 80, 60, 50, 50, 50, 120],
+    width: 555,
+    columnsSize: [20, 125, 80, 60, 50, 50, 50, 120],
+    divider: {
+      header: { disabled: false, width: 1, opacity: 0.5 },
+      horizontal: { disabled: false, opacity: 0.2 },
+    },
+    prepareHeader: () => {
+      statement
+        .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+        .fontSize(8)
+        .fillColor(textDarkPrimary);
+    },
+    prepareRow: () =>
+      statement
+        .font('services/fonts/Ubuntu/Ubuntu-Light.ttf')
+        .fontSize(8)
+        .fillColor(textDarkSecondary),
   });
 
   statement.text(req.t('signature'));
