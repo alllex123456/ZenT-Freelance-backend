@@ -147,7 +147,7 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
     '',
     '',
     req.t('statement.previousBalance'),
-    `${client.remainder.toLocaleString(client.language, {
+    `${client.balance.toLocaleString(client.language, {
       maximumFractionDigits: client.decimalPoints,
     })} ${client.currency}`,
   ]);
@@ -173,7 +173,9 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
         .fillColor(textDarkSecondary),
   });
 
-  statement.text(req.t('signature'));
+  statement.text(req.t('signature'), {
+    link: 'https://www.zent-freelance.com',
+  });
 
   statement.end();
 
