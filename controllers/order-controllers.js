@@ -8,8 +8,6 @@ const Invoice = require('../models/invoice');
 const HttpError = require('../models/http-error');
 const AddedItem = require('../models/added-item');
 
-const { localISOTime } = require('../utils/ISO-offset');
-
 const calculatedTotal = (unit, count, rate) => {
   let total;
   if (unit === '2000cw/s') {
@@ -85,6 +83,36 @@ exports.getQueueList = async (req, res, next) => {
   });
 };
 
+exports.getCompletedOrders = async (req, res, next) => {
+  const { userId } = req.userData;
+
+  let completedOrders;
+  try {
+    completedOrders = await Order.find({
+      userId,
+      status: 'completed',
+    }).populate('clientId');
+  } catch (error) {
+    return next(new HttpError(req.t('errors.orders.not_found'), 500));
+  }
+
+  let invoicedOrders;
+  try {
+    invoicedOrders = await Order.find({
+      userId,
+      status: 'invoiced',
+    }).populate('clientId');
+  } catch (error) {
+    return next(new HttpError(req.t('errors.orders.not_found'), 500));
+  }
+
+  res.json({
+    message: completedOrders
+      .concat(invoicedOrders)
+      .map((order) => order.toObject({ getters: true })),
+  });
+};
+
 exports.getOrder = async (req, res, next) => {
   const { orderId } = req.params;
 
@@ -106,7 +134,7 @@ exports.addOrder = async (req, res, next) => {
   const {
     service,
     clientId,
-    ref,
+    reference,
     receivedDate,
     deliveredDate,
     deadline,
@@ -133,7 +161,7 @@ exports.addOrder = async (req, res, next) => {
     service,
     receivedDate,
     deliveredDate: req.body.addToStatement ? deliveredDate : new Date(),
-    reference: ref || '-',
+    reference: reference || '-',
     deadline,
     rate,
     unit,
@@ -141,7 +169,6 @@ exports.addOrder = async (req, res, next) => {
     count,
     notes,
     status: req.body.addToStatement ? 'completed' : 'queue',
-    reference: ref || '-',
     total: calculatedTotal(unit, count, rate).toFixed(client.decimalPoints),
   });
 
@@ -162,6 +189,7 @@ exports.addOrder = async (req, res, next) => {
 
   res.json({
     confirmation: req.t('success.orders.added'),
+    order: { ...newOrder._doc, clientId: client },
   });
 };
 
@@ -204,7 +232,7 @@ exports.completeOrder = async (req, res, next) => {
     return next(new HttpError(req.t('errors.orders.complete_failed'), 500));
   }
 
-  res.json({ message: req.t('success.orders.completed') });
+  res.json({ order, confirmation: req.t('success.orders.completed') });
 };
 
 exports.modifyOrder = async (req, res, next) => {
@@ -217,13 +245,6 @@ exports.modifyOrder = async (req, res, next) => {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
 
-  let client;
-  try {
-    client = await Client.find({ _id: order.clientId });
-  } catch (error) {
-    return next(new HttpError(req.t('errors.client.not_found'), 500));
-  }
-
   if (order.userId.toString() !== req.userData.userId) {
     return next(new HttpError(req.t('errors.orders.no_authorization'), 401));
   }
@@ -234,19 +255,13 @@ exports.modifyOrder = async (req, res, next) => {
     }
   }
 
-  order.total = calculatedTotal(
-    order.unit,
-    req.body.count,
-    req.body.rate
-  ).toFixed(client.decimalPoints);
-
   try {
     await order.save();
   } catch (error) {
     return next(new HttpError(req.t('errors.orders.modify_failed'), 500));
   }
 
-  res.json({ message: req.t('success.orders.modified') });
+  res.json({ order, confirmation: req.t('success.orders.modified') });
 };
 
 exports.deleteOrder = async (req, res, next) => {
@@ -276,65 +291,5 @@ exports.deleteOrder = async (req, res, next) => {
     return next(new HttpError(req.t('errors.orders.delete_failed'), 500));
   }
 
-  res.json({ message: req.t('success.orders.deleted') });
-};
-
-exports.cleanUpOrders = async (req, res, next) => {
-  const { userId } = req.userData;
-
-  let user;
-  try {
-    user = await User.findById(userId).populate('orders invoices');
-  } catch (error) {
-    return next(new HttpError(req.t('errors.user.not_found'), 500));
-  }
-
-  user.orders = user.orders.filter(
-    (order) =>
-      order.status === 'queue' || order.deliveredDate > Date.now() - 31536000000
-  );
-  user.invoices = user.invoices.filter(
-    (invoice) => invoice.updatedAt > Date.now() - 31536000000
-  );
-
-  const clients = await Client.find({ userId }).populate('orders invoices');
-
-  try {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-    await user.save({ session });
-
-    clients.forEach(async (client) => {
-      client.orders = client.orders.filter(
-        (order) =>
-          order.status === 'queue' ||
-          order.deliveredDate > Date.now() - 31536000000
-      );
-      client.invoices = client.invoices.filter(
-        (invoice) => invoice.updatedAt > Date.now() - 31536000000
-      );
-      await client.save({ session });
-    });
-
-    await Invoice.deleteMany(
-      {
-        userId,
-        updatedAt: { $lte: Date.now() - 31536000000 },
-      },
-      { session }
-    );
-
-    await Order.deleteMany(
-      {
-        userId,
-        deliveredDate: { $lte: Date.now() - 31536000000 },
-      },
-      { session }
-    );
-    session.commitTransaction();
-  } catch (error) {
-    return next(new HttpError(req.t('database.connection_failed'), 500));
-  }
-
-  next();
+  res.json({ order, confirmation: req.t('success.orders.deleted') });
 };

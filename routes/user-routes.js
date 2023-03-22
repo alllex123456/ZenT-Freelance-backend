@@ -10,6 +10,7 @@ const {
   getUserData,
   getRecoverPassword,
   postRecoverPassword,
+  changePassword,
 } = require('../controllers/user-controllers');
 const { signS3 } = require('../middleware/aws-s3');
 
@@ -55,5 +56,6 @@ router.use(authGuard);
 router.get('/', getUserData);
 router.get('/sign-s3', signS3);
 router.post('/update', updateUser);
+router.post('/change-password', changePassword);
 
 module.exports = router;

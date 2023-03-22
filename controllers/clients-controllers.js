@@ -52,16 +52,27 @@ exports.addClient = async (req, res, next) => {
   }
 
   const newClient = new Client({
-    ...req.body,
     userId,
     orders: [],
     invoices: [],
-    remainder: 0,
-    decimalPoints: 0,
+    addedItems: [],
+    balance: 0,
+    invoiceDue: 5,
+    translationRate: 0,
+    proofreadingRate: 0,
+    posteditingRate: 0,
+    mobile: '',
+    mailingAddress: '',
+    bank: '',
+    iban: '',
+    representative: '',
+    notes: '',
+    invoiceNotes: '',
     contacts: {
       primary: { name: '', email: '', phone: '', mobile: '' },
       secondary: { name: '', email: '', phone: '', mobile: '' },
     },
+    ...req.body,
   });
   user.clients.push(newClient);
 
@@ -75,7 +86,7 @@ exports.addClient = async (req, res, next) => {
     return next(new HttpError(req.t('errors.clients.save_failed'), 500));
   }
 
-  res.json({ confirmation: req.t('success.clients.added') });
+  res.json({ confirmation: req.t('success.clients.added'), client: newClient });
 };
 
 exports.modifyClient = async (req, res, next) => {

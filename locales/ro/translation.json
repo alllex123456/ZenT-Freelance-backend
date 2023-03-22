@@ -27,6 +27,12 @@
       "modify_failed": "A survenit o problemă la modificarea comenzii în baza de comenzi. Vă rugăm să reîncercați.",
       "delete_failed": "A survenit o problemă la ștergerea comenzii în baza de comenzi. Vă rugăm să reîncercați."
     },
+    "items": {
+      "not_found": "A survenit o problemă la interogarea bazei de comenzi. Vă rugăm să reîncercați.",
+      "save_failed": "A survenit o problemă la salvarea articolului în baza de date. Vă rugăm să reîncercați.",
+      "modify_failed": "A survenit o problemă la modificarea articolului în baza de date. Vă rugăm să reîncercați.",
+      "delete_failed": "A survenit o problemă la ștergerea articolului în baza de date. Vă rugăm să reîncercați."
+    },
     "clients": {
       "not_found": "A survenit o problemă la interogarea bazei de clienți. Vă rugăm să reîncercați.",
       "no_client": "Clientul nu există.",
@@ -54,6 +60,11 @@
       "save_failed": "A survenit o problemă la salvarea notelor. Vă rugăm să reîncercați.",
       "delete_failed": "A survenit o problemă la stergerea notelor. Vă rugăm să reîncercați."
     },
+    "notifications:": {
+      "not_found": "A survenit o problemă la interogarea bazei de notificari. Vă rugăm să reîncercați.",
+      "save_failed": "A survenit o problemă la salvarea notificarii. Vă rugăm să reîncercați.",
+      "delete_failed": "A survenit o problemă la stergerea notificarii. Vă rugăm să reîncercați."
+    },
     "miscellaneous": {
       "mime_type_invalid": "Format fișier invalid!"
     }
@@ -70,6 +81,11 @@
       "modified": "Comanda a fost modificată cu succes!",
       "deleted": "Comanda a fost ștearsă cu succes!"
     },
+    "items": {
+      "added": "Articolul a fost adăugat cu succes!",
+      "modified": "Articolul a fost modificat cu succes!",
+      "deleted": "Articolul a fost ștears cu succes!"
+    },
     "clients": {
       "added": "Clientul a fost adăugat cu succes!",
       "modified": "Clientul a fost modificat cu succes!",
@@ -80,6 +96,7 @@
     },
     "invoicing": {
       "issued": "Factura a fost emisa cu succes!",
+      "cashed": "Factura a fost încasată cu succes!",
       "reversed_issued": "Factura storno a fost emisa!",
       "sent": "Factura a fost trimisa cu succes. Veti primi pe adresa dvs. de email o copie a mesajului trimis.",
       "modified": "Factura a fost modificata cu succes!",
@@ -112,17 +129,17 @@
     "postediting": "post-editare"
   },
   "statement": {
-    "title": "Situatie",
+    "title": "Situație",
     "clientCode": "Cod client",
     "clientName": "Nume client",
     "generatedAt": "Generat la",
     "it": "Nr.",
-    "jobRef": "Serviciu/Referinta",
+    "jobRef": "Serviciu/Referință",
     "deadline": "Termen",
     "receivedDelivered": "Primit/predat",
     "qty": "Cantitate",
     "mu": "UM",
-    "rate": "Pret unitar",
+    "rate": "Preț unitar",
     "amount": "Valoare",
     "notes": "Note",
     "total": "Total",
@@ -144,6 +161,8 @@
     "contact": "Contact",
     "email": "Email",
     "phone": "Telefon",
+    "items": "Articole",
+    "description": "Descriere",
     "clientBalance": "Sold client",
     "billingUnit": "unitate de măsură",
     "it": "Nr.",
@@ -155,9 +174,14 @@
     "vat": "TVA",
     "amountWithVAT": "Valoare + TVA",
     "toPay": "Total de plată",
+    "subtotal": "Sub-total",
+    "discount": "Reducere",
     "remainder": "Rest",
     "deducted": "Deducere",
-    "notes": "Note"
+    "notes": "Note",
+    "reverseHeading": "storno factura",
+    "paymentInfo": "Modalități de plată",
+    "bankAccounts": "Conturi bancare"
   },
   "mail": {
     "cc": "--message copy--"

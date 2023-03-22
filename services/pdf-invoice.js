@@ -1,12 +1,18 @@
 const fs = require('fs');
+const { fetchImage } = require('../utils/generalFunc');
 const PDFDocument = require('pdfkit-table');
+const { computeUnits } = require('../utils/compute-units');
 
-const {
-  translateServices,
-  translateUnits,
-} = require('../utils/translateUnits');
+const margin = 20;
+const textDarkPrimary = '#757575';
+const textDarkSecondary = '#006e1e';
+const divider = '#2ecc71';
+const dividerLight = '#82e0aa';
+const tableHeaderBackground = '#fff';
 
-exports.InvoicePDF = (req, res, invoiceData, totalInvoice, type) => {
+const { translateServices } = require('../utils/translateUnits');
+
+exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
   const {
     VATpayer,
     VATrate,
@@ -15,8 +21,14 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice, type) => {
     orders,
     addedItems,
     dueDate,
-    invoiceRemainder,
+    reversing,
+    detailedOrders,
+    reversedInvoice,
   } = invoiceData;
+
+  const logo = await fetchImage(
+    'https://zent.s3.eu-west-3.amazonaws.com/zent-logo-dark.png'
+  );
 
   if (!req) {
     const translationObject = require(`../locales/${client.language}/translation.json`);
@@ -40,12 +52,24 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice, type) => {
     };
   }
 
+  const items = detailedOrders ? orders.concat(addedItems) : addedItems;
+
+  const totalWithoutDiscount = items.reduce((acc, item) => {
+    if (item.discount) return acc;
+    return (acc += item.total + (item.total * VATrate) / 100);
+  }, 0);
+
+  const total = items.reduce(
+    (acc, item) => (acc += item.total + (item.total * VATrate) / 100),
+    0
+  );
+
   const invoice = new PDFDocument({
     info: {
       Title: req.t('invoice.title'),
     },
     size: 'A4',
-    font: 'services/fonts/Titillium/TitilliumWeb-Regular.ttf',
+    font: 'services/fonts/Ubuntu/Ubuntu-Regular.ttf',
     margin: 20,
     bufferPages: true,
   });
@@ -58,120 +82,87 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice, type) => {
     )
   );
 
-  let gradient = invoice.linearGradient(25, 25, 560, 100);
-  gradient.stop(0.3, '#fff').stop(0.5, '#6daae8').stop(1, '#2e86de');
-  invoice.rect(25, 25, 560, 100);
-  invoice.fill(gradient);
+  invoice.image(logo, { fit: [80, 80] });
+
   invoice
-    .fill('#fff')
-    .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
-    .fontSize(24)
-    .text(req.t('invoice.title').toUpperCase(), 50, 30, {
-      align: 'right',
-      characterSpacing: 1,
-    })
-    .fontSize(10)
+    .fillColor(textDarkPrimary)
+    .fontSize(18)
+    .lineGap(4)
+    .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+    .text(req.t('invoice.title').toUpperCase(), 350, margin, { align: 'right' })
+    .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
+    .fontSize(8)
+    .fillColor(textDarkSecondary)
     .text(
       `${req.t('invoice.series')} ${user.invoiceSeries}/${req.t(
         'invoice.number'
       )} ${invoiceData.number}`,
-      {
-        align: 'right',
-      }
-    );
-  invoice
-    .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
-    .fontSize(10)
+      { align: 'right' }
+    )
+    .text(
+      reversing
+        ? `${req.t('invoice.reverseHeading')} ${reversedInvoice.series}/${
+            reversedInvoice.number
+          }`
+        : '',
+      { align: 'right' }
+    )
     .text(
       `${req.t('invoice.issuedDate')}: ${new Date(
         invoiceData.issuedDate
-      ).toLocaleDateString(user.language)}`,
-      {
-        align: 'right',
-      }
-    );
-  invoice
-    .fontSize(10)
+      ).toLocaleDateString(client.language)}`,
+      { align: 'right' }
+    )
     .text(
       `${req.t('invoice.maturity')}: ${new Date(dueDate).toLocaleDateString(
-        user.language
+        client.language
       )}`,
-      {
-        align: 'right',
-      }
+      { align: 'right' }
     );
 
-  invoice.font('services/fonts/Titillium/TitilliumWeb-Regular.ttf');
-  invoice.fill('#2f3640');
   invoice
-    .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
+    .fontSize(8)
+    .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+    .text(`${req.t('invoice.supplier')}:`, margin, invoice.y)
+    .fillColor(textDarkPrimary)
     .fontSize(10)
-    .text(`${req.t('invoice.supplier')}: ${user.name}`, 25, 140, { width: 270 })
-    .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
-    .text(
-      `${req.t('invoice.registeredOffice')}: ${user.registeredOffice || ''}`,
-      { width: 270 }
-    )
-    .text(
-      `${req.t('invoice.registrationNumber')}: ${user.registrationNumber || ''}`
-    )
-    .text(`${req.t('invoice.taxNumber')}: ${user.taxNumber}`)
-    .text(`${req.t('invoice.bank')}: ${user.bank || ''}`)
-    .text(`${req.t('invoice.iban')}: ${user.iban || ''}`);
+    .text(user.name.toUpperCase(), { width: 270 })
+    .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
+    .fontSize(8)
+    .fillColor(textDarkSecondary)
+    .text(user.registeredOffice, { width: 270 })
+    .text(user.registrationNumber, { width: 270 })
+    .text(user.taxNumber, { width: 270 })
+    .text(user.email, { width: 270 })
+    .text(user.phone, { width: 270 });
+
+  invoice.moveDown();
+
+  invoice.moveTo(margin, invoice.y).lineTo(575, invoice.y).stroke(divider);
+
+  invoice.moveDown();
 
   invoice
-    .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
+    .fontSize(8)
+    .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+    .text(`${req.t('invoice.client')}:`, 20, invoice.y)
+    .fillColor(textDarkPrimary)
     .fontSize(10)
-    .text(`${req.t('invoice.client')}: ${client.name}`, 300, 140, {
-      width: 280,
-    })
-    .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
-    .text(
-      `${req.t('invoice.registeredOffice')}: ${client.registeredOffice || ''}`,
-      {
-        width: 280,
-      }
-    )
-    .text(
-      `${req.t('invoice.registrationNumber')}: ${
-        client.registrationNumber || ''
-      }`
-    )
-    .text(`${req.t('invoice.taxNumber')}: ${client.taxNumber}`)
-    .text(`${req.t('invoice.bank')}: ${client.bank || ''}`)
-    .text(`${req.t('invoice.iban')}: ${client.iban || ''}`);
+    .text(client.name.toUpperCase(), { width: 270 })
+    .fillColor(textDarkSecondary)
+    .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
+    .fontSize(8)
+    .text(client.registeredOffice, { width: 270 })
+    .text(client.registrationNumber, { width: 270 })
+    .text(client.taxNumber, { width: 270 })
+    .text(client.bank, { width: 270 })
+    .text(client.iban, { width: 270 })
+    .text(client.email, { width: 270 })
+    .text(client.phone, { width: 270 });
 
-  invoice.rect(25, 272, 82, 18);
-  invoice.fill('#079992');
-  invoice
-    .fill('#fff')
-    .fontSize(10)
-    .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
-    .text(req.t('invoice.contact').toUpperCase(), 30, 274, {
-      characterSpacing: 5,
-    });
-  invoice.moveDown(0.3);
-  invoice
-    .fill('#2f3640')
-    .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
-    .text(`${req.t('invoice.email')}: ${user.email || ''}`, 25)
-    .text(`${req.t('invoice.phone')}: ${user.phone || ''}`);
+  invoice.moveDown(3);
 
-  invoice.rect(300, 272, 82, 18);
-  invoice.fill('#079992');
-  invoice
-    .fill('#fff')
-    .fontSize(10)
-    .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
-    .text(req.t('invoice.contact').toUpperCase(), 305, 274, {
-      characterSpacing: 5,
-    });
-  invoice.moveDown(0.3);
-  invoice
-    .fill('#2f3640')
-    .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
-    .text(`${req.t('invoice.email')}: ${client.email || ''}`, 300)
-    .text(`${req.t('invoice.phone')}: ${client.phone || ''}`);
+  ///////////////////////////////////////////
 
   let table;
   if (VATpayer) {
@@ -179,268 +170,238 @@ exports.InvoicePDF = (req, res, invoiceData, totalInvoice, type) => {
       headers: [
         {
           label: req.t('invoice.it'),
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          headerColor: tableHeaderBackground,
         },
         {
-          label: req.t('invoice.jobRef'),
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          label: req.t('invoice.description'),
+          headerColor: tableHeaderBackground,
         },
         {
           label: req.t('invoice.qty'),
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          headerColor: tableHeaderBackground,
         },
         {
-          label: req.t('invoice.mu'),
-          headerColor: '#079992',
-          headerOpacity: 0.5,
-        },
-        {
-          label: `${req.t('invoice.rate')}*`,
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          label: req.t('invoice.rate'),
+          headerColor: tableHeaderBackground,
         },
         {
           label: `${req.t('invoice.amount')} (${client.currency})`,
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          headerColor: tableHeaderBackground,
         },
         {
           label: `${req.t('invoice.vat')} ${VATrate}% (${client.currency})`,
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          headerColor: tableHeaderBackground,
         },
         {
           label: `${req.t('invoice.amountWithVAT')} (${client.currency})`,
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          headerColor: tableHeaderBackground,
         },
       ],
-
-      rows: [[0, req.t('invoice.clientBalance'), '', '', '', client.remainder]],
+      rows: [],
     };
   } else {
     table = {
       headers: [
         {
           label: req.t('invoice.it'),
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          headerColor: tableHeaderBackground,
         },
         {
-          label: req.t('invoice.jobRef'),
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          label: req.t('invoice.description'),
+          headerColor: tableHeaderBackground,
         },
         {
           label: req.t('invoice.qty'),
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          headerColor: tableHeaderBackground,
         },
         {
-          label: req.t('invoice.mu'),
-          headerColor: '#079992',
-          headerOpacity: 0.5,
-        },
-        {
-          label: `${req.t('invoice.rate')}`,
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          label: req.t('invoice.rate'),
+          headerColor: tableHeaderBackground,
         },
         {
           label: `${req.t('invoice.amount')} (${client.currency})`,
-          headerColor: '#079992',
-          headerOpacity: 0.5,
+          headerColor: tableHeaderBackground,
         },
       ],
-
-      rows: [
-        [0, req.t('invoice.clientBalance'), '', '', '', invoice.clientBalance],
-      ],
+      rows: [],
     };
   }
 
-  orders.forEach((order, index) => {
+  items.forEach((item, index) => {
     if (VATpayer) {
       table.rows.push([
         index + 1,
-        `${translateServices([order.service], req.t)?.displayedValue} / ${
-          order.reference
-        }`,
-        `${order.count.toLocaleString(user.language, {
-          maximumFractionDigits: client.decimalPoints,
+        item.addedItem
+          ? item.description
+          : `${translateServices([item.service], req.t)?.displayedValue} / ${
+              item.reference
+            }`,
+        item.addedItem
+          ? item.count.toLocaleString(client.language, {
+              maximumFractionDigits: 1,
+            })
+          : `${computeUnits(item.count, item.unit).toLocaleString(
+              client.language,
+              {
+                maximumFractionDigits: 1,
+              }
+            )}`,
+        `${item.rate.toLocaleString(client.language, {
+          maximumFractionDigits: 2,
         })}`,
-        `${translateUnits([order.unit], req.t).number}`,
-        `${order.rate.toLocaleString(user.language, {
-          maximumFractionDigits: client.decimalPoints,
-        })}`,
-        order.total.toLocaleString(user.language, {
-          maximumFractionDigits: client.decimalPoints,
+        item.total.toLocaleString(client.language, {
+          maximumFractionDigits: 2,
         }),
-        ((order.total * VATrate) / 100).toLocaleString(user.language, {
-          maximumFractionDigits: client.decimalPoints,
+        ((item.total * VATrate) / 100).toLocaleString(client.language, {
+          maximumFractionDigits: 2,
         }),
-        (order.total + (order.total * VATrate) / 100).toLocaleString(
-          user.language,
-          { maximumFractionDigits: client.decimalPoints }
+        (item.total + (item.total * VATrate) / 100).toLocaleString(
+          client.language,
+          { maximumFractionDigits: 2 }
         ),
       ]);
     } else {
       table.rows.push([
         index + 1,
-        `${translateServices([order.service], req.t)?.displayedValue} / ${
-          order.reference
-        }`,
-        `${order.count.toLocaleString(user.language, {
+        item.addedItem
+          ? item.description
+          : `${translateServices([item.service], req.t)?.displayedValue} / ${
+              item.reference
+            }`,
+        item.addedItem
+          ? item.count.toLocaleString(client.language, {
+              maximumFractionDigits: 1,
+            })
+          : `${computeUnits(item.count, item.unit).toLocaleString(
+              client.language,
+              {
+                maximumFractionDigits: 1,
+              }
+            )}`,
+        `${item.rate.toLocaleString(client.language, {
           maximumFractionDigits: client.decimalPoints,
         })}`,
-        `${translateUnits([order.unit], req.t).number}`,
-        `${order.rate.toLocaleString(user.language, {
-          maximumFractionDigits: client.decimalPoints,
-        })}`,
-        order.total.toLocaleString(user.language, {
+        item.total.toLocaleString(client.language, {
           maximumFractionDigits: client.decimalPoints,
         }),
       ]);
     }
   });
 
-  if (addedItems?.length !== 0) {
-    addedItems.forEach((item, index) => {
-      if (VATpayer) {
-        table.rows.push([
-          index + 1 + orders.length,
-          `-/${item.reference}`,
-          `${item.count.toLocaleString(user.language, {
-            maximumFractionDigits: client.decimalPoints,
-          })}`,
-          `${
-            item.unit !== '-' ? translateUnits([item.unit], req.t).number : '-'
-          }`,
-          `${item.rate.toLocaleString(user.language, {
-            maximumFractionDigits: client.decimalPoints,
-          })}`,
-          item.discount
-            ? -item.total.toLocaleString(user.language, {
-                maximumFractionDigits: client.decimalPoints,
-              })
-            : item.total.toLocaleString(user.language, {
-                maximumFractionDigits: client.decimalPoints,
-              }),
-          item.discount
-            ? -((item.total * VATrate) / 100).toLocaleString(user.language, {
-                maximumFractionDigits: client.decimalPoints,
-              })
-            : ((item.total * VATrate) / 100).toLocaleString(user.language, {
-                maximumFractionDigits: client.decimalPoints,
-              }),
-          item.discount
-            ? -(item.total + (item.total * VATrate) / 100).toLocaleString(
-                user.language,
-                { maximumFractionDigits: client.decimalPoints }
-              )
-            : (item.total + (item.total * VATrate) / 100).toLocaleString(
-                user.language,
-                { maximumFractionDigits: client.decimalPoints }
-              ),
-        ]);
-      } else {
-        table.rows.push([
-          index + 1 + orders.length,
-          `-/${item.reference}`,
-          `${item.count.toLocaleString(user.language, {
-            maximumFractionDigits: client.decimalPoints,
-          })}`,
-          `${
-            item.unit !== '-' ? translateUnits([item.unit], req.t).number : '-'
-          }`,
-          `${item.rate.toLocaleString(user.language, {
-            maximumFractionDigits: client.decimalPoints,
-          })}`,
-          item.discount
-            ? -item.total.toLocaleString(user.language, {
-                maximumFractionDigits: client.decimalPoints,
-              })
-            : item.total.toLocaleString(user.language, {
-                maximumFractionDigits: client.decimalPoints,
-              }),
-        ]);
-      }
-    });
-  }
-
-  VATpayer
-    ? table.rows.push([
-        '',
-        req.t('invoice.deducted'),
-        '1',
-        '-',
-        '-',
-        -invoiceRemainder,
-        -((invoiceRemainder * VATrate) / 100),
-        -(invoiceRemainder + (invoiceRemainder * VATrate) / 100),
-      ])
-    : table.rows.push([
-        '',
-        req.t('invoice.deducted'),
-        '1',
-        '-',
-        '-',
-        -invoiceRemainder,
-      ]);
-
   invoice.table(table, {
-    width: 560,
+    width: 575,
     padding: 5,
-    x: 25,
-    y: 350,
+    x: margin,
+    y: invoice.y,
     columnsSize: VATpayer
-      ? [40, 140, 60, 60, 80, 50, 50, 80]
-      : [40, 170, 80, 80, 90, 100],
+      ? [40, 165, 80, 80, 50, 50, 90]
+      : [40, 200, 100, 100, 115],
     divider: {
-      header: { disabled: false, width: 2, opacity: 1 },
+      header: { disabled: false, width: 1, opacity: 0.5 },
       horizontal: { disabled: false, opacity: 0.2 },
     },
     prepareHeader: () => {
       invoice
-        .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
-        .fontSize(10);
+        .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+        .fontSize(8)
+        .fillColor(textDarkPrimary);
     },
     prepareRow: () =>
       invoice
-        .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
-        .fontSize(8),
+        .font('services/fonts/Ubuntu/Ubuntu-Light.ttf')
+        .fontSize(8)
+        .fillColor(textDarkSecondary),
   });
 
-  invoice.moveDown();
+  invoice.moveDown(2);
+
   invoice
-    .font('services/fonts/Titillium/TitilliumWeb-Bold.ttf')
-    .fontSize(12)
+    .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
+    .fontSize(8)
     .text(
-      `${req.t('invoice.toPay')}: ${totalInvoice.toLocaleString(user.language, {
-        maximumFractionDigits: client.decimalPoints,
-      })} ${client.currency}`,
+      `${req.t('invoice.subtotal')}: ${totalWithoutDiscount.toLocaleString(
+        client.language,
+        {
+          style: 'currency',
+          currency: client.currency,
+          maximumFractionDigits: VATpayer ? 2 : client.decimalPoints,
+        }
+      )}`,
+      {
+        align: 'right',
+      }
+    )
+    .text(
+      `${req.t('invoice.discount')}: ${(
+        totalWithoutDiscount - total
+      ).toLocaleString(client.language, {
+        style: 'currency',
+        currency: client.currency,
+        maximumFractionDigits: VATpayer ? 2 : client.decimalPoints,
+      })}`,
       {
         align: 'right',
       }
     );
+
+  invoice
+    .fontSize(10)
+    .fillColor(textDarkPrimary)
+    .text(
+      `${req.t('invoice.toPay')}: ${total.toLocaleString(client.language, {
+        style: 'currency',
+        currency: client.currency,
+        maximumFractionDigits: VATpayer ? 2 : client.decimalPoints,
+      })}`,
+      { align: 'right' }
+    );
+
   invoice.moveDown();
+
+  if (invoice.notes) {
+    invoice
+      .moveTo(margin, invoice.y)
+      .lineTo(575, invoice.y)
+      .stroke(dividerLight);
+
+    invoice.moveDown();
+
+    invoice
+      .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+      .text(`${req.t('invoice.notes')}`)
+      .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
+      .text(invoice.notes || '');
+
+    invoice.moveDown();
+  }
+
+  invoice.moveTo(margin, invoice.y).lineTo(575, invoice.y).stroke(dividerLight);
+
+  invoice.moveDown();
+
   invoice
-    .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
-    .fontSize(10);
+    .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+    .text(req.t('invoice.paymentInfo').toUpperCase())
+    .fontSize(8)
+    .text(req.t('invoice.bankAccounts'));
 
-  invoice.moveDown(3);
+  user.bankAccounts.map((account) =>
+    invoice.text(
+      `${req.t('invoice.bank')}: ${account.bank} IBAN: ${account.iban}SWIFT: ${
+        account.swift
+      }`
+    )
+  );
 
-  invoice.moveTo(20, invoice.y).lineTo(580, invoice.y).stroke();
-  invoice
-    .font('services/fonts/Titillium/TitilliumWeb-Regular.ttf')
-    .text(`${req.t('invoice.notes')}: ${invoice.notes || ''}`);
+  invoice.moveDown();
 
-  invoice.moveDown(2);
+  invoice.moveTo(margin, invoice.y).lineTo(575, invoice.y).stroke(dividerLight);
 
-  invoice.text(req.t('signature'));
+  invoice.moveDown();
+
+  invoice.font('services/fonts/Ubuntu/Ubuntu-Regular.ttf');
+
+  invoice.text(req.t('signature'), { link: 'https://www.zent-freelance.com' });
 
   invoice.end();
 

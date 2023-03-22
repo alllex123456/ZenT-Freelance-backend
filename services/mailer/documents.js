@@ -11,7 +11,7 @@ exports.sendStatement = (user, recipient, req, setEmail) => {
   if (!recipient.email || !user.email) return;
 
   transporter.sendMail({
-    from: `${user.name} <admin@zent-freelance.com>`,
+    from: `${user.name || user.email} <admin@zent-freelance.com>`,
     to: `<${setEmail || recipient.email}>`,
     subject:
       user.language === 'ro'
@@ -31,7 +31,7 @@ exports.sendInvoice = (user, recipient, body, req, setEmail) => {
   if (!recipient.email || !user.email) return;
 
   transporter.sendMail({
-    from: `${user.name} <admin@zent-freelance.com>`,
+    from: `${user.name || user.email} <admin@zent-freelance.com>`,
     to: `<${setEmail || recipient.email}>`,
     cc: `${req.t('mail.cc')} <${user.email}>`,
     subject:
@@ -56,7 +56,14 @@ exports.sendInvoice = (user, recipient, body, req, setEmail) => {
   <p>${body.message
     .replace('{series}', body.series)
     .replace('{number}', body.number)
-    .replace('{total}', `${body.totalInvoice} ${recipient.currency}`)
+    .replace(
+      '{total}',
+      `${body.totalInvoice.toLocaleString(recipient.language, {
+        style: 'currency',
+        currency: recipient.currency,
+        maximumFractionDigits: user.VATpayer ? 2 : recipient.decimalPoints,
+      })}`
+    )
     .replace(
       '{date}',
       new Date(body.dueDate).toLocaleDateString(user.language)
