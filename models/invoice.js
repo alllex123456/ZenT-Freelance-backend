@@ -4,9 +4,9 @@ const Schema = mongoose.Schema;
 const invoiceSchema = new Schema(
   {
     userId: { type: mongoose.Types.ObjectId, required: true, ref: 'User' },
-    VATpayer: { type: Boolean, required: true },
-    VATrate: { type: Number, required: true },
     clientId: { type: mongoose.Types.ObjectId, required: true, ref: 'Client' },
+    userData: { type: Object, required: true },
+    clientData: { type: Object, required: true },
     cashed: { type: Boolean, required: true },
     reversed: { type: Boolean, required: false },
     payment: {
@@ -14,9 +14,9 @@ const invoiceSchema = new Schema(
       dateCashed: { type: Date, required: false },
       receipt: { type: String, required: false },
     },
-    series: { type: String, required: false },
+    series: { type: String, required: true },
     number: { type: Number, required: true },
-    detailedOrders: { type: Boolean, required: false },
+    detailedOrders: { type: Boolean, required: true },
     orders: [
       {
         type: mongoose.Types.ObjectId,
@@ -40,6 +40,7 @@ const invoiceSchema = new Schema(
       required: false,
       ref: 'Invoice',
     },
+    bankAccounts: { type: Array, required: true },
   },
   { timestamps: true }
 );

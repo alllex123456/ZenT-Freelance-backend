@@ -12,19 +12,21 @@ const tableHeaderBackground = '#fff';
 
 const { translateServices } = require('../utils/translateUnits');
 
-exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
+exports.InvoicePDF = async (req, res, invoiceData, type) => {
   const {
-    VATpayer,
-    VATrate,
-    clientId: client,
-    userId: user,
+    series,
+    number,
     orders,
     addedItems,
+    issuedDate,
     dueDate,
     reversing,
     detailedOrders,
     reversedInvoice,
   } = invoiceData;
+
+  const user = invoiceData.userData;
+  const client = invoiceData.clientData;
 
   const logo = await fetchImage(
     'https://zent.s3.eu-west-3.amazonaws.com/zent-logo-dark.png'
@@ -56,11 +58,11 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
 
   const totalWithoutDiscount = items.reduce((acc, item) => {
     if (item.discount) return acc;
-    return (acc += item.total + (item.total * VATrate) / 100);
+    return (acc += item.total + (item.total * user.VATrate) / 100);
   }, 0);
 
   const total = items.reduce(
-    (acc, item) => (acc += item.total + (item.total * VATrate) / 100),
+    (acc, item) => (acc += item.total + (item.total * user.VATrate) / 100),
     0
   );
 
@@ -76,7 +78,7 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
 
   invoice.pipe(
     fs.createWriteStream(
-      `./uploads/invoices/${req.t('invoice.title')}[${user.id}][${
+      `./uploads/invoices/${req.t('invoice.title')}[${user._id}][${
         client.name
       }]${type ? type : ''}.pdf`
     )
@@ -94,9 +96,9 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
     .fontSize(8)
     .fillColor(textDarkSecondary)
     .text(
-      `${req.t('invoice.series')} ${user.invoiceSeries}/${req.t(
+      `${req.t('invoice.series')} ${series}/${req.t(
         'invoice.number'
-      )} ${invoiceData.number}`,
+      )} ${number}`,
       { align: 'right' }
     )
     .text(
@@ -109,7 +111,7 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
     )
     .text(
       `${req.t('invoice.issuedDate')}: ${new Date(
-        invoiceData.issuedDate
+        issuedDate
       ).toLocaleDateString(client.language)}`,
       { align: 'right' }
     )
@@ -165,7 +167,7 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
   ///////////////////////////////////////////
 
   let table;
-  if (VATpayer) {
+  if (user.VATpayer) {
     table = {
       headers: [
         {
@@ -228,7 +230,7 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
   }
 
   items.forEach((item, index) => {
-    if (VATpayer) {
+    if (user.VATpayer) {
       table.rows.push([
         index + 1,
         item.addedItem
@@ -252,10 +254,10 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
         item.total.toLocaleString(client.language, {
           maximumFractionDigits: 2,
         }),
-        ((item.total * VATrate) / 100).toLocaleString(client.language, {
+        ((item.total * user.VATrate) / 100).toLocaleString(client.language, {
           maximumFractionDigits: 2,
         }),
-        (item.total + (item.total * VATrate) / 100).toLocaleString(
+        (item.total + (item.total * user.VATrate) / 100).toLocaleString(
           client.language,
           { maximumFractionDigits: 2 }
         ),
@@ -293,7 +295,7 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
     padding: 5,
     x: margin,
     y: invoice.y,
-    columnsSize: VATpayer
+    columnsSize: user.VATpayer
       ? [40, 165, 80, 80, 50, 50, 90]
       : [40, 200, 100, 100, 115],
     divider: {
@@ -324,7 +326,7 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
         {
           style: 'currency',
           currency: client.currency,
-          maximumFractionDigits: VATpayer ? 2 : client.decimalPoints,
+          maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
         }
       )}`,
       {
@@ -337,7 +339,7 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
       ).toLocaleString(client.language, {
         style: 'currency',
         currency: client.currency,
-        maximumFractionDigits: VATpayer ? 2 : client.decimalPoints,
+        maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
       })}`,
       {
         align: 'right',
@@ -351,7 +353,7 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
       `${req.t('invoice.toPay')}: ${total.toLocaleString(client.language, {
         style: 'currency',
         currency: client.currency,
-        maximumFractionDigits: VATpayer ? 2 : client.decimalPoints,
+        maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
       })}`,
       { align: 'right' }
     );
@@ -381,17 +383,46 @@ exports.InvoicePDF = async (req, res, invoiceData, totalInvoice, type) => {
 
   invoice
     .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
-    .text(req.t('invoice.paymentInfo').toUpperCase())
-    .fontSize(8)
-    .text(req.t('invoice.bankAccounts'));
+    .text(req.t('invoice.paymentInfo').toUpperCase());
 
-  user.bankAccounts.map((account) =>
-    invoice.text(
-      `${req.t('invoice.bank')}: ${account.bank} IBAN: ${account.iban}SWIFT: ${
-        account.swift
-      }`
-    )
-  );
+  invoice.moveDown();
+
+  const bankAccountsTable = {
+    headers: [
+      { label: req.t('invoice.bank'), headerColor: tableHeaderBackground },
+      { label: req.t('invoice.iban'), headerColor: tableHeaderBackground },
+      { label: 'SWIFT', headerColor: tableHeaderBackground },
+    ],
+    rows: [],
+  };
+  invoiceData.bankAccounts.forEach((account) => {
+    if (account.iban) {
+      bankAccountsTable.rows.push([account.bank, account.iban, account.swift]);
+    }
+  });
+
+  invoice.table(bankAccountsTable, {
+    width: 575,
+    padding: 5,
+    x: margin,
+    y: invoice.y,
+    columnsSize: [200, 150, 100],
+    divider: {
+      header: { disabled: false, width: 1, opacity: 0.5 },
+      horizontal: { disabled: false, opacity: 0.2 },
+    },
+    prepareHeader: () => {
+      invoice
+        .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+        .fontSize(8)
+        .fillColor(textDarkPrimary);
+    },
+    prepareRow: () =>
+      invoice
+        .font('services/fonts/Ubuntu/Ubuntu-Light.ttf')
+        .fontSize(8)
+        .fillColor(textDarkSecondary),
+  });
 
   invoice.moveDown();
 
