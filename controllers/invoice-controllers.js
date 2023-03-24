@@ -74,8 +74,6 @@ exports.getInvoice = async (req, res, next) => {
 exports.createInvoice = async (req, res, next) => {
   const { userId } = req.userData;
   const {
-    VATpayer,
-    VATrate,
     clientId,
     series,
     number,
@@ -111,49 +109,72 @@ exports.createInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.clients.no_client'), 404));
   }
 
-  if (req.body.reverse) {
-    let reversedInvoice;
-    try {
-      reversedInvoice = await Invoice.findById(req.body.reversedInvoice);
-    } catch (error) {
-      return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
-    }
+  // if (req.body.reverse) {
+  //   let reversedInvoice;
+  //   try {
+  //     reversedInvoice = await Invoice.findById(req.body.reversedInvoice);
+  //   } catch (error) {
+  //     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
+  //   }
 
-    reversedInvoice.reversed = true;
+  //   reversedInvoice.reversed = true;
 
-    await reversedInvoice.save();
+  //   await reversedInvoice.save();
 
-    const orderIds = orders.filter((order) => !order.addedItem);
-    let reversedOrders;
-    try {
-      reversedOrders = await Order.find({ _id: { $in: orderIds } });
-    } catch (error) {
-      return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
-    }
-    reversedOrders.forEach(async (order) => {
-      order.count = -order.count;
-      order.total = -order.total;
-      await order.save();
-    });
+  //   const orderIds = orders.filter((order) => !order.addedItem);
+  //   let reversedOrders;
+  //   try {
+  //     reversedOrders = await Order.find({ _id: { $in: orderIds } });
+  //   } catch (error) {
+  //     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
+  //   }
+  //   reversedOrders.forEach(async (order) => {
+  //     order.count = -order.count;
+  //     order.total = -order.total;
+  //     await order.save();
+  //   });
 
-    const addedItemIds = orders.filter((order) => !order.addedItem);
-    let addedItems;
-    try {
-      addedItems = await Order.find({ _id: { $in: addedItemIds } });
-    } catch (error) {
-      return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
-    }
-    addedItems.forEach(async (item) => {
-      item.count = -item.count;
-      item.total = -item.total;
-      await item.save();
-    });
-  }
+  //   const addedItemIds = orders.filter((order) => !order.addedItem);
+  //   let addedItems;
+  //   try {
+  //     addedItems = await Order.find({ _id: { $in: addedItemIds } });
+  //   } catch (error) {
+  //     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
+  //   }
+  //   addedItems.forEach(async (item) => {
+  //     item.count = -item.count;
+  //     item.total = -item.total;
+  //     await item.save();
+  //   });
+  // }
 
   const newInvoice = new Invoice({
-    VATpayer,
-    VATrate,
     userId,
+    userData: {
+      _id: user._doc._id,
+      VATpayer: user._doc.VATpayer,
+      VATrate: user._doc.VATrate,
+      name: user._doc.name,
+      registeredOffice: user._doc.registeredOffice,
+      registrationNumber: user._doc.registrationNumber,
+      taxNumber: user._doc.taxNumber,
+      email: user._doc.email,
+      phone: user._doc.phone,
+    },
+    clientData: {
+      _id: client._doc._id,
+      VATpayer: client._doc.VATpayer,
+      VATrate: client._doc.VATrate,
+      name: client._doc.name,
+      registeredOffice: client._doc.registeredOffice,
+      registrationNumber: client._doc.registrationNumber,
+      taxNumber: client._doc.taxNumber,
+      email: client._doc.email,
+      phone: client._doc.phone,
+      language: client._doc.language,
+      currency: client._doc.currency,
+      decimalPoints: client._doc.decimalPoints,
+    },
     clientId,
     series,
     number,
@@ -165,6 +186,12 @@ exports.createInvoice = async (req, res, next) => {
     reversing: req.body.reverse,
     reversedInvoice: req.body.reversedInvoice,
     detailedOrders,
+    payment: {
+      cashedAmount: 0,
+      dateCashed: '',
+      receipt: '',
+    },
+    bankAccounts: [...user._doc.bankAccounts],
   });
 
   const addedItems = orders.filter((order) => order.addedItem);
@@ -203,70 +230,30 @@ exports.createInvoice = async (req, res, next) => {
     await client.save({ session });
     await newInvoice.save({ session });
 
-    if (!req.body.reverse) {
-      await Order.updateMany(
-        {
-          _id: { $in: req.body.orders.filter((order) => !order.addedItem) },
-        },
-        { $set: { status: 'invoiced', invoiceId: newInvoice._id } }
-      );
-    }
+    await Order.updateMany(
+      {
+        _id: { $in: req.body.orders.filter((order) => !order.addedItem) },
+      },
+      { $set: { status: 'invoiced', invoiceId: newInvoice._id } }
+    );
 
     session.commitTransaction();
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.issue_fail'), 401));
   }
 
-  if (req.body.reverse) {
-    const reversedOrders = orders.filter((order) => !order.addedItem);
-    const addedItems = orders.filter((order) => order.addedItem);
-
-    InvoicePDF(
-      req,
-      res,
-      {
-        reverse: true,
-        clientId: client,
-        userId: user,
-        number: newInvoice.number,
-        issuedDate: newInvoice.issuedDate,
-        orders: reversedOrders,
-        addedItems,
-        dueDate: newInvoice.dueDate,
-      },
-      +totalInvoice
-    );
-  } else {
-    let pdfOrders;
-    let addedItems;
-    try {
-      pdfOrders = await Order.find({
-        _id: { $in: req.body.orders.filter((order) => !order.addedItem) },
-      });
-      addedItems = await AddedItem.find({
-        _id: { $in: req.body.addedItems?.filter((item) => item.addedItem) },
-      });
-    } catch (error) {
-      return next(new HttpError(req.t('errors.PDF.gen_failed'), 500));
-    }
-    InvoicePDF(req, res, {
-      VATpayer,
-      VATrate,
-      clientId: client,
-      userId: user,
-      number: newInvoice.number,
-      issuedDate: newInvoice.issuedDate,
-      orders: pdfOrders,
-      addedItems,
-      dueDate: newInvoice.dueDate,
-    });
-  }
+  const issuedInvoice = {
+    ...newInvoice._doc,
+    clientId: {
+      ...client._doc,
+    },
+  };
 
   res.json({
     message: req.body.reverse
       ? req.t('success.invoicing.reversed_issued')
       : req.t('success.invoicing.issued'),
-    invoiceId: newInvoice._id,
+    issuedInvoice,
   });
 };
 
@@ -287,7 +274,7 @@ exports.generateInvoice = async (req, res, next) => {
   }
 
   try {
-    InvoicePDF(req, res, invoice, invoice.totalInvoice);
+    InvoicePDF(req, res, invoice);
   } catch (error) {
     return next(new HttpError(req.t('errors.PDF.gen_failed'), 500));
   }
@@ -295,7 +282,7 @@ exports.generateInvoice = async (req, res, next) => {
 
 exports.sendInvoice = async (req, res, next) => {
   const { userId } = req.userData;
-  const { invoiceId, clientId, email, message } = req.body;
+  const { invoiceId, clientId, email, message, includeStatement } = req.body;
 
   let user;
   try {
@@ -336,7 +323,8 @@ exports.sendInvoice = async (req, res, next) => {
     ? invoice.orders.concat(invoice.addedItems)
     : invoice.addedItems;
   const totalInvoice = invoiceItems.reduce(
-    (acc, item) => (acc += item.total + (item.total * invoice.VATrate) / 100),
+    (acc, item) =>
+      (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
     0
   );
 
@@ -354,7 +342,9 @@ exports.sendInvoice = async (req, res, next) => {
   message.replace('{date}', invoice.dueDate);
 
   try {
-    StatementPDF(res, client, user, req.body.date, req, invoice.orders);
+    if (includeStatement) {
+      StatementPDF(res, client, user, req.body.date, req, invoice.orders);
+    }
     sendInvoice(user, client, body, req, email);
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));

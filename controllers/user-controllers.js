@@ -75,14 +75,14 @@ exports.signup = async (req, res, next) => {
     totalInvoice = '{total}'
   ) => {
     return {
-      ro: `Stimate client, vi s-a emis factura seria ${invoiceSeries} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura și situația lucrărilor facturate se regăsesc atașate acestui mesaj. Vă mulțumim!`,
-      en: `Dear Client, please find attached your invoice series ${invoiceSeries} no. ${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. The detailed work statement is also attached to this message. Thank you!`,
+      ro: `Stimate client, vi s-a emis factura seria ${invoiceSeries} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura se regăsește atașată acestui mesaj. Vă mulțumim!`,
+      en: `Dear Client, please find attached your invoice series ${invoiceSeries} no. ${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. Thank you!`,
     };
   };
 
   const statementTemplate = () => {
     return {
-      ro: 'Stimate client, regăsiți în atașament situația lucrărilor predate la zi. Vă mulțumim.',
+      ro: 'Stimate client, regăsiți în atașament evidența lucrărilor predate la zi. Vă mulțumim.',
       en: 'Dear Client, please find attached our detailed work statement up to date. Thank you.',
     };
   };

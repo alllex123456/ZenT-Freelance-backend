@@ -15,7 +15,7 @@ exports.sendStatement = (user, recipient, req, setEmail) => {
     to: `<${setEmail || recipient.email}>`,
     subject:
       user.language === 'ro'
-        ? 'Situatia lucrarilor la zi'
+        ? 'Evidența lucrarilor la zi'
         : 'Updated statement of work',
     attachments: {
       filename: `${req.t('statement.title')}[${recipient.name}].pdf`,
@@ -38,20 +38,29 @@ exports.sendInvoice = (user, recipient, body, req, setEmail) => {
       user.language === 'ro'
         ? 'Factură emisă'
         : 'Your invoice is now available',
-    attachments: [
-      {
-        filename: `${req.t('statement.title')}[${recipient.name}].pdf`,
-        path: `./uploads/statements/${req.t('statement.title')}[${user.id}][${
-          recipient.name
-        }].pdf`,
-      },
-      {
-        filename: `${req.t('invoice.title')}[${recipient.name}].pdf`,
-        path: `./uploads/invoices/${req.t('invoice.title')}[${user.id}][${
-          recipient.name
-        }].pdf`,
-      },
-    ],
+    attachments: req.includeStatement
+      ? [
+          {
+            filename: `${req.t('statement.title')}[${recipient.name}].pdf`,
+            path: `./uploads/statements/${req.t('statement.title')}[${
+              user.id
+            }][${recipient.name}].pdf`,
+          },
+          {
+            filename: `${req.t('invoice.title')}[${recipient.name}].pdf`,
+            path: `./uploads/invoices/${req.t('invoice.title')}[${user.id}][${
+              recipient.name
+            }].pdf`,
+          },
+        ]
+      : [
+          {
+            filename: `${req.t('invoice.title')}[${recipient.name}].pdf`,
+            path: `./uploads/invoices/${req.t('invoice.title')}[${user.id}][${
+              recipient.name
+            }].pdf`,
+          },
+        ],
     html: `<html><body>
   <p>${body.message
     .replace('{series}', body.series)
