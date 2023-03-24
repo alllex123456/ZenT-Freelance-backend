@@ -152,6 +152,7 @@ exports.createInvoice = async (req, res, next) => {
     userId,
     userData: {
       _id: user._doc._id,
+      avatar: user._doc.avatar,
       VATpayer: user._doc.VATpayer,
       VATrate: user._doc.VATrate,
       name: user._doc.name,
@@ -163,6 +164,7 @@ exports.createInvoice = async (req, res, next) => {
     },
     clientData: {
       _id: client._doc._id,
+      avatar: client._doc.avatar,
       VATpayer: client._doc.VATpayer,
       VATrate: client._doc.VATrate,
       name: client._doc.name,
@@ -263,7 +265,7 @@ exports.generateInvoice = async (req, res, next) => {
   let invoice;
   try {
     invoice = await Invoice.findById(invoiceId).populate(
-      'orders addedItems clientId userId reversedInvoice'
+      'orders addedItems reversedInvoice'
     );
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
