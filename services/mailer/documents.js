@@ -13,6 +13,7 @@ exports.sendStatement = (user, recipient, req, setEmail) => {
   transporter.sendMail({
     from: `${user.name || user.email} <admin@zent-freelance.com>`,
     to: `<${setEmail || recipient.email}>`,
+    replyTo: user.email,
     subject:
       user.language === 'ro'
         ? 'Evidența lucrarilor la zi'
@@ -33,12 +34,13 @@ exports.sendInvoice = (user, recipient, body, req, setEmail) => {
   transporter.sendMail({
     from: `${user.name || user.email} <admin@zent-freelance.com>`,
     to: `<${setEmail || recipient.email}>`,
-    cc: `${req.t('mail.cc')} <${user.email}>`,
+    cc: user.email,
+    replyTo: user.email,
     subject:
       user.language === 'ro'
         ? 'Factură emisă'
         : 'Your invoice is now available',
-    attachments: req.includeStatement
+    attachments: req.body.includeStatement
       ? [
           {
             filename: `${req.t('statement.title')}[${recipient.name}].pdf`,

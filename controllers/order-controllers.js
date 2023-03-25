@@ -245,10 +245,6 @@ exports.modifyOrder = async (req, res, next) => {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
 
-  if (order.status === 'invoiced') {
-    return next(new HttpError(req.t('errors.orders.no_authorization'), 401));
-  }
-
   if (order.userId.toString() !== req.userData.userId) {
     return next(new HttpError(req.t('errors.orders.no_authorization'), 401));
   }

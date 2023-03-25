@@ -187,6 +187,7 @@ exports.createInvoice = async (req, res, next) => {
     notes,
     reversing: req.body.reverse,
     reversedInvoice: req.body.reversedInvoice,
+    previousClientBalance: req.body.previousClientBalance,
     detailedOrders,
     payment: {
       cashedAmount: 0,
@@ -271,7 +272,7 @@ exports.generateInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
   }
 
-  if (req.userData.userId !== invoice.userId.id) {
+  if (req.userData.userId !== invoice.userId.toString()) {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
 
@@ -464,11 +465,12 @@ exports.cashInvoice = async (req, res, next) => {
     ? invoice.orders.concat(invoice.addedItems)
     : invoice.addedItems;
   const totalInvoice = invoicedItems.reduce(
-    (acc, item) => (acc += item.total + (item.total * invoice.VATrate) / 100),
+    (acc, item) =>
+      (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
     0
   );
 
-  if (req.body.cashedAmount === totalInvoice) {
+  if (req.body.cashedAmount >= totalInvoice) {
     invoice.cashed = true;
   } else {
     invoice.cashed = false;
