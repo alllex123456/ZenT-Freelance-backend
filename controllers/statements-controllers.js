@@ -10,7 +10,14 @@ exports.getAllStatements = async (req, res, next) => {
 
   let clients;
   try {
-    clients = await Client.find({ userId }).populate('orders invoices');
+    clients = await Client.find({ userId })
+      .populate('orders')
+      .populate({
+        path: 'invoices',
+        populate: {
+          path: 'addedItems orders',
+        },
+      });
   } catch (error) {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
@@ -32,7 +39,14 @@ exports.getClientOrders = async (req, res, next) => {
 
   let client;
   try {
-    client = await Client.findById(clientId).populate('orders');
+    client = await Client.findById(clientId)
+      .populate('orders')
+      .populate({
+        path: 'invoices',
+        populate: {
+          path: 'addedItems orders',
+        },
+      });
   } catch (error) {
     return next(new HttpError(req.t('errors.client.not_found'), 500));
   }
@@ -41,13 +55,20 @@ exports.getClientOrders = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
 
-  const orders = client.orders.filter((order) => order.status === 'completed');
+  client = {
+    ...client._doc,
+    orders: client._doc.orders.map((order) => ({
+      ...order._doc,
+      clientId: {
+        clientId: client._doc._id,
+        decimalPoints: client._doc.decimalPoints,
+        language: client._doc.language,
+      },
+    })),
+  };
 
   res.json({
-    message: {
-      orders: orders.map((order) => order.toObject({ getters: true })),
-      client,
-    },
+    message: client,
   });
 };
 

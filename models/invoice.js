@@ -41,6 +41,7 @@ const invoiceSchema = new Schema(
       ref: 'Invoice',
     },
     bankAccounts: { type: Array, required: true },
+    previousClientBalance: { type: Number, required: true },
   },
   { timestamps: true }
 );
