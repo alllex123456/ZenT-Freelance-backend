@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
+const Client = require('../models/client');
 const { signupEmail, resetPasswordLink } = require('../services/mailer/user');
 
 exports.getUserData = async (req, res, next) => {
@@ -201,6 +202,10 @@ exports.updateUser = async (req, res, next) => {
     } else {
       user[key] = value;
     }
+  }
+
+  if (req.body.VATpayer === true) {
+    await Client.updateMany({ userId }, { $set: { decimalPoints: 2 } });
   }
 
   try {

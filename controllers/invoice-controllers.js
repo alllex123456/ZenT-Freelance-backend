@@ -464,11 +464,12 @@ exports.cashInvoice = async (req, res, next) => {
   const invoicedItems = invoice.detailedOrders
     ? invoice.orders.concat(invoice.addedItems)
     : invoice.addedItems;
-  const totalInvoice = invoicedItems.reduce(
-    (acc, item) =>
-      (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
-    0
-  );
+  const totalInvoice =
+    invoicedItems.reduce(
+      (acc, item) =>
+        (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
+      0
+    ) + invoice.previousClientBalance;
 
   if (req.body.cashedAmount >= totalInvoice) {
     invoice.cashed = true;
