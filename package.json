@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "aws-sdk": "^2.1259.0",
+    "base64-stream": "^1.0.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.0",
     "date-fns": "^2.29.3",
@@ -29,6 +30,7 @@
     "nodemailer": "^6.8.0",
     "pdfkit": "^0.13.0",
     "pdfkit-table": "^0.1.99",
+    "sib-api-v3-sdk": "^8.5.0",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

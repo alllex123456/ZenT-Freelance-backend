@@ -23,6 +23,7 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
     reversing,
     detailedOrders,
     reversedInvoice,
+    previousClientBalance,
   } = invoiceData;
 
   const user = invoiceData.userData;
@@ -56,13 +57,35 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
 
   const items = detailedOrders ? orders.concat(addedItems) : addedItems;
 
-  const totalWithoutDiscount = items.reduce((acc, item) => {
-    if (item.discount) return acc;
-    return (acc += item.total + (item.total * user.VATrate) / 100);
+  const subTotalInvoice = items.reduce((acc, item) => {
+    if (item.discount) {
+      return acc;
+    } else {
+      return (acc += item.total + (item.total * user.VATrate) / 100);
+    }
   }, 0);
 
-  const total = items.reduce(
-    (acc, item) => (acc += item.total + (item.total * user.VATrate) / 100),
+  const totalDiscount = items.reduce((acc, item) => {
+    if (item.discount) {
+      return (acc += item.total + (item.total * user.VATrate) / 100);
+    } else {
+      return acc;
+    }
+  }, 0);
+
+  const totalWithoutVAT = items.reduce((acc, item) => {
+    if (item.discount) return acc;
+    return (acc += item.total);
+  }, 0);
+
+  const totalInvoice =
+    items.reduce(
+      (acc, item) => (acc += item.total + (item.total * user.VATrate) / 100),
+      0
+    ) + previousClientBalance;
+
+  const totalInvoiceVAT = items.reduce(
+    (acc, item) => (acc += (item.total * user.VATrate) / 100),
     0
   );
 
@@ -191,7 +214,9 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
           headerColor: tableHeaderBackground,
         },
         {
-          label: `${req.t('invoice.vat')} ${VATrate}% (${client.currency})`,
+          label: `${req.t('invoice.vat')} ${user.VATrate}% (${
+            client.currency
+          })`,
           headerColor: tableHeaderBackground,
         },
         {
@@ -318,10 +343,10 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
   invoice.moveDown(2);
 
   invoice
-    .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
-    .fontSize(8)
+    .fontSize(10)
+    .fillColor(textDarkPrimary)
     .text(
-      `${req.t('invoice.subtotal')}: ${totalWithoutDiscount.toLocaleString(
+      `${req.t('invoice.subTotal')}: ${subTotalInvoice.toLocaleString(
         client.language,
         {
           style: 'currency',
@@ -329,34 +354,64 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
           maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
         }
       )}`,
-      {
-        align: 'right',
-      }
+      { align: 'right' }
     )
     .text(
-      `${req.t('invoice.discount')}: ${(
-        totalWithoutDiscount - total
-      ).toLocaleString(client.language, {
-        style: 'currency',
-        currency: client.currency,
-        maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
-      })}`,
-      {
-        align: 'right',
-      }
-    );
-
-  invoice
-    .fontSize(10)
-    .fillColor(textDarkPrimary)
-    .text(
-      `${req.t('invoice.toPay')}: ${total.toLocaleString(client.language, {
+      `${req.t(
+        'statement.previousBalance'
+      )}: ${previousClientBalance.toLocaleString(client.language, {
         style: 'currency',
         currency: client.currency,
         maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
       })}`,
       { align: 'right' }
+    )
+    .text(
+      `${req.t('invoice.discount')}: ${totalDiscount.toLocaleString(
+        client.language,
+        {
+          style: 'currency',
+          currency: client.currency,
+          maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
+        }
+      )}`,
+      { align: 'right' }
     );
+
+  if (user.VATpayer) {
+    invoice
+      .text(
+        `${req.t('invoice.amountWithoutVAT')}: ${totalWithoutVAT.toLocaleString(
+          client.language,
+          {
+            style: 'currency',
+            currency: client.currency,
+            maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
+          }
+        )}`,
+        { align: 'right' }
+      )
+      .text(
+        `${req.t('invoice.vat')}: ${totalInvoiceVAT.toLocaleString(
+          client.language,
+          {
+            style: 'currency',
+            currency: client.currency,
+            maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
+          }
+        )}`,
+        { align: 'right' }
+      );
+  }
+
+  invoice.text(
+    `${req.t('invoice.toPay')}: ${totalInvoice.toLocaleString(client.language, {
+      style: 'currency',
+      currency: client.currency,
+      maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
+    })}`,
+    { align: 'right' }
+  );
 
   invoice.moveDown();
 

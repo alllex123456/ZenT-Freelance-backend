@@ -139,18 +139,6 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders) => {
       maximumFractionDigits: client.decimalPoints,
     })} ${client.currency}`,
   ]);
-  table.rows.push([
-    '',
-    '',
-    '',
-    '',
-    '',
-    '',
-    req.t('statement.previousBalance'),
-    `${client.balance.toLocaleString(client.language, {
-      maximumFractionDigits: client.decimalPoints,
-    })} ${client.currency}`,
-  ]);
 
   statement.table(table, {
     x: 20,
