@@ -52,6 +52,9 @@ const clientSchema = new Schema(
     invoices: [
       { type: mongoose.Types.ObjectId, required: true, ref: 'Invoice' },
     ],
+    receipts: [
+      { type: mongoose.Types.ObjectId, required: true, ref: 'Receipt' },
+    ],
     balance: { type: Number, required: true },
   },
   { timestamps: true }

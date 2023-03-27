@@ -55,6 +55,7 @@ exports.addClient = async (req, res, next) => {
     userId,
     orders: [],
     invoices: [],
+    receipts: [],
     addedItems: [],
     balance: 0,
     invoiceDue: 5,

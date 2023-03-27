@@ -108,6 +108,7 @@ exports.signup = async (req, res, next) => {
     orders: [],
     addedItems: [],
     invoices: [],
+    receipts: [],
     notes: [],
     bankAccounts: [
       { bank: '', iban: '', swift: '' },
