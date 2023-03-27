@@ -31,6 +31,13 @@ const invoiceSchema = new Schema(
         ref: 'AddedItem',
       },
     ],
+    receipts: [
+      {
+        type: mongoose.Types.ObjectId,
+        required: false,
+        ref: 'Receipt',
+      },
+    ],
     issuedDate: { type: Date, required: true },
     dueDate: { type: Date, required: true },
     notes: { type: String, required: false },

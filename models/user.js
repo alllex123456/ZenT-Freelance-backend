@@ -44,6 +44,9 @@ const userSchema = new Schema(
     invoices: [
       { type: mongoose.Types.ObjectId, required: true, ref: 'Invoice' },
     ],
+    receipts: [
+      { type: mongoose.Types.ObjectId, required: true, ref: 'Receipt' },
+    ],
     notes: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Note' }],
     bankAccounts: { type: Array, required: false },
   },

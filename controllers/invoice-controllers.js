@@ -6,10 +6,9 @@ const Client = require('../models/client');
 const User = require('../models/user');
 const Order = require('../models/order');
 const AddedItem = require('../models/added-item');
+const Receipt = require('../models/receipt');
 
-const { StatementPDF } = require('../services/pdf-statement');
 const { InvoicePDF } = require('../services/pdf-invoice');
-const { sendInvoice } = require('../services/mailer/documents');
 
 exports.getAllInvoices = async (req, res, next) => {
   let user;
@@ -474,10 +473,38 @@ exports.cashInvoice = async (req, res, next) => {
     invoice.cashed = false;
   }
 
-  try {
-    await invoice.save();
-  } catch (error) {
-    return next(new HttpError(req.t('errors.invoicing.update_failed'), 500));
+  if (req.body.cashReceipt) {
+    const newReceipt = new Receipt({
+      userId: invoice.userId._id,
+      clientId: invoice.clientId._id,
+      invoiceId: invoice._id,
+      prefix: req.body.receiptPrefix,
+      number: req.body.receiptNumber,
+      amount: req.body.cashedAmount,
+    });
+
+    invoice.userId.receipts.push(newReceipt);
+    invoice.clientId.receipts.push(newReceipt);
+    invoice.receipts.push(newReceipt);
+
+    try {
+      const session = await mongoose.startSession();
+      session.startTransaction();
+      await invoice.userId.save({ session });
+      await invoice.clientId.save({ session });
+      await invoice.save({ session });
+      await newReceipt.save();
+
+      session.commitTransaction();
+    } catch (error) {
+      return next(new HttpError(req.t('errors.invoicing.update_failed'), 500));
+    }
+  } else {
+    try {
+      await invoice.save();
+    } catch (error) {
+      return next(new HttpError(req.t('errors.invoicing.update_failed'), 500));
+    }
   }
 
   res.json({
