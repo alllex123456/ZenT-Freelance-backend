@@ -84,6 +84,7 @@ exports.addClient = async (req, res, next) => {
     await user.save({ session });
     session.commitTransaction();
   } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.clients.save_failed'), 500));
   }
 

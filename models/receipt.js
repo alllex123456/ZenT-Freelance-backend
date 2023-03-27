@@ -12,8 +12,9 @@ const receiptSchema = new Schema(
       ref: 'Invoice',
     },
     prefix: { type: String, required: true },
-    number: { type: String, required: true },
-    amount: { type: Number, required: true },
+    number: { type: Number, required: true },
+    cashedAmount: { type: Number, required: true },
+    dateCashed: { type: Date, required: true },
   },
   { timestamps: true }
 );

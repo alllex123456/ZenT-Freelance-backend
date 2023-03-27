@@ -61,7 +61,7 @@ exports.getInvoice = async (req, res, next) => {
   let invoice;
   try {
     invoice = await Invoice.findById(invoiceId).populate(
-      'userId clientId orders addedItems'
+      'userId clientId orders addedItems payments receipts'
     );
   } catch (error) {
     return next(new HttpError(req.t('errors.user.not_found'), 500));
@@ -447,15 +447,11 @@ exports.cashInvoice = async (req, res, next) => {
   let invoice;
   try {
     invoice = await Invoice.findById(req.body.invoiceId).populate(
-      'clientId orders addedItems'
+      'userId clientId orders addedItems payments receipts'
     );
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
   }
-
-  invoice.payment.cashedAmount = req.body.cashedAmount;
-  invoice.payment.dateCashed = req.body.dateCashed;
-  invoice.payment.receipt = req.body.receipt;
 
   const invoicedItems = invoice.detailedOrders
     ? invoice.orders.concat(invoice.addedItems)
@@ -467,10 +463,28 @@ exports.cashInvoice = async (req, res, next) => {
       0
     ) + invoice.previousClientBalance;
 
-  if (req.body.cashedAmount >= totalInvoice) {
-    invoice.cashed = true;
-  } else {
-    invoice.cashed = false;
+  if (!req.body.cashReceipt) {
+    invoice.payments.push({
+      cashedAmount: req.body.cashedAmount,
+      dateCashed: req.body.dateCashed,
+      prefix: req.body.prefix,
+    });
+
+    const totalPaid = invoice.payments
+      .concat(invoice.receipts)
+      .reduce((acc, payment) => (acc += payment.cashedAmount), 0);
+
+    if (totalPaid < totalInvoice) {
+      invoice.cashed = false;
+    } else {
+      invoice.cashed = true;
+    }
+
+    try {
+      await invoice.save();
+    } catch (error) {
+      return next(new HttpError(req.t('errors.invoicing.update_failed'), 500));
+    }
   }
 
   if (req.body.cashReceipt) {
@@ -479,39 +493,131 @@ exports.cashInvoice = async (req, res, next) => {
       clientId: invoice.clientId._id,
       invoiceId: invoice._id,
       prefix: req.body.receiptPrefix,
-      number: req.body.receiptNumber,
-      amount: req.body.cashedAmount,
+      number: req.body.receiptStartNumber,
+      cashedAmount: req.body.cashedAmount,
+      dateCashed: req.body.dateCashed,
     });
-
-    invoice.userId.receipts.push(newReceipt);
-    invoice.clientId.receipts.push(newReceipt);
-    invoice.receipts.push(newReceipt);
 
     try {
       const session = await mongoose.startSession();
       session.startTransaction();
+
+      invoice.userId.receipts.push(newReceipt);
+      invoice.userId.receiptStartNumber++;
+      invoice.clientId.receipts.push(newReceipt);
+      invoice.receipts.push(newReceipt);
+
+      const totalPaid = invoice.payments
+        .concat(invoice.receipts)
+        .reduce((acc, payment) => (acc += payment.cashedAmount), 0);
+
+      if (totalPaid < totalInvoice) {
+        invoice.cashed = false;
+      } else {
+        invoice.cashed = true;
+      }
+
+      await newReceipt.save({ session });
+      await invoice.save({ session });
       await invoice.userId.save({ session });
       await invoice.clientId.save({ session });
-      await invoice.save({ session });
-      await newReceipt.save();
 
       session.commitTransaction();
-    } catch (error) {
-      return next(new HttpError(req.t('errors.invoicing.update_failed'), 500));
-    }
-  } else {
-    try {
-      await invoice.save();
     } catch (error) {
       return next(new HttpError(req.t('errors.invoicing.update_failed'), 500));
     }
   }
 
   res.json({
-    confirmation: req.body.modifyPayment
-      ? req.t('success.invoicing.modified')
-      : req.t('success.invoicing.cashed'),
-    invoice,
+    confirmation: req.t('success.invoicing.cashed'),
+    invoice: invoice.toObject({ getters: true }),
+  });
+};
+
+exports.modifyPayment = async (req, res, next) => {
+  let invoice;
+  try {
+    invoice = await Invoice.findById(req.body.invoiceId).populate(
+      'userId clientId orders addedItems payments receipts'
+    );
+  } catch (error) {
+    return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
+  }
+
+  req.body.inputs.forEach(async (input) => {
+    if (input.number) {
+      let receipt;
+      try {
+        receipt = await Receipt.findById(input._id);
+      } catch (error) {}
+
+      for (const [key, value] of Object.entries(input)) {
+        if (value) {
+          receipt[key] = value;
+        }
+      }
+
+      const changedReceiptIndex = invoice.receipts.findIndex(
+        (receipt) => receipt._id.toString() === input._id
+      );
+
+      for (const [key, value] of Object.entries(input)) {
+        if (value) {
+          invoice.receipts[changedReceiptIndex][key] = value;
+        }
+      }
+
+      try {
+        await receipt.save();
+      } catch (error) {
+        return next(
+          new HttpError(req.t('errors.invoicing.update_failed'), 500)
+        );
+      }
+    }
+  });
+
+  req.body.inputs.forEach(async (input) => {
+    if (!input.number) {
+      const changedIndex = invoice.payments.findIndex(
+        (receipt) => receipt._id.toString() === input._id
+      );
+      for (const [key, value] of Object.entries(input)) {
+        if (value) {
+          invoice.payments[changedIndex][key] = value;
+        }
+      }
+    }
+  });
+
+  const invoicedItems = invoice.detailedOrders
+    ? invoice.orders.concat(invoice.addedItems)
+    : invoice.addedItems;
+  const totalInvoice =
+    invoicedItems.reduce(
+      (acc, item) =>
+        (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
+      0
+    ) + invoice.previousClientBalance;
+  const totalPaid = invoice.payments
+    .concat(invoice.receipts)
+    .reduce((acc, payment) => (acc += payment.cashedAmount), 0);
+
+  if (totalPaid < totalInvoice) {
+    invoice.cashed = false;
+  } else {
+    invoice.cashed = true;
+  }
+
+  try {
+    await invoice.save();
+  } catch (error) {
+    return next(new HttpError(req.t('errors.invoicing.update_failed'), 500));
+  }
+
+  res.json({
+    confirmation: req.t('success.invoicing.modified'),
+    invoice: invoice.toObject({ getters: true }),
   });
 };
 

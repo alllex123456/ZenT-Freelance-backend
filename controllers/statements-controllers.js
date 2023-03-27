@@ -15,7 +15,7 @@ exports.getAllStatements = async (req, res, next) => {
       .populate({
         path: 'invoices',
         populate: {
-          path: 'addedItems orders',
+          path: 'addedItems orders payments receipts',
         },
       });
   } catch (error) {
