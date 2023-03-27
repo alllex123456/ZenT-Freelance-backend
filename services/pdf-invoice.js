@@ -2,6 +2,15 @@ const fs = require('fs');
 const { fetchImage } = require('../utils/generalFunc');
 const PDFDocument = require('pdfkit-table');
 const { computeUnits } = require('../utils/compute-units');
+const { translateServices } = require('../utils/translateUnits');
+const nodemailer = require('nodemailer');
+const AWS = require('aws-sdk');
+
+AWS.config.update({ region: 'eu-west-3' });
+
+let transporter = nodemailer.createTransport({
+  SES: new AWS.SES(),
+});
 
 const margin = 20;
 const textDarkPrimary = '#757575';
@@ -10,9 +19,14 @@ const divider = '#2ecc71';
 const dividerLight = '#82e0aa';
 const tableHeaderBackground = '#fff';
 
-const { translateServices } = require('../utils/translateUnits');
-
-exports.InvoicePDF = async (req, res, invoiceData, type) => {
+exports.InvoicePDF = async (
+  req,
+  res,
+  invoiceData,
+  body,
+  email,
+  includeStatement
+) => {
   const {
     series,
     number,
@@ -98,14 +112,6 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
     margin: 20,
     bufferPages: true,
   });
-
-  invoice.pipe(
-    fs.createWriteStream(
-      `./uploads/invoices/${req.t('invoice.title')}[${user._id}][${
-        client.name
-      }]${type ? type : ''}.pdf`
-    )
-  );
 
   invoice.image(logo, { fit: [80, 80] });
 
@@ -240,6 +246,10 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
         {
           label: req.t('invoice.qty'),
           headerColor: tableHeaderBackground,
+          renderer: (value) =>
+            value.toLocaleString(client.language, {
+              maximumFractionDigits: 1,
+            }),
         },
         {
           label: req.t('invoice.rate'),
@@ -263,16 +273,7 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
           : `${translateServices([item.service], req.t)?.displayedValue} / ${
               item.reference
             }`,
-        item.addedItem
-          ? item.count.toLocaleString(client.language, {
-              maximumFractionDigits: 1,
-            })
-          : `${computeUnits(item.count, item.unit).toLocaleString(
-              client.language,
-              {
-                maximumFractionDigits: 1,
-              }
-            )}`,
+        item.addedItem ? item.count : computeUnits(item.count, item.unit),
         `${item.rate.toLocaleString(client.language, {
           maximumFractionDigits: 2,
         })}`,
@@ -295,16 +296,7 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
           : `${translateServices([item.service], req.t)?.displayedValue} / ${
               item.reference
             }`,
-        item.addedItem
-          ? item.count.toLocaleString(client.language, {
-              maximumFractionDigits: 1,
-            })
-          : `${computeUnits(item.count, item.unit).toLocaleString(
-              client.language,
-              {
-                maximumFractionDigits: 1,
-              }
-            )}`,
+        item.addedItem ? item.count : computeUnits(item.count, item.unit),
         `${item.rate.toLocaleString(client.language, {
           maximumFractionDigits: client.decimalPoints,
         })}`,
@@ -404,7 +396,7 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
       );
   }
 
-  invoice.text(
+  invoice.font('services/fonts/Ubuntu/Ubuntu-Medium.ttf').text(
     `${req.t('invoice.toPay')}: ${totalInvoice.toLocaleString(client.language, {
       style: 'currency',
       currency: client.currency,
@@ -461,10 +453,10 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
     padding: 5,
     x: margin,
     y: invoice.y,
-    columnsSize: [200, 150, 100],
+    columnsSize: [150, 150, 80],
     divider: {
-      header: { disabled: false, width: 1, opacity: 0.5 },
-      horizontal: { disabled: false, opacity: 0.2 },
+      header: { disabled: false, width: 1, opacity: 0.2 },
+      horizontal: { disabled: true },
     },
     prepareHeader: () => {
       invoice
@@ -479,19 +471,207 @@ exports.InvoicePDF = async (req, res, invoiceData, type) => {
         .fillColor(textDarkSecondary),
   });
 
-  invoice.moveDown();
-
-  invoice.moveTo(margin, invoice.y).lineTo(575, invoice.y).stroke(dividerLight);
-
-  invoice.moveDown();
+  invoice.moveDown(2);
 
   invoice.font('services/fonts/Ubuntu/Ubuntu-Regular.ttf');
 
   invoice.text(req.t('signature'), { link: 'https://www.zent-freelance.com' });
 
+  //////////////////// STATEMENT ///////////////////////////
+  let statement;
+  if (Object.keys(req.body).length !== 0 && includeStatement) {
+    let statementOrders;
+
+    statementOrders = orders.map((order, index) => [
+      index + 1,
+      `${translateServices([order.service], req.t)?.displayedValue} / ${
+        order.reference
+      }`,
+      `${new Date(order.receivedDate).toLocaleDateString(client.language)} /
+        ${new Date(order.deliveredDate || order.deadline).toLocaleDateString(
+          client.language
+        )}`,
+      new Date(order.deadline).toLocaleDateString(client.language),
+      order.count.toLocaleString(client.language, {
+        maximumFractionDigits: client.decimalPoints,
+      }),
+      order.rate.toLocaleString(client.language, {
+        maximumFractionDigits: client.decimalPoints,
+      }),
+      order.total.toLocaleString(client.language, {
+        maximumFractionDigits: client.decimalPoints,
+      }),
+      order.notes,
+    ]);
+
+    let totalOrders;
+
+    totalOrders = orders.reduce((acc, val) => (acc += val.total), 0);
+
+    statement = new PDFDocument({
+      info: {
+        Title: `${req.t('statement.title')} ${client.name} la ${new Date(
+          req.body.date
+        ).toLocaleDateString(client.language)}`,
+      },
+      size: 'A4',
+      font: 'services/fonts/Ubuntu/Ubuntu-Regular.ttf',
+      margin,
+      bufferPages: true,
+    });
+
+    statement
+      .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+      .fontSize(14)
+      .fillColor(textDarkPrimary)
+      .text(req.t('statement.title').toUpperCase())
+      .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
+      .fontSize(8)
+      .fillColor(textDarkSecondary)
+      .text(`${req.t('statement.clientName')}: ${client.name}`)
+      .text(
+        `${req.t('statement.generatedAt')}: ${new Date(
+          req.body.date
+        ).toLocaleDateString(client.language)}`
+      );
+
+    statement.moveDown(3);
+
+    statement
+      .moveTo(margin, statement.y)
+      .lineTo(575, statement.y)
+      .stroke(divider);
+
+    statement.moveDown(3);
+
+    const statementTable = {
+      headers: [
+        req.t('statement.it'),
+        req.t('statement.jobRef'),
+        req.t('statement.receivedDelivered'),
+        req.t('statement.deadline'),
+        req.t('statement.qty'),
+        `${req.t('statement.rate')} (${client.currency})`,
+        `${req.t('statement.amount')} (${client.currency})`,
+        req.t('statement.notes'),
+        ,
+      ],
+
+      rows: statementOrders,
+    };
+
+    table.rows.push([
+      '',
+      '',
+      '',
+      '',
+      '',
+      '',
+      req.t('statement.total'),
+      `${totalOrders.toLocaleString(client.language, {
+        maximumFractionDigits: client.decimalPoints,
+      })} ${client.currency}`,
+    ]);
+
+    statement.table(statementTable, {
+      x: 20,
+      width: 555,
+      columnsSize: [20, 125, 80, 60, 50, 50, 50, 120],
+      divider: {
+        header: { disabled: false, width: 1, opacity: 0.5 },
+        horizontal: { disabled: false, opacity: 0.2 },
+      },
+      prepareHeader: () => {
+        statement
+          .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+          .fontSize(8)
+          .fillColor(textDarkPrimary);
+      },
+      prepareRow: () =>
+        statement
+          .font('services/fonts/Ubuntu/Ubuntu-Light.ttf')
+          .fontSize(8)
+          .fillColor(textDarkSecondary),
+    });
+
+    statement.text(req.t('signature'), {
+      link: 'https://www.zent-freelance.com',
+    });
+
+    statement.end();
+  }
+
+  //////////////////// STATEMENT ///////////////////////////
+
+  if (Object.keys(req.body).length !== 0) {
+    if (!client.email || !user.email)
+      return HttpError(req.t('errors.invoice.send_failed'), 500);
+    const invoiceChunks = [];
+    const statementChunks = [];
+    invoice.on('data', invoiceChunks.push.bind(invoiceChunks));
+    if (includeStatement) {
+      statement.on('data', statementChunks.push.bind(statementChunks));
+    }
+    invoice.on('end', () => {
+      let invoiceBuffer = Buffer.concat(invoiceChunks);
+      let statementBuffer;
+      if (includeStatement) {
+        statementBuffer = Buffer.concat(statementChunks);
+      }
+
+      return transporter
+        .sendMail({
+          from: `${user.name || user.email} <admin@zent-freelance.com>`,
+          to: `<${email || client.email}>`,
+          cc: user.email,
+          replyTo: user.email,
+          subject:
+            client.language === 'ro'
+              ? 'Factură emisă'
+              : 'Your invoice is now available',
+          attachments: includeStatement
+            ? [
+                {
+                  filename: `${req.t('invoice.title')}[${client.name}].pdf`,
+                  content: invoiceBuffer,
+                },
+                {
+                  filename: `${req.t('statement.title')}[${client.name}].pdf`,
+                  content: statementBuffer,
+                },
+              ]
+            : {
+                filename: `${req.t('invoice.title')}[${client.name}].pdf`,
+                content: invoiceBuffer,
+              },
+          html: `<html><body>
+  <p>${body.message
+    .replace('{series}', body.series)
+    .replace('{number}', body.number)
+    .replace(
+      '{total}',
+      `${body.totalInvoice.toLocaleString(client.language, {
+        style: 'currency',
+        currency: client.currency,
+        maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
+      })}`
+    )
+    .replace(
+      '{date}',
+      new Date(body.dueDate).toLocaleDateString(user.language)
+    )}</p>
+  </body></html>`,
+        })
+        .then(() => {})
+        .catch((error) => {
+          return next(new HttpError(req.t('errors.invoice.send_failed'), 500));
+        });
+    });
+  }
+
   invoice.end();
 
-  if (res && invoiceData._id) {
+  if (Object.keys(req.body).length === 0) {
     invoice.pipe(res);
   }
 };

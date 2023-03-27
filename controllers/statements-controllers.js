@@ -160,14 +160,9 @@ exports.sendStatement = async (req, res, next) => {
   }
 
   try {
-    StatementPDF(res, client, user, date, req, orders);
+    StatementPDF(res, client, user, date, req, orders, email);
   } catch (error) {
-    return next(new HttpError(req.t('errors.statement.send_failed'), 500));
-  }
-
-  try {
-    sendStatement(user, client, req, email);
-  } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.statement.send_failed'), 500));
   }
 
