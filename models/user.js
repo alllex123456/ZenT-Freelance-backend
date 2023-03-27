@@ -24,6 +24,8 @@ const userSchema = new Schema(
     taxNumber: { type: String, required: false },
     VATpayer: { type: Boolean, required: false },
     VATrate: { type: Number, required: false },
+    receiptPrefix: { type: String, required: false },
+    receiptStartNumber: { type: Number, required: false },
     invoiceNotes: { type: String, required: false },
     invoiceSeries: { type: String, required: false },
     invoiceStartNumber: { type: Number, required: false },

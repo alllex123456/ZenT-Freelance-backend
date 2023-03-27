@@ -9,11 +9,13 @@ const invoiceSchema = new Schema(
     clientData: { type: Object, required: true },
     cashed: { type: Boolean, required: true },
     reversed: { type: Boolean, required: false },
-    payment: {
-      cashedAmount: { type: Number, required: false },
-      dateCashed: { type: Date, required: false },
-      receipt: { type: String, required: false },
-    },
+    payments: [
+      {
+        cashedAmount: { type: Number, required: false },
+        dateCashed: { type: Date, required: false },
+        prefix: { type: String, required: false },
+      },
+    ],
     series: { type: String, required: true },
     number: { type: Number, required: true },
     detailedOrders: { type: Boolean, required: true },

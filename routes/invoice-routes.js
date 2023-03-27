@@ -10,6 +10,7 @@ const {
   deleteInvoice,
   cashInvoice,
   getClientInvoices,
+  modifyPayment,
 } = require('../controllers/invoice-controllers');
 const authGuard = require('../middleware/auth-guard');
 
@@ -25,6 +26,7 @@ router.post('/:clientId', createInvoice);
 
 router.patch('/cash-invoice', cashInvoice);
 router.patch('/modify-invoice', modifyInvoice);
+router.patch('/modify-payment', modifyPayment);
 router.delete('/delete-invoice/:invoiceId', deleteInvoice);
 
 module.exports = router;
