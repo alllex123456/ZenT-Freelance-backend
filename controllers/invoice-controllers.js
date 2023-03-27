@@ -345,10 +345,7 @@ exports.sendInvoice = async (req, res, next) => {
   message.replace('{date}', invoice.dueDate);
 
   try {
-    if (includeStatement) {
-      StatementPDF(res, client, user, req.body.date, req, invoice.orders);
-    }
-    sendInvoice(user, client, body, req, email);
+    InvoicePDF(req, res, invoice, body, email, includeStatement);
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
   }
