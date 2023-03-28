@@ -16,7 +16,7 @@ const invoiceSchema = new Schema(
         prefix: { type: String, required: false },
       },
     ],
-    series: { type: String, required: true },
+    prefix: { type: String, required: true },
     number: { type: Number, required: true },
     detailedOrders: { type: Boolean, required: true },
     orders: [

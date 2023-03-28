@@ -17,7 +17,6 @@ module.exports = (req, res, next) => {
 
     next();
   } catch (error) {
-    console.log(error);
     return next(new HttpError(req.t('errors.user.no_token'), 401));
   }
 };

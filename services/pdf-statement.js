@@ -41,9 +41,9 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
   if (req.headers.invoiceid || req.headers.listedorders?.length === 0) {
     orders = completedOrders.map((order, index) => [
       index + 1,
-      `${
-        translateServices([order.service], client.language)?.displayedValue
-      } / ${order.reference}`,
+      `${translateServices([order.service], req.t)?.displayedValue} / ${
+        order.reference
+      }`,
       `${new Date(order.receivedDate).toLocaleDateString(client.language)} /
         ${
           order.deliveredDate
@@ -65,9 +65,9 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
   } else {
     orders = invoiceOrders.map((order, index) => [
       index + 1,
-      `${
-        translateServices([order.service], client.language)?.displayedValue
-      } / ${order.reference}`,
+      `${translateServices([order.service], req.t)?.displayedValue} / ${
+        order.reference
+      }`,
       `${new Date(order.receivedDate).toLocaleDateString(client.language)} /
         ${new Date(order.deliveredDate || order.deadline).toLocaleDateString(
           client.language

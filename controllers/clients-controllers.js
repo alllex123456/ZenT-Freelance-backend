@@ -29,7 +29,12 @@ exports.getClient = async (req, res, next) => {
 
   let client;
   try {
-    client = await Client.findById(clientId);
+    client = await Client.findById(clientId).populate({
+      path: 'invoices',
+      populate: {
+        path: 'orders addedItems payments receipts',
+      },
+    });
   } catch (error) {
     return next(new HttpError(req.t('errors.clients.not_found'), 500));
   }

@@ -9,6 +9,7 @@ const AddedItem = require('../models/added-item');
 const Receipt = require('../models/receipt');
 
 const { InvoicePDF } = require('../services/pdf-invoice');
+const { ReceiptPDF } = require('../services/pdf-receipt');
 
 exports.getAllInvoices = async (req, res, next) => {
   let user;
@@ -74,7 +75,7 @@ exports.createInvoice = async (req, res, next) => {
   const { userId } = req.userData;
   const {
     clientId,
-    series,
+    prefix,
     number,
     orders,
     dueDate,
@@ -177,7 +178,7 @@ exports.createInvoice = async (req, res, next) => {
       decimalPoints: client._doc.decimalPoints,
     },
     clientId,
-    series,
+    prefix,
     number,
     orders: orders.filter((order) => !order.addedItem),
     dueDate,
@@ -332,13 +333,13 @@ exports.sendInvoice = async (req, res, next) => {
 
   const body = {
     message,
-    series: invoice.series,
+    prefix: invoice.prefix,
     number: invoice.number,
     totalInvoice,
     dueDate: invoice.dueDate,
   };
 
-  message.replace('{series}', invoice.series);
+  message.replace('{prefix}', invoice.prefix);
   message.replace('{number}', invoice.number);
   message.replace('{total}', totalInvoice);
   message.replace('{date}', invoice.dueDate);
@@ -640,7 +641,7 @@ exports.reverseInvoice = async (req, res, next) => {
   const newInvoice = new Invoice({
     userId: invoice.userId.id,
     clientId: invoice.clientId.id,
-    series: invoice.userId.invoiceSeries,
+    prefix: invoice.userId.invoicePrefix,
     number: invoice.userId.invoiceStartNumber,
     orders: [],
     dueDate: req.body.dueDate,
@@ -666,4 +667,22 @@ exports.reverseInvoice = async (req, res, next) => {
   }
 
   res.json({ message: req.t('success.invoicing.reversed') });
+};
+
+exports.downloadReceipt = async (req, res, next) => {
+  let receipt;
+  try {
+    receipt = await Receipt.findById(req.params.receiptId)
+      .populate('userId clientId')
+      .populate({
+        path: 'invoiceId',
+        populate: {
+          path: 'orders addedItems clientData',
+        },
+      });
+  } catch (error) {
+    return next(new HttpError(req.t('errors.invoicing.not_found'), 404));
+  }
+
+  ReceiptPDF(res, receipt);
 };

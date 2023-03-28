@@ -1,4 +1,3 @@
-const fs = require('fs');
 const { fetchImage } = require('../utils/generalFunc');
 const PDFDocument = require('pdfkit-table');
 const { computeUnits } = require('../utils/compute-units');
@@ -28,7 +27,7 @@ exports.InvoicePDF = async (
   includeStatement
 ) => {
   const {
-    series,
+    prefix,
     number,
     orders,
     addedItems,
@@ -43,31 +42,28 @@ exports.InvoicePDF = async (
   const user = invoiceData.userData;
   const client = invoiceData.clientData;
 
+  const translationObject = require(`../locales/${client.language}/translation.json`);
+
+  CLIENT_LNG = (args) => {
+    const argsArray = args.split('.');
+    const argsCount = argsArray.length;
+
+    if (argsCount === 1) {
+      return translationObject[`${args}`];
+    }
+    if (argsCount === 2) {
+      return translationObject[`${argsArray[0]}`][`${argsArray[1]}`];
+    }
+    if (argsCount === 3) {
+      return translationObject[`${argsArray[0]}`][`${argsArray[1]}`][
+        `${argsArray[2]}`
+      ];
+    }
+  };
+
   const logo = await fetchImage(
     'https://zent.s3.eu-west-3.amazonaws.com/zent-logo-dark.png'
   );
-
-  if (!req) {
-    const translationObject = require(`../locales/${client.language}/translation.json`);
-    req = {
-      t: (args) => {
-        const argsArray = args.split('.');
-        const argsCount = argsArray.length;
-
-        if (argsCount === 1) {
-          return translationObject[`${args}`];
-        }
-        if (argsCount === 2) {
-          return translationObject[`${argsArray[0]}`][`${argsArray[1]}`];
-        }
-        if (argsCount === 3) {
-          return translationObject[`${argsArray[0]}`][`${argsArray[1]}`][
-            `${argsArray[2]}`
-          ];
-        }
-      },
-    };
-  }
 
   const items = detailedOrders ? orders.concat(addedItems) : addedItems;
 
@@ -105,7 +101,7 @@ exports.InvoicePDF = async (
 
   const invoice = new PDFDocument({
     info: {
-      Title: req.t('invoice.title'),
+      Title: CLIENT_LNG('invoice.title'),
     },
     size: 'A4',
     font: 'services/fonts/Ubuntu/Ubuntu-Regular.ttf',
@@ -120,41 +116,43 @@ exports.InvoicePDF = async (
     .fontSize(18)
     .lineGap(4)
     .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
-    .text(req.t('invoice.title').toUpperCase(), 350, margin, { align: 'right' })
+    .text(CLIENT_LNG('invoice.title').toUpperCase(), 350, margin, {
+      align: 'right',
+    })
     .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
     .fontSize(8)
     .fillColor(textDarkSecondary)
     .text(
-      `${req.t('invoice.series')} ${series}/${req.t(
+      `${CLIENT_LNG('invoice.prefix')} ${prefix}/${CLIENT_LNG(
         'invoice.number'
       )} ${number}`,
       { align: 'right' }
     )
     .text(
       reversing
-        ? `${req.t('invoice.reverseHeading')} ${reversedInvoice.series}/${
+        ? `${CLIENT_LNG('invoice.reverseHeading')} ${reversedInvoice.prefix}/${
             reversedInvoice.number
           }`
         : '',
       { align: 'right' }
     )
     .text(
-      `${req.t('invoice.issuedDate')}: ${new Date(
+      `${CLIENT_LNG('invoice.issuedDate')}: ${new Date(
         issuedDate
       ).toLocaleDateString(client.language)}`,
       { align: 'right' }
     )
     .text(
-      `${req.t('invoice.maturity')}: ${new Date(dueDate).toLocaleDateString(
-        client.language
-      )}`,
+      `${CLIENT_LNG('invoice.maturity')}: ${new Date(
+        dueDate
+      ).toLocaleDateString(client.language)}`,
       { align: 'right' }
     );
 
   invoice
     .fontSize(8)
     .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
-    .text(`${req.t('invoice.supplier')}:`, margin, invoice.y)
+    .text(`${CLIENT_LNG('invoice.supplier')}:`, margin, invoice.y)
     .fillColor(textDarkPrimary)
     .fontSize(10)
     .text(user.name.toUpperCase(), { width: 270 })
@@ -176,7 +174,7 @@ exports.InvoicePDF = async (
   invoice
     .fontSize(8)
     .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
-    .text(`${req.t('invoice.client')}:`, 20, invoice.y)
+    .text(`${CLIENT_LNG('invoice.client')}:`, 20, invoice.y)
     .fillColor(textDarkPrimary)
     .fontSize(10)
     .text(client.name.toUpperCase(), { width: 270 })
@@ -200,33 +198,33 @@ exports.InvoicePDF = async (
     table = {
       headers: [
         {
-          label: req.t('invoice.it'),
+          label: CLIENT_LNG('invoice.it'),
           headerColor: tableHeaderBackground,
         },
         {
-          label: req.t('invoice.description'),
+          label: CLIENT_LNG('invoice.description'),
           headerColor: tableHeaderBackground,
         },
         {
-          label: req.t('invoice.qty'),
+          label: CLIENT_LNG('invoice.qty'),
           headerColor: tableHeaderBackground,
         },
         {
-          label: req.t('invoice.rate'),
+          label: CLIENT_LNG('invoice.rate'),
           headerColor: tableHeaderBackground,
         },
         {
-          label: `${req.t('invoice.amount')} (${client.currency})`,
+          label: `${CLIENT_LNG('invoice.amount')} (${client.currency})`,
           headerColor: tableHeaderBackground,
         },
         {
-          label: `${req.t('invoice.vat')} ${user.VATrate}% (${
+          label: `${CLIENT_LNG('invoice.vat')} ${user.VATrate}% (${
             client.currency
           })`,
           headerColor: tableHeaderBackground,
         },
         {
-          label: `${req.t('invoice.amountWithVAT')} (${client.currency})`,
+          label: `${CLIENT_LNG('invoice.amountWithVAT')} (${client.currency})`,
           headerColor: tableHeaderBackground,
         },
       ],
@@ -236,15 +234,15 @@ exports.InvoicePDF = async (
     table = {
       headers: [
         {
-          label: req.t('invoice.it'),
+          label: CLIENT_LNG('invoice.it'),
           headerColor: tableHeaderBackground,
         },
         {
-          label: req.t('invoice.description'),
+          label: CLIENT_LNG('invoice.description'),
           headerColor: tableHeaderBackground,
         },
         {
-          label: req.t('invoice.qty'),
+          label: CLIENT_LNG('invoice.qty'),
           headerColor: tableHeaderBackground,
           renderer: (value) =>
             value.toLocaleString(client.language, {
@@ -252,11 +250,11 @@ exports.InvoicePDF = async (
             }),
         },
         {
-          label: req.t('invoice.rate'),
+          label: CLIENT_LNG('invoice.rate'),
           headerColor: tableHeaderBackground,
         },
         {
-          label: `${req.t('invoice.amount')} (${client.currency})`,
+          label: `${CLIENT_LNG('invoice.amount')} (${client.currency})`,
           headerColor: tableHeaderBackground,
         },
       ],
@@ -270,9 +268,9 @@ exports.InvoicePDF = async (
         index + 1,
         item.addedItem
           ? item.description
-          : `${translateServices([item.service], req.t)?.displayedValue} / ${
-              item.reference
-            }`,
+          : `${
+              translateServices([item.service], CLIENT_LNG)?.displayedValue
+            } / ${item.reference}`,
         item.addedItem ? item.count : computeUnits(item.count, item.unit),
         `${item.rate.toLocaleString(client.language, {
           maximumFractionDigits: 2,
@@ -293,9 +291,9 @@ exports.InvoicePDF = async (
         index + 1,
         item.addedItem
           ? item.description
-          : `${translateServices([item.service], req.t)?.displayedValue} / ${
-              item.reference
-            }`,
+          : `${
+              translateServices([item.service], CLIENT_LNG)?.displayedValue
+            } / ${item.reference}`,
         item.addedItem ? item.count : computeUnits(item.count, item.unit),
         `${item.rate.toLocaleString(client.language, {
           maximumFractionDigits: client.decimalPoints,
@@ -338,7 +336,7 @@ exports.InvoicePDF = async (
     .fontSize(10)
     .fillColor(textDarkPrimary)
     .text(
-      `${req.t('invoice.subTotal')}: ${subTotalInvoice.toLocaleString(
+      `${CLIENT_LNG('invoice.subTotal')}: ${subTotalInvoice.toLocaleString(
         client.language,
         {
           style: 'currency',
@@ -349,7 +347,7 @@ exports.InvoicePDF = async (
       { align: 'right' }
     )
     .text(
-      `${req.t(
+      `${CLIENT_LNG(
         'statement.previousBalance'
       )}: ${previousClientBalance.toLocaleString(client.language, {
         style: 'currency',
@@ -359,7 +357,7 @@ exports.InvoicePDF = async (
       { align: 'right' }
     )
     .text(
-      `${req.t('invoice.discount')}: ${totalDiscount.toLocaleString(
+      `${CLIENT_LNG('invoice.discount')}: ${totalDiscount.toLocaleString(
         client.language,
         {
           style: 'currency',
@@ -373,18 +371,17 @@ exports.InvoicePDF = async (
   if (user.VATpayer) {
     invoice
       .text(
-        `${req.t('invoice.amountWithoutVAT')}: ${totalWithoutVAT.toLocaleString(
-          client.language,
-          {
-            style: 'currency',
-            currency: client.currency,
-            maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
-          }
-        )}`,
+        `${CLIENT_LNG(
+          'invoice.amountWithoutVAT'
+        )}: ${totalWithoutVAT.toLocaleString(client.language, {
+          style: 'currency',
+          currency: client.currency,
+          maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
+        })}`,
         { align: 'right' }
       )
       .text(
-        `${req.t('invoice.vat')}: ${totalInvoiceVAT.toLocaleString(
+        `${CLIENT_LNG('invoice.vat')}: ${totalInvoiceVAT.toLocaleString(
           client.language,
           {
             style: 'currency',
@@ -397,11 +394,14 @@ exports.InvoicePDF = async (
   }
 
   invoice.font('services/fonts/Ubuntu/Ubuntu-Medium.ttf').text(
-    `${req.t('invoice.toPay')}: ${totalInvoice.toLocaleString(client.language, {
-      style: 'currency',
-      currency: client.currency,
-      maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
-    })}`,
+    `${CLIENT_LNG('invoice.toPay')}: ${totalInvoice.toLocaleString(
+      client.language,
+      {
+        style: 'currency',
+        currency: client.currency,
+        maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
+      }
+    )}`,
     { align: 'right' }
   );
 
@@ -417,7 +417,7 @@ exports.InvoicePDF = async (
 
     invoice
       .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
-      .text(`${req.t('invoice.notes')}`)
+      .text(`${CLIENT_LNG('invoice.notes')}`)
       .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
       .text(invoice.notes || '');
 
@@ -430,14 +430,14 @@ exports.InvoicePDF = async (
 
   invoice
     .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
-    .text(req.t('invoice.paymentInfo').toUpperCase());
+    .text(CLIENT_LNG('invoice.paymentInfo').toUpperCase());
 
   invoice.moveDown();
 
   const bankAccountsTable = {
     headers: [
-      { label: req.t('invoice.bank'), headerColor: tableHeaderBackground },
-      { label: req.t('invoice.iban'), headerColor: tableHeaderBackground },
+      { label: CLIENT_LNG('invoice.bank'), headerColor: tableHeaderBackground },
+      { label: CLIENT_LNG('invoice.iban'), headerColor: tableHeaderBackground },
       { label: 'SWIFT', headerColor: tableHeaderBackground },
     ],
     rows: [],
@@ -475,7 +475,9 @@ exports.InvoicePDF = async (
 
   invoice.font('services/fonts/Ubuntu/Ubuntu-Regular.ttf');
 
-  invoice.text(req.t('signature'), { link: 'https://www.zent-freelance.com' });
+  invoice.text(CLIENT_LNG('signature'), {
+    link: 'https://www.zent-freelance.com',
+  });
 
   //////////////////// STATEMENT ///////////////////////////
   let statement;
@@ -484,7 +486,7 @@ exports.InvoicePDF = async (
 
     statementOrders = orders.map((order, index) => [
       index + 1,
-      `${translateServices([order.service], req.t)?.displayedValue} / ${
+      `${translateServices([order.service], CLIENT_LNG)?.displayedValue} / ${
         order.reference
       }`,
       `${new Date(order.receivedDate).toLocaleDateString(client.language)} /
@@ -510,7 +512,7 @@ exports.InvoicePDF = async (
 
     statement = new PDFDocument({
       info: {
-        Title: `${req.t('statement.title')} ${client.name} la ${new Date(
+        Title: `${CLIENT_LNG('statement.title')} ${client.name} la ${new Date(
           req.body.date
         ).toLocaleDateString(client.language)}`,
       },
@@ -524,13 +526,13 @@ exports.InvoicePDF = async (
       .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
       .fontSize(14)
       .fillColor(textDarkPrimary)
-      .text(req.t('statement.title').toUpperCase())
+      .text(CLIENT_LNG('statement.title').toUpperCase())
       .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
       .fontSize(8)
       .fillColor(textDarkSecondary)
-      .text(`${req.t('statement.clientName')}: ${client.name}`)
+      .text(`${CLIENT_LNG('statement.clientName')}: ${client.name}`)
       .text(
-        `${req.t('statement.generatedAt')}: ${new Date(
+        `${CLIENT_LNG('statement.generatedAt')}: ${new Date(
           req.body.date
         ).toLocaleDateString(client.language)}`
       );
@@ -546,14 +548,14 @@ exports.InvoicePDF = async (
 
     const statementTable = {
       headers: [
-        req.t('statement.it'),
-        req.t('statement.jobRef'),
-        req.t('statement.receivedDelivered'),
-        req.t('statement.deadline'),
-        req.t('statement.qty'),
-        `${req.t('statement.rate')} (${client.currency})`,
-        `${req.t('statement.amount')} (${client.currency})`,
-        req.t('statement.notes'),
+        CLIENT_LNG('statement.it'),
+        CLIENT_LNG('statement.jobRef'),
+        CLIENT_LNG('statement.receivedDelivered'),
+        CLIENT_LNG('statement.deadline'),
+        CLIENT_LNG('statement.qty'),
+        `${CLIENT_LNG('statement.rate')} (${client.currency})`,
+        `${CLIENT_LNG('statement.amount')} (${client.currency})`,
+        CLIENT_LNG('statement.notes'),
         ,
       ],
 
@@ -567,7 +569,7 @@ exports.InvoicePDF = async (
       '',
       '',
       '',
-      req.t('statement.total'),
+      CLIENT_LNG('statement.total'),
       `${totalOrders.toLocaleString(client.language, {
         maximumFractionDigits: client.decimalPoints,
       })} ${client.currency}`,
@@ -594,7 +596,7 @@ exports.InvoicePDF = async (
           .fillColor(textDarkSecondary),
     });
 
-    statement.text(req.t('signature'), {
+    statement.text(CLIENT_LNG('signature'), {
       link: 'https://www.zent-freelance.com',
     });
 
@@ -605,7 +607,7 @@ exports.InvoicePDF = async (
 
   if (Object.keys(req.body).length !== 0) {
     if (!client.email || !user.email)
-      return HttpError(req.t('errors.invoice.send_failed'), 500);
+      return HttpError(CLIENT_LNG('errors.invoice.send_failed'), 500);
     const invoiceChunks = [];
     const statementChunks = [];
     invoice.on('data', invoiceChunks.push.bind(invoiceChunks));
@@ -625,28 +627,29 @@ exports.InvoicePDF = async (
           to: `<${email || client.email}>`,
           cc: user.email,
           replyTo: user.email,
-          subject:
-            client.language === 'ro'
-              ? 'Factură emisă'
-              : 'Your invoice is now available',
+          subject: CLIENT_LNG('mail.subjectInvoice'),
           attachments: includeStatement
             ? [
                 {
-                  filename: `${req.t('invoice.title')}[${client.name}].pdf`,
+                  filename: `${CLIENT_LNG('invoice.title')}[${
+                    client.name
+                  }].pdf`,
                   content: invoiceBuffer,
                 },
                 {
-                  filename: `${req.t('statement.title')}[${client.name}].pdf`,
+                  filename: `${CLIENT_LNG('statement.title')}[${
+                    client.name
+                  }].pdf`,
                   content: statementBuffer,
                 },
               ]
             : {
-                filename: `${req.t('invoice.title')}[${client.name}].pdf`,
+                filename: `${CLIENT_LNG('invoice.title')}[${client.name}].pdf`,
                 content: invoiceBuffer,
               },
           html: `<html><body>
   <p>${body.message
-    .replace('{series}', body.series)
+    .replace('{prefix}', body.prefix)
     .replace('{number}', body.number)
     .replace(
       '{total}',
@@ -664,7 +667,9 @@ exports.InvoicePDF = async (
         })
         .then(() => {})
         .catch((error) => {
-          return next(new HttpError(req.t('errors.invoice.send_failed'), 500));
+          return next(
+            new HttpError(CLIENT_LNG('errors.invoice.send_failed'), 500)
+          );
         });
     });
   }

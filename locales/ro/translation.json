@@ -147,7 +147,7 @@
   },
   "invoice": {
     "title": "Factura",
-    "series": "seria",
+    "prefix": "seria",
     "number": "nr.",
     "issuedDate": "Data emiterii",
     "maturity": "Data scadentă",
@@ -184,8 +184,23 @@
     "paymentInfo": "Modalități de plată",
     "bankAccounts": "Conturi bancare"
   },
+  "receipt": {
+    "title": "Chitanță",
+    "number": "Numărul",
+    "date": "Data",
+    "amount": "Valoarea",
+    "received": "S-a încasat",
+    "from": "de la",
+    "for": "reprezentând",
+    "invoice": "Factura",
+    "amounting": "în valoare de",
+    "receivedBy": "Numele",
+    "signature": "Semnătura"
+  },
   "mail": {
-    "cc": "--message copy--"
+    "cc": "--copie mesaj--",
+    "subjectInvoice": "Factură emisă",
+    "subjectStatement": "Evidența lucrărilor"
   },
   "signature": "Document generat cu Zent"
 }

@@ -11,6 +11,7 @@ const {
   cashInvoice,
   getClientInvoices,
   modifyPayment,
+  downloadReceipt,
 } = require('../controllers/invoice-controllers');
 const authGuard = require('../middleware/auth-guard');
 
@@ -20,6 +21,7 @@ router.get('/', getAllInvoices);
 router.get('/client/:clientId', getClientInvoices);
 router.get('/pdf/:invoiceId', generateInvoice);
 router.get('/:invoiceId', getInvoice);
+router.get('/download-receipt/:receiptId', downloadReceipt);
 
 router.post('/send-invoice', sendInvoice);
 router.post('/:clientId', createInvoice);

@@ -60,14 +60,14 @@ exports.signup = async (req, res, next) => {
   }
 
   const invoiceTemplate = (
-    invoiceSeries = '{series}',
+    invoicePrefix = '{prefix}',
     invoiceNumber = '{number}',
     dueDate = '{date}',
     totalInvoice = '{total}'
   ) => {
     return {
-      ro: `Stimate client, vi s-a emis factura seria ${invoiceSeries} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura se regăsește atașată acestui mesaj. Vă mulțumim!`,
-      en: `Dear Client, please find attached your invoice series ${invoiceSeries} no. ${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. Thank you!`,
+      ro: `Stimate client, vi s-a emis factura seria ${invoicePrefix} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura se regăsește atașată acestui mesaj. Vă mulțumim!`,
+      en: `Dear Client, please find attached your invoice #${invoicePrefix}${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. Thank you!`,
     };
   };
 
@@ -99,7 +99,7 @@ exports.signup = async (req, res, next) => {
     VATpayer: false,
     VATrate: 0,
     invoiceNotes: '',
-    invoiceSeries: '',
+    invoicePrefix: '',
     invoiceStartNumber: 1,
     invoiceDefaultDue: 5,
     invoiceEmailMessage: invoiceTemplate(),
@@ -165,7 +165,9 @@ exports.login = async (req, res, next) => {
 
   let token;
   try {
-    token = jwt.sign({ user }, process.env.JWT_KEY, { expiresIn: '24h' });
+    token = jwt.sign({ user }, process.env.JWT_KEY, {
+      expiresIn: Math.floor(Date.now() / 1000) + 60 * 60 * 168,
+    });
   } catch (error) {
     return next(new HttpError(req.t('errors.user.token_gen_failed'), 500));
   }

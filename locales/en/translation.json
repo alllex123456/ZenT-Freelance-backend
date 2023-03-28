@@ -149,7 +149,7 @@
   },
   "invoice": {
     "title": "Invoice",
-    "series": "series",
+    "prefix": "prefix",
     "number": "no.",
     "issuedDate": "Date issued",
     "maturity": "Due by",
@@ -186,8 +186,23 @@
     "paymentInfo": "Payment methods",
     "bankAccounts": "Bank accounts"
   },
+  "receipt": {
+    "title": "Cash Receipt",
+    "number": "Number",
+    "date": "Date",
+    "amount": "Amount",
+    "received": "Received",
+    "from": "from",
+    "for": "for",
+    "invoice": "Invoice",
+    "amounting": "amounting",
+    "receivedBy": "Received by",
+    "signature": "Signature"
+  },
   "mail": {
-    "cc": "--copie mesaj--"
+    "cc": "--message copy--",
+    "subjectInvoice": "You invoice is here",
+    "subjectStatement": "Work statement"
   },
   "signature": "Document generated with Zent"
 }
