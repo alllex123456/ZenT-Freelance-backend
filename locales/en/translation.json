@@ -39,7 +39,8 @@
       "save_failed": "There was a problem while saving the client. Please try again.",
       "no_delete": "The client has pending or uninvoiced orders. Please complete or remove client's orders before attempting to remove it.",
       "modify_failed": "There was a problem while editing the client. Please reload the page.",
-      "delete_failed": "There was a problem while removing the client. Please reload the page."
+      "delete_failed": "There was a problem while removing the client. Please reload the page.",
+      "already_registered": "The client is already registered."
     },
     "statement": {
       "send_failed": "There was a problem while sending the message. Please try again."
@@ -201,8 +202,53 @@
   },
   "mail": {
     "cc": "--message copy--",
+    "subjectSignUp": "Your Zent account has been created",
+    "subjectResetPassword": "Reset your Zent password",
     "subjectInvoice": "You invoice is here",
-    "subjectStatement": "Work statement"
+    "subjectStatement": "Work statement",
+    "userSignUp": {
+      "h1": "Welcome to Zent!",
+      "h2": "You account has been created. With Zent, you can streamline your work by taking advantage of the following functionalities",
+      "clientRegistration": "client registration",
+      "listLineOne": "company data, contacts, pricing, invoicing preferences",
+      "orderRegistration": "order registration",
+      "listLineTwo": "pending orders are automatically assigned to client work statement on completion",
+      "workStatement": "work statements",
+      "listLineThree": "based on the orders registered with the client",
+      "invoicingAndPayment": "invoicing and payments",
+      "listLineFour": "issue invoices based on the work statements or as a separate invoice, send it directly as an e-mail attachment and possibily include the related work statement",
+      "invoiceDetails": "invoice details",
+      "listLineFive": "invoice-dedicated page, with events and info about payments",
+      "invoiceFunctionalities": "invoice functionalities",
+      "listLineSix": "edit, cash, send, download, cancel, reverse",
+      "userAccount": "user account",
+      "listLineSeven": "with personal, invoicing and communication preferences",
+      "legalNoteTitle": "LEGAL NOTE",
+      "legalNoteText": "Continued and error-free operation of this software is not guaranteed. The user may expect momentary system errors, nevertheless all measures are in place to prevent data loss."
+    },
+    "passwordReset": {
+      "h1": "Hi",
+      "h2": "You have recently requested a password reset for your Zent account.",
+      "instruction": "Please click the button below in order to reset your password.",
+      "button": "RESET",
+      "warning": "If you did not request this reset, please ignore this message."
+    },
+    "statement": {
+      "h1": "Dear Client",
+      "h2": "Please find attached our detailed work statement",
+      "summary": "Summary",
+      "ordersCompleted": "Orders completed",
+      "amount": "Amount",
+      "footer": "For any questions, please reply to this message or contact us at"
+    },
+    "invoice": {
+      "h1": "Dear Client",
+      "h2": "Please find attached your invoice",
+      "summary": "Summary",
+      "amount": "Amount",
+      "dueBy": "Due by",
+      "footer": "For any questions, please reply to this message or contact us at"
+    }
   },
   "signature": "Document generated with Zent"
 }

@@ -125,7 +125,7 @@ exports.generateStatement = async (req, res, next) => {
 
 exports.sendStatement = async (req, res, next) => {
   const { userId } = req.userData;
-  const { clientId, orders: orderIds, email, message, date } = req.body;
+  const { clientId, orders: orderIds, email, date } = req.body;
 
   let user;
   try {
@@ -162,7 +162,6 @@ exports.sendStatement = async (req, res, next) => {
   try {
     StatementPDF(res, client, user, date, req, orders, email);
   } catch (error) {
-    console.log(error);
     return next(new HttpError(req.t('errors.statement.send_failed'), 500));
   }
 

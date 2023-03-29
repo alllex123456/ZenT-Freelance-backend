@@ -4,6 +4,7 @@ const { computeUnits } = require('../utils/compute-units');
 const { translateServices } = require('../utils/translateUnits');
 const nodemailer = require('nodemailer');
 const AWS = require('aws-sdk');
+const { sendInvoice } = require('./mailer/html-contents');
 
 AWS.config.update({ region: 'eu-west-3' });
 
@@ -18,14 +19,7 @@ const divider = '#2ecc71';
 const dividerLight = '#82e0aa';
 const tableHeaderBackground = '#fff';
 
-exports.InvoicePDF = async (
-  req,
-  res,
-  invoiceData,
-  body,
-  email,
-  includeStatement
-) => {
+exports.InvoicePDF = async (req, res, invoiceData, email, includeStatement) => {
   const {
     prefix,
     number,
@@ -61,9 +55,7 @@ exports.InvoicePDF = async (
     }
   };
 
-  const logo = await fetchImage(
-    'https://zent.s3.eu-west-3.amazonaws.com/zent-logo-dark.png'
-  );
+  const userLogo = await fetchImage(user.invoiceLogo);
 
   const items = detailedOrders ? orders.concat(addedItems) : addedItems;
 
@@ -109,7 +101,7 @@ exports.InvoicePDF = async (
     bufferPages: true,
   });
 
-  invoice.image(logo, { fit: [80, 80] });
+  invoice.image(userLogo, { fit: [80, 80] });
 
   invoice
     .fillColor(textDarkPrimary)
@@ -647,23 +639,18 @@ exports.InvoicePDF = async (
                 filename: `${CLIENT_LNG('invoice.title')}[${client.name}].pdf`,
                 content: invoiceBuffer,
               },
-          html: `<html><body>
-  <p>${body.message
-    .replace('{prefix}', body.prefix)
-    .replace('{number}', body.number)
-    .replace(
-      '{total}',
-      `${body.totalInvoice.toLocaleString(client.language, {
-        style: 'currency',
-        currency: client.currency,
-        maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
-      })}`
-    )
-    .replace(
-      '{date}',
-      new Date(body.dueDate).toLocaleDateString(user.language)
-    )}</p>
-  </body></html>`,
+          html: sendInvoice(
+            CLIENT_LNG,
+            {
+              totalInvoice: totalInvoice.toLocaleString(client.language, {
+                style: 'currency',
+                currency: client.currency,
+                maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
+              }),
+              ...invoiceData._doc,
+            },
+            user.email
+          ),
         })
         .then(() => {})
         .catch((error) => {

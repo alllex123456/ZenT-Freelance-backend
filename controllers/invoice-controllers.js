@@ -161,6 +161,7 @@ exports.createInvoice = async (req, res, next) => {
       taxNumber: user._doc.taxNumber,
       email: user._doc.email,
       phone: user._doc.phone,
+      invoiceLogo: user._doc.invoiceLogo,
     },
     clientData: {
       _id: client._doc._id,
@@ -285,7 +286,7 @@ exports.generateInvoice = async (req, res, next) => {
 
 exports.sendInvoice = async (req, res, next) => {
   const { userId } = req.userData;
-  const { invoiceId, clientId, email, message, includeStatement } = req.body;
+  const { invoiceId, clientId, email, includeStatement } = req.body;
 
   let user;
   try {
@@ -331,21 +332,8 @@ exports.sendInvoice = async (req, res, next) => {
     0
   );
 
-  const body = {
-    message,
-    prefix: invoice.prefix,
-    number: invoice.number,
-    totalInvoice,
-    dueDate: invoice.dueDate,
-  };
-
-  message.replace('{prefix}', invoice.prefix);
-  message.replace('{number}', invoice.number);
-  message.replace('{total}', totalInvoice);
-  message.replace('{date}', invoice.dueDate);
-
   try {
-    InvoicePDF(req, res, invoice, body, email, includeStatement);
+    InvoicePDF(req, res, invoice, email, includeStatement);
   } catch (error) {
     return next(new HttpError(req.t('errors.invoicing.send_failed'), 500));
   }

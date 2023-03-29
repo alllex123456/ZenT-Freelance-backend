@@ -59,25 +59,6 @@ exports.signup = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.pass_generate_fail'), 500));
   }
 
-  const invoiceTemplate = (
-    invoicePrefix = '{prefix}',
-    invoiceNumber = '{number}',
-    dueDate = '{date}',
-    totalInvoice = '{total}'
-  ) => {
-    return {
-      ro: `Stimate client, vi s-a emis factura seria ${invoicePrefix} numărul ${invoiceNumber}, în valoare totală de ${totalInvoice} și scadentă la ${dueDate}. Factura se regăsește atașată acestui mesaj. Vă mulțumim!`,
-      en: `Dear Client, please find attached your invoice #${invoicePrefix}${invoiceNumber}, in total amount of ${totalInvoice} and due by ${dueDate}. Thank you!`,
-    };
-  };
-
-  const statementTemplate = () => {
-    return {
-      ro: 'Stimate client, regăsiți în atașament evidența lucrărilor predate la zi. Vă mulțumim.',
-      en: 'Dear Client, please find attached our detailed work statement up to date. Thank you.',
-    };
-  };
-
   const user = new User({
     subscription: {
       package: 'free',
@@ -102,8 +83,7 @@ exports.signup = async (req, res, next) => {
     invoicePrefix: '',
     invoiceStartNumber: 1,
     invoiceDefaultDue: 5,
-    invoiceEmailMessage: invoiceTemplate(),
-    statementEmailMessage: statementTemplate(),
+    invoiceLogo: '',
     clients: [],
     orders: [],
     addedItems: [],
@@ -117,6 +97,8 @@ exports.signup = async (req, res, next) => {
     ],
   });
 
+  return signupEmail(user, req);
+
   try {
     await user.save();
   } catch (error) {
@@ -129,8 +111,6 @@ exports.signup = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError(req.t('errors.user.token_gen_failed'), 500));
   }
-
-  signupEmail(user);
 
   res.json({
     user: { ...user._doc, password: '' },
@@ -192,19 +172,7 @@ exports.updateUser = async (req, res, next) => {
   }
 
   for (const [key, value] of Object.entries(req.body)) {
-    if (key === 'invoiceEmailMessage') {
-      user['invoiceEmailMessage'] = {
-        ...user['invoiceEmailMessage'],
-        [user.language]: value,
-      };
-    } else if (key === 'statementEmailMessage') {
-      user['statementEmailMessage'] = {
-        ...user['statementEmailMessage'],
-        [user.language]: value,
-      };
-    } else {
-      user[key] = value;
-    }
+    user[key] = value;
   }
 
   if (req.body.VATpayer === true) {
@@ -296,7 +264,7 @@ exports.getRecoverPassword = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.token_gen_failed'), 500));
   }
 
-  resetPasswordLink(user, token);
+  resetPasswordLink(user, token, req);
 
   res.json({
     message: req.t('success.user.reset_link_sent'),

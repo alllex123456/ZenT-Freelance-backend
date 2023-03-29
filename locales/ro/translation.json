@@ -39,7 +39,8 @@
       "save_failed": "A survenit o problemă la salvarea clientului. Vă rugăm să reîncercați.",
       "no_delete": "Clientul are comenzi în așteptare sau nefacturate. Finalizați sau ștergeți comenzile clientului înainte de a încerca ștergerea acestuia.",
       "modify_failed": "A survenit o problemă la modificarea clientului. Vă rugăm să reîncărcați pagina.",
-      "delete_failed": "A survenit o problemă la ștergerea clientului. Vă rugăm să reîncărcați pagina."
+      "delete_failed": "A survenit o problemă la ștergerea clientului. Vă rugăm să reîncărcați pagina.",
+      "already_registered": "Clientul este deja înregistrat."
     },
     "statement": {
       "send_failed": "A survenit o problemă la trimiterea mesajului. Vă rugăm să reîncercați."
@@ -175,7 +176,7 @@
     "amountWithoutVAT": "Valoare fără TVA",
     "amountWithVAT": "Valoare cu TVA",
     "toPay": "Total de plată",
-    "subtotal": "Sub-total",
+    "subTotal": "Sub-total",
     "discount": "Reducere",
     "remainder": "Rest",
     "deducted": "Deducere",
@@ -199,8 +200,54 @@
   },
   "mail": {
     "cc": "--copie mesaj--",
+    "subjectSignUp": "Contul tău Zent a fost creat",
+    "subjectResetPassword": "Resetare parolă Zent",
     "subjectInvoice": "Factură emisă",
-    "subjectStatement": "Evidența lucrărilor"
+    "subjectStatement": "Evidența lucrărilor",
+    "signature": "Generat cu Zent",
+    "userSignUp": {
+      "h1": "Bun venit la Zent!",
+      "h2": "Contul tău a fost creat. Cu Zent, îți poți eficientiza activitatea profitând de următoarele funcționalități",
+      "clientRegistration": "înregistrare clienți",
+      "listLineOne": "datele companiei, contacte, prețuri, preferințe de facturare",
+      "orderRegistration": "înregistrare comenzi",
+      "listLineTwo": "comenzile în curs sunt alocate automat evidenței clientului la finalizare",
+      "workStatement": "evidența lucrărilor",
+      "listLineThree": "pe baza comenzilor înregistrate pe client",
+      "invoicingAndPayment": "facturare și plăți",
+      "listLineFour": "emiți facturi pe baza evidenței lucrărilor sau ca document separat, o trimiți direct ca atașament e-mail și poți include evidența aferentă în mesaj",
+      "invoiceDetails": "detalii facturi",
+      "listLineFive": "pagină dedicată facturii, cu evenimente și informații despre plăți",
+      "invoiceFunctionalities": "funcționalități facturi",
+      "listLineSix": "editează, încasează, trimite, descarcă, anulează, stornează",
+      "userAccount": "cont utilizator",
+      "listLineSeven": "cu preferințe personale, de facturare și comunicare",
+      "legalNoteTitle": "NOTĂ LEGALĂ",
+      "legalNoteText": "Funcționarea neîntreruptă și fără erori nu este garantată. Utilizatorul se poate aștepta la erori momentane de sistem, însă toate măsurile au fost implementate pentru a împiedica pierderea de date."
+    },
+    "passwordReset": {
+      "h1": "Salut",
+      "h2": "Ai solicitat recent resetarea parolei contului tău Zent.",
+      "instruction": "Apasă pe butonul de mai jos pentru a reseta parola.",
+      "button": "RESETEAZĂ",
+      "warning": "Dacă nu ai făcut această solicitare, te rugăm să ignori acest mesaj."
+    },
+    "statement": {
+      "h1": "Stimate client",
+      "h2": "Regăsiți atașat evidența lucrărilor",
+      "summary": "Sumar",
+      "ordersCompleted": "Comenzi finalizate",
+      "amount": "Valoare",
+      "footer": "Pentru întrebări, puteți răspunde acestui mesaj sau ne puteți contacta la"
+    },
+    "invoice": {
+      "h1": "Stimate client",
+      "h2": "Regăsiți atașat factura dvs.",
+      "summary": "Sumar",
+      "amount": "Valoare",
+      "dueBy": "Data scadentă",
+      "footer": "Pentru întrebări, puteți răspunde acestui mesaj sau ne puteți contacta la"
+    }
   },
   "signature": "Document generat cu Zent"
 }

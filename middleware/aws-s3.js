@@ -3,11 +3,19 @@ const aws = require('aws-sdk');
 exports.signS3 = (req, res, next) => {
   const { userId } = req.userData;
   const { clientId } = req.params;
+  const { invoiceLogo } = req.query;
 
   aws.config.region = 'eu-west-3';
 
   const s3 = new aws.S3();
-  const fileName = `avatar-${clientId || userId}-${new Date().toISOString()}`;
+  let fileName;
+
+  if (invoiceLogo) {
+    fileName = `invoiceLogo-${userId}-${new Date().toISOString()}`;
+  } else {
+    fileName = `avatar-${clientId || userId}-${new Date().toISOString()}`;
+  }
+
   const fileType = req.query['file-type'];
   const s3Params = {
     Bucket: process.env.S3_BUCKET,
@@ -29,8 +37,18 @@ exports.signS3 = (req, res, next) => {
           );
         }
       }
-      if (!clientId) {
+      if (userId && !invoiceLogo) {
         if (image.Key.includes(`avatar-${userId}`)) {
+          s3.deleteObject(
+            { Bucket: process.env.S3_BUCKET, Key: image.Key },
+            (err, data) => {
+              console.log(err);
+            }
+          );
+        }
+      }
+      if (invoiceLogo) {
+        if (image.Key.includes(`invoiceLogo-${userId}`)) {
           s3.deleteObject(
             { Bucket: process.env.S3_BUCKET, Key: image.Key },
             (err, data) => {

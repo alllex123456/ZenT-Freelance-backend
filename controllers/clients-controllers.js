@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 
 const Client = require('../models/client');
 const User = require('../models/user');
+const Order = require('../models/order');
 
 const HttpError = require('../models/http-error');
 
@@ -55,6 +56,21 @@ exports.addClient = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError(req.t('errors.user.not_found'), 500));
   }
+
+  let userClients;
+  try {
+    userClients = await Client.find();
+  } catch (error) {
+    return next(new HttpError(req.t('errors.clients.not_found'), 500));
+  }
+
+  userClients.forEach((client) => {
+    if (client.taxNumber === req.body.taxNumber) {
+      return next(
+        new HttpError(req.t('errors.clients.already_registered'), 401)
+      );
+    }
+  });
 
   const newClient = new Client({
     userId,
@@ -139,18 +155,16 @@ exports.deleteClient = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
 
-  if (client.orders.length !== 0) {
-    return next(new HttpError(req.t('errors.clients.no_delete'), 500));
-  }
-
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
+    await Order.deleteMany({ _id: { $in: client.orders } }, { session });
     await client.remove({ session });
     client.userId.clients.pull(client);
     await client.userId.save({ session });
     session.commitTransaction();
   } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.clients.delete_failed'), 500));
   }
 
