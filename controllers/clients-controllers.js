@@ -13,7 +13,12 @@ exports.getAllClients = async (req, res, next) => {
 
   let user;
   try {
-    user = await User.findById(userId).populate('clients');
+    user = await User.findById(userId).populate({
+      path: 'clients',
+      populate: {
+        path: 'orders',
+      },
+    });
   } catch (error) {
     return next(new HttpError(req.t('errors.clients.not_found'), 500));
   }

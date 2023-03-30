@@ -97,8 +97,6 @@ exports.signup = async (req, res, next) => {
     ],
   });
 
-  return signupEmail(user, req);
-
   try {
     await user.save();
   } catch (error) {
@@ -111,6 +109,8 @@ exports.signup = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError(req.t('errors.user.token_gen_failed'), 500));
   }
+
+  signupEmail(user, req);
 
   res.json({
     user: { ...user._doc, password: '' },

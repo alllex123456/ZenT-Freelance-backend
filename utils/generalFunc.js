@@ -28,6 +28,7 @@ exports.quantity = (subject) =>
     : '1800 caractere fara spatii;';
 
 exports.fetchImage = async (src) => {
+  if (!src) return;
   const response = await fetch(src);
   const image = await response.buffer();
 
