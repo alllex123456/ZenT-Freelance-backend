@@ -237,7 +237,7 @@
       "h1": "Dear Client",
       "h2": "Please find attached our detailed work statement",
       "summary": "Summary",
-      "ordersCompleted": "Orders completed",
+      "quantity": "Quantity",
       "amount": "Amount",
       "footer": "For any questions, please reply to this message or contact us at"
     },

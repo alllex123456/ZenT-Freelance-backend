@@ -101,7 +101,7 @@ exports.InvoicePDF = async (req, res, invoiceData, email, includeStatement) => {
     bufferPages: true,
   });
 
-  invoice.image(userLogo, { fit: [80, 80] });
+  if (userLogo) invoice.image(userLogo, { fit: [80, 80] });
 
   invoice
     .fillColor(textDarkPrimary)
@@ -649,7 +649,7 @@ exports.InvoicePDF = async (req, res, invoiceData, email, includeStatement) => {
               }),
               ...invoiceData._doc,
             },
-            user.email
+            user
           ),
         })
         .then(() => {})

@@ -60,9 +60,7 @@ exports.getClientOrders = async (req, res, next) => {
     orders: client._doc.orders.map((order) => ({
       ...order._doc,
       clientId: {
-        clientId: client._doc._id,
-        decimalPoints: client._doc.decimalPoints,
-        language: client._doc.language,
+        ...client._doc,
       },
     })),
   };

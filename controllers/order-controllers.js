@@ -160,7 +160,7 @@ exports.addOrder = async (req, res, next) => {
     clientId,
     service,
     receivedDate,
-    deliveredDate: req.body.addToStatement ? deliveredDate : new Date(),
+    deliveredDate: req.body.addToStatement ? deliveredDate : '',
     reference: reference || '-',
     deadline,
     rate,
@@ -240,7 +240,7 @@ exports.modifyOrder = async (req, res, next) => {
 
   let order;
   try {
-    order = await Order.findById(orderId);
+    order = await Order.findById(orderId).populate();
   } catch (error) {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
@@ -255,13 +255,21 @@ exports.modifyOrder = async (req, res, next) => {
     }
   }
 
+  let client;
+  try {
+    client = await Client.findById(req.body.clientId);
+  } catch (error) {}
+
   try {
     await order.save();
   } catch (error) {
     return next(new HttpError(req.t('errors.orders.modify_failed'), 500));
   }
 
-  res.json({ order, confirmation: req.t('success.orders.modified') });
+  res.json({
+    order: { ...order._doc, clientId: client._doc },
+    confirmation: req.t('success.orders.modified'),
+  });
 };
 
 exports.deleteOrder = async (req, res, next) => {

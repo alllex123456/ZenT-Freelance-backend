@@ -221,15 +221,10 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
           },
           html: sendStatement(
             CLIENT_LNG,
-            totalOrders.toLocaleString(client.language, {
-              style: 'currency',
-              currency: client.currency,
-              maximumFractionDigits: client.decimalPoints,
-            }),
-            totalCounts.toLocaleString(client.language, {
-              maximumFractionDigits: client.decimalPoints,
-            }),
-            user
+            totalOrders,
+            totalCounts,
+            user,
+            client
           ),
         })
         .then(() => {})

@@ -27,7 +27,7 @@ const userSchema = new Schema(
     receiptPrefix: { type: String, required: false },
     receiptStartNumber: { type: Number, required: false },
     invoiceNotes: { type: String, required: false },
-    invoiceSeries: { type: String, required: false },
+    invoicePrefix: { type: String, required: false },
     invoiceStartNumber: { type: Number, required: false },
     invoiceDefaultDue: { type: Number, required: false },
     invoiceLogo: { type: String, required: false },
