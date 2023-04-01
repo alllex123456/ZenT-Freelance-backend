@@ -294,3 +294,82 @@ ${
 </body>
 </html>`;
 };
+
+exports.invoiceReminders = (CLIENT_LNG, invoice, user, severity) => {
+  return `<!DOCTYPE html>
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body>
+
+<table align="center" style="margin: 0 auto;">
+
+${
+  user.invoiceLogo &&
+  `<tr style="margin: 0 0 20px 0">
+        <td style="text-align:center">
+          <img alt="" src=${user.invoiceLogo} width="170" height="90" />
+        </td>
+      </tr>`
+}
+
+    <tr style="padding:20px 0">
+          <td>
+               <h1 style="text-align:center; color:#006e1e; font-size:18px">${CLIENT_LNG(
+                 'mail.reminders.invoice.h1'
+               )},</h1>
+          </td>
+    </tr>
+
+    <tr style="padding:20px 0">
+          <td>
+               <h2 style="text-align:center; color:#006e1e; font-size:16px">${CLIENT_LNG(
+                 'mail.reminders.invoice.h2'
+               )} ${invoice.prefix}${invoice.number} ${CLIENT_LNG(
+    'mail.reminders.invoice.issued'
+  )} ${new Date(invoice.issuedDate).toLocaleDateString(
+    invoice.clientData.language
+  )} ${CLIENT_LNG(
+    'mail.reminders.invoice.inAmountOf'
+  )} ${invoice.totalInvoice.toLocaleString(invoice.clientData.language, {
+    style: 'currency',
+    currency: invoice.clientData.currency,
+    maximumFractionDigits: invoice.clientData.decimalPoints,
+  })} ${CLIENT_LNG(`mail.reminders.invoice.${severity}`)}. </h2>
+          </td>
+    </tr>
+
+   
+    <tr style="background-color:#ecf0f1; margin: 20px 0">
+          <td >
+               <p style="text-align:center; color:#006e1e; font-size:14px; font-weight: bold">${CLIENT_LNG(
+                 'mail.reminders.invoice.findDocumentAttached'
+               )}.</p>
+          </td>
+    </tr>
+
+   
+    <tr style="padding:20px 0; border-bottom: 1px solid grey">
+          <td>
+               <p style="text-align:center; font-size:10px"><strong>${CLIENT_LNG(
+                 'mail.invoice.footer'
+               )}: ${user.email}</strong></p>
+          </td>
+    </tr>
+
+    <tr style="padding:20px 0">
+          <td>
+               <p style="color:#999;font-size:9px">${CLIENT_LNG(
+                 'mail.signature'
+               )}.</p> <a style="font-size:9px" href="https://www.zent-freelance.com">www.zent-freelance.com</a>
+          </td>
+    </tr>
+
+</table>
+
+
+</body>
+</html>`;
+};

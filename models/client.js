@@ -56,6 +56,7 @@ const clientSchema = new Schema(
       { type: mongoose.Types.ObjectId, required: true, ref: 'Receipt' },
     ],
     balance: { type: Number, required: true },
+    archived: { type: Boolean, required: false },
   },
   { timestamps: true }
 );

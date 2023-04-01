@@ -2,15 +2,8 @@ const { fetchImage } = require('../utils/generalFunc');
 const PDFDocument = require('pdfkit-table');
 const { computeUnits } = require('../utils/compute-units');
 const { translateServices } = require('../utils/translateUnits');
-const nodemailer = require('nodemailer');
-const AWS = require('aws-sdk');
-const { sendInvoice } = require('./mailer/html-contents');
 
-AWS.config.update({ region: 'eu-west-3' });
-
-let transporter = nodemailer.createTransport({
-  SES: new AWS.SES(),
-});
+const { sendInvoice, invoiceReminders } = require('./mailer/html-contents');
 
 const margin = 20;
 const textDarkPrimary = '#757575';
@@ -19,7 +12,14 @@ const divider = '#2ecc71';
 const dividerLight = '#82e0aa';
 const tableHeaderBackground = '#fff';
 
-exports.InvoicePDF = async (req, res, invoiceData, email, includeStatement) => {
+exports.InvoicePDF = async (
+  req,
+  res,
+  invoiceData,
+  email,
+  includeStatement,
+  reminderSeverity
+) => {
   const {
     prefix,
     number,
@@ -52,6 +52,11 @@ exports.InvoicePDF = async (req, res, invoiceData, email, includeStatement) => {
       return translationObject[`${argsArray[0]}`][`${argsArray[1]}`][
         `${argsArray[2]}`
       ];
+    }
+    if (argsCount === 4) {
+      return translationObject[`${argsArray[0]}`][`${argsArray[1]}`][
+        `${argsArray[2]}`
+      ][`${argsArray[3]}`];
     }
   };
 
@@ -471,131 +476,158 @@ exports.InvoicePDF = async (req, res, invoiceData, email, includeStatement) => {
     link: 'https://www.zent-freelance.com',
   });
 
-  //////////////////// STATEMENT ///////////////////////////
+  //////////////////// STATEMENT START ///////////////////////////
   let statement;
-  if (Object.keys(req.body).length !== 0 && includeStatement) {
-    let statementOrders;
+  if (req) {
+    if (Object.keys(req.body).length !== 0 && includeStatement) {
+      let statementOrders;
 
-    statementOrders = orders.map((order, index) => [
-      index + 1,
-      `${translateServices([order.service], CLIENT_LNG)?.displayedValue} / ${
-        order.reference
-      }`,
-      `${new Date(order.receivedDate).toLocaleDateString(client.language)} /
+      statementOrders = orders.map((order, index) => [
+        index + 1,
+        `${translateServices([order.service], CLIENT_LNG)?.displayedValue} / ${
+          order.reference
+        }`,
+        `${new Date(order.receivedDate).toLocaleDateString(client.language)} /
         ${new Date(order.deliveredDate || order.deadline).toLocaleDateString(
           client.language
         )}`,
-      new Date(order.deadline).toLocaleDateString(client.language),
-      order.count.toLocaleString(client.language, {
-        maximumFractionDigits: client.decimalPoints,
-      }),
-      order.rate.toLocaleString(client.language, {
-        maximumFractionDigits: client.decimalPoints,
-      }),
-      order.total.toLocaleString(client.language, {
-        maximumFractionDigits: client.decimalPoints,
-      }),
-      order.notes,
-    ]);
+        new Date(order.deadline).toLocaleDateString(client.language),
+        order.count.toLocaleString(client.language, {
+          maximumFractionDigits: client.decimalPoints,
+        }),
+        order.rate.toLocaleString(client.language, {
+          maximumFractionDigits: client.decimalPoints,
+        }),
+        order.total.toLocaleString(client.language, {
+          maximumFractionDigits: client.decimalPoints,
+        }),
+        order.notes,
+      ]);
 
-    let totalOrders;
+      let totalOrders;
 
-    totalOrders = orders.reduce((acc, val) => (acc += val.total), 0);
+      totalOrders = orders.reduce((acc, val) => (acc += val.total), 0);
 
-    statement = new PDFDocument({
-      info: {
-        Title: `${CLIENT_LNG('statement.title')} ${client.name} la ${new Date(
-          req.body.date
-        ).toLocaleDateString(client.language)}`,
-      },
-      size: 'A4',
-      font: 'services/fonts/Ubuntu/Ubuntu-Regular.ttf',
-      margin,
-      bufferPages: true,
-    });
+      statement = new PDFDocument({
+        info: {
+          Title: `${CLIENT_LNG('statement.title')} ${client.name} la ${new Date(
+            req.body.date
+          ).toLocaleDateString(client.language)}`,
+        },
+        size: 'A4',
+        font: 'services/fonts/Ubuntu/Ubuntu-Regular.ttf',
+        margin,
+        bufferPages: true,
+      });
 
-    statement
-      .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
-      .fontSize(14)
-      .fillColor(textDarkPrimary)
-      .text(CLIENT_LNG('statement.title').toUpperCase())
-      .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
-      .fontSize(8)
-      .fillColor(textDarkSecondary)
-      .text(`${CLIENT_LNG('statement.clientName')}: ${client.name}`)
-      .text(
-        `${CLIENT_LNG('statement.generatedAt')}: ${new Date(
-          req.body.date
-        ).toLocaleDateString(client.language)}`
-      );
+      statement
+        .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+        .fontSize(14)
+        .fillColor(textDarkPrimary)
+        .text(CLIENT_LNG('statement.title').toUpperCase())
+        .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
+        .fontSize(8)
+        .fillColor(textDarkSecondary)
+        .text(`${CLIENT_LNG('statement.clientName')}: ${client.name}`)
+        .text(
+          `${CLIENT_LNG('statement.generatedAt')}: ${new Date(
+            req.body.date
+          ).toLocaleDateString(client.language)}`
+        );
 
-    statement.moveDown(3);
+      statement.moveDown(3);
 
-    statement
-      .moveTo(margin, statement.y)
-      .lineTo(575, statement.y)
-      .stroke(divider);
+      statement
+        .moveTo(margin, statement.y)
+        .lineTo(575, statement.y)
+        .stroke(divider);
 
-    statement.moveDown(3);
+      statement.moveDown(3);
 
-    const statementTable = {
-      headers: [
-        CLIENT_LNG('statement.it'),
-        CLIENT_LNG('statement.jobRef'),
-        CLIENT_LNG('statement.receivedDelivered'),
-        CLIENT_LNG('statement.deadline'),
-        CLIENT_LNG('statement.qty'),
-        `${CLIENT_LNG('statement.rate')} (${client.currency})`,
-        `${CLIENT_LNG('statement.amount')} (${client.currency})`,
-        CLIENT_LNG('statement.notes'),
-        ,
-      ],
+      const statementTable = {
+        headers: [
+          CLIENT_LNG('statement.it'),
+          CLIENT_LNG('statement.jobRef'),
+          CLIENT_LNG('statement.receivedDelivered'),
+          CLIENT_LNG('statement.deadline'),
+          CLIENT_LNG('statement.qty'),
+          `${CLIENT_LNG('statement.rate')} (${client.currency})`,
+          `${CLIENT_LNG('statement.amount')} (${client.currency})`,
+          CLIENT_LNG('statement.notes'),
+          ,
+        ],
 
-      rows: statementOrders,
-    };
+        rows: statementOrders,
+      };
 
-    table.rows.push([
-      '',
-      '',
-      '',
-      '',
-      '',
-      '',
-      CLIENT_LNG('statement.total'),
-      `${totalOrders.toLocaleString(client.language, {
-        maximumFractionDigits: client.decimalPoints,
-      })} ${client.currency}`,
-    ]);
+      table.rows.push([
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        CLIENT_LNG('statement.total'),
+        `${totalOrders.toLocaleString(client.language, {
+          maximumFractionDigits: client.decimalPoints,
+        })} ${client.currency}`,
+      ]);
 
-    statement.table(statementTable, {
-      x: 20,
-      width: 555,
-      columnsSize: [20, 125, 80, 60, 50, 50, 50, 120],
-      divider: {
-        header: { disabled: false, width: 1, opacity: 0.5 },
-        horizontal: { disabled: false, opacity: 0.2 },
-      },
-      prepareHeader: () => {
-        statement
-          .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
-          .fontSize(8)
-          .fillColor(textDarkPrimary);
-      },
-      prepareRow: () =>
-        statement
-          .font('services/fonts/Ubuntu/Ubuntu-Light.ttf')
-          .fontSize(8)
-          .fillColor(textDarkSecondary),
-    });
+      statement.table(statementTable, {
+        x: 20,
+        width: 555,
+        columnsSize: [20, 125, 80, 60, 50, 50, 50, 120],
+        divider: {
+          header: { disabled: false, width: 1, opacity: 0.5 },
+          horizontal: { disabled: false, opacity: 0.2 },
+        },
+        prepareHeader: () => {
+          statement
+            .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+            .fontSize(8)
+            .fillColor(textDarkPrimary);
+        },
+        prepareRow: () =>
+          statement
+            .font('services/fonts/Ubuntu/Ubuntu-Light.ttf')
+            .fontSize(8)
+            .fillColor(textDarkSecondary),
+      });
 
-    statement.text(CLIENT_LNG('signature'), {
-      link: 'https://www.zent-freelance.com',
-    });
+      statement.text(CLIENT_LNG('signature'), {
+        link: 'https://www.zent-freelance.com',
+      });
 
-    statement.end();
+      statement.end();
+    }
   }
 
-  //////////////////// STATEMENT ///////////////////////////
+  //////////////////// STATEMENT END ///////////////////////////
+
+  const messageSubject = reminderSeverity
+    ? `${CLIENT_LNG('mail.reminders.invoice.subject')} ${CLIENT_LNG(
+        `mail.reminders.invoice.${reminderSeverity}`
+      )}`
+    : CLIENT_LNG('mail.subjectInvoice');
+
+  const messageHtml = reminderSeverity
+    ? invoiceReminders(
+        CLIENT_LNG,
+        {
+          totalInvoice,
+          ...invoiceData._doc,
+        },
+        invoiceData._doc.userId,
+        reminderSeverity
+      )
+    : sendInvoice(
+        CLIENT_LNG,
+        {
+          totalInvoice,
+          ...invoiceData._doc,
+        },
+        user
+      );
 
   if (Object.keys(req.body).length !== 0) {
     if (!client.email || !user.email)
@@ -613,51 +645,48 @@ exports.InvoicePDF = async (req, res, invoiceData, email, includeStatement) => {
         statementBuffer = Buffer.concat(statementChunks);
       }
 
-      return transporter
-        .sendMail({
-          from: `${user.name || user.email} <admin@zent-freelance.com>`,
-          to: `<${email || client.email}>`,
-          cc: user.email,
-          replyTo: user.email,
-          subject: CLIENT_LNG('mail.subjectInvoice'),
-          attachments: includeStatement
-            ? [
-                {
-                  filename: `${CLIENT_LNG('invoice.title')}[${
-                    client.name
-                  }].pdf`,
-                  content: invoiceBuffer,
-                },
-                {
-                  filename: `${CLIENT_LNG('statement.title')}[${
-                    client.name
-                  }].pdf`,
-                  content: statementBuffer,
-                },
-              ]
-            : {
-                filename: `${CLIENT_LNG('invoice.title')}[${client.name}].pdf`,
-                content: invoiceBuffer,
-              },
-          html: sendInvoice(
-            CLIENT_LNG,
+      const SibApiV3Sdk = require('sib-api-v3-sdk');
+      let defaultClient = SibApiV3Sdk.ApiClient.instance;
+
+      let apiKey = defaultClient.authentications['api-key'];
+      apiKey.apiKey = process.env.SENDINBLUE_KEY;
+
+      let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+      let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+      sendSmtpEmail.subject = messageSubject;
+      sendSmtpEmail.htmlContent = messageHtml;
+      sendSmtpEmail.sender = {
+        name: user.name || user.email,
+        email: user.email,
+      };
+      sendSmtpEmail.to = [{ email: email || client.email }];
+      sendSmtpEmail.cc = [{ email: user.email }];
+      sendSmtpEmail.replyTo = { email: user.email };
+      sendSmtpEmail.attachment = includeStatement
+        ? [
             {
-              totalInvoice: totalInvoice.toLocaleString(client.language, {
-                style: 'currency',
-                currency: client.currency,
-                maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
-              }),
-              ...invoiceData._doc,
+              content: invoiceBuffer.toString('base64'),
+              name: `${CLIENT_LNG('invoice.title')}[${client.name}].pdf`,
             },
-            user
-          ),
-        })
-        .then(() => {})
-        .catch((error) => {
-          return next(
-            new HttpError(CLIENT_LNG('errors.invoice.send_failed'), 500)
-          );
-        });
+            {
+              content: statementBuffer.toString('base64'),
+              name: `${CLIENT_LNG('statement.title')}[${client.name}].pdf`,
+            },
+          ]
+        : [
+            {
+              content: invoiceBuffer.toString('base64'),
+              name: `${CLIENT_LNG('invoice.title')}[${client.name}].pdf`,
+            },
+          ];
+
+      return apiInstance.sendTransacEmail(sendSmtpEmail).then(
+        function (data) {},
+        function (error) {
+          console.error(error);
+        }
+      );
     });
   }
 

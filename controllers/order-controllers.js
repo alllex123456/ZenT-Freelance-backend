@@ -160,7 +160,7 @@ exports.addOrder = async (req, res, next) => {
     clientId,
     service,
     receivedDate,
-    deliveredDate: req.body.addToStatement ? deliveredDate : '',
+    deliveredDate: req.body.statement ? deliveredDate : '',
     reference: reference || '-',
     deadline,
     rate,
@@ -168,7 +168,7 @@ exports.addOrder = async (req, res, next) => {
     currency,
     count,
     notes,
-    status: req.body.addToStatement ? 'completed' : 'queue',
+    status: req.body.statement ? 'completed' : 'queue',
     total: calculatedTotal(unit, count, rate).toFixed(client.decimalPoints),
   });
 

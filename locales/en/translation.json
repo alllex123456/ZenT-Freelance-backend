@@ -248,6 +248,21 @@
       "amount": "Amount",
       "dueBy": "Due by",
       "footer": "For any questions, please reply to this message or contact us at"
+    },
+    "reminders": {
+      "invoice": {
+        "subject": "Your invoice",
+        "h1": "Dear Client",
+        "h2": "This is a kind remainder that your invoice",
+        "issued": "issued",
+        "inAmountOf": "in amount of",
+        "dueTomorrow": "is due tomorrow",
+        "twoDaysOutstanding": "is two days past due",
+        "fourDaysOutstanding": "is four days past due",
+        "sixDaysOutstanding": "is six days past due",
+        "findDocumentAttached": "You can find the document attached to this message",
+        "thankYou": "Thank you for choosing to work with us"
+      }
     }
   },
   "signature": "Document generated with Zent"

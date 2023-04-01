@@ -1,15 +1,8 @@
 const PDFDocument = require('pdfkit-table');
 const { translateServices } = require('../utils/translateUnits');
 const nodemailer = require('nodemailer');
-const AWS = require('aws-sdk');
 const { sendStatement } = require('./mailer/html-contents');
 const { computePages } = require('../utils/compute-pages');
-
-AWS.config.update({ region: 'eu-west-3' });
-
-let transporter = nodemailer.createTransport({
-  SES: new AWS.SES(),
-});
 
 const margin = 20;
 const textDarkPrimary = '#757575';
@@ -207,32 +200,44 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
     const buffers = [];
     statement.on('data', buffers.push.bind(buffers));
     statement.on('end', () => {
-      let pdfData = Buffer.concat(buffers);
+      let statementBuffer = Buffer.concat(buffers);
 
-      return transporter
-        .sendMail({
-          from: `${user.name || user.email} <admin@zent-freelance.com>`,
-          to: `<${email || client.email}>`,
-          replyTo: user.email,
-          subject: CLIENT_LNG('mail.subjectStatement'),
-          attachments: {
-            filename: `${CLIENT_LNG('statement.title')}[${client.name}].pdf`,
-            content: pdfData,
-          },
-          html: sendStatement(
-            CLIENT_LNG,
-            totalOrders,
-            totalCounts,
-            user,
-            client
-          ),
-        })
-        .then(() => {})
-        .catch((error) => {
-          return next(
-            new HttpError(CLIENT_LNG('errors.statement.send_failed'), 500)
-          );
-        });
+      const SibApiV3Sdk = require('sib-api-v3-sdk');
+      let defaultClient = SibApiV3Sdk.ApiClient.instance;
+
+      let apiKey = defaultClient.authentications['api-key'];
+      apiKey.apiKey = process.env.SENDINBLUE_KEY;
+
+      let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+      let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+
+      sendSmtpEmail.subject = CLIENT_LNG('mail.subjectStatement');
+      sendSmtpEmail.htmlContent = sendStatement(
+        CLIENT_LNG,
+        totalOrders,
+        totalCounts,
+        user,
+        client
+      );
+      sendSmtpEmail.sender = {
+        name: user.name || user.email,
+        email: user.email,
+      };
+      sendSmtpEmail.to = [{ email: email || client.email }];
+      sendSmtpEmail.replyTo = { email: user.email };
+      sendSmtpEmail.attachment = [
+        {
+          content: statementBuffer.toString('base64'),
+          name: `${CLIENT_LNG('invoice.title')}[${client.name}].pdf`,
+        },
+      ];
+
+      return apiInstance.sendTransacEmail(sendSmtpEmail).then(
+        function (data) {},
+        function (error) {
+          console.error(error);
+        }
+      );
     });
   }
 
