@@ -25,8 +25,13 @@ exports.invoiceOutstandingMail = (user, recipient, req, invoice, type) => {
         }
         if (argsCount === 3) {
           return translationObject[`${argsArray[0]}`][`${argsArray[1]}`][
-            `${argsArray[2]}`
+            `${argsArray[2]}]`
           ];
+        }
+        if (argsCount === 4) {
+          return translationObject[`${argsArray[0]}`][`${argsArray[1]}`][
+            `${argsArray[2]}`
+          ][`${argsArray[3]}`];
         }
       },
     };

@@ -391,41 +391,81 @@ exports.deleteInvoice = async (req, res, next) => {
     );
   }
 
-  invoice.userId.invoices.pull(invoice);
-  invoice.clientId.invoices.pull(invoice);
-  invoice.userId.invoiceStartNumber -= 1;
-
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
-    await invoice.remove({ session });
-    await invoice.userId.save({ session });
-    await invoice.clientId.save({ session });
 
-    if (removeOrders === 'true') {
+    if (invoice.clientId.archived) {
+      await Order.deleteMany({ _id: { $in: invoice.orders } }, { session });
       await User.updateOne(
         { _id: invoice.userId },
-        { $pullAll: { orders: invoice.orders } },
+        {
+          $pullAll: {
+            orders: invoice.orders,
+            addedItems: invoice.addedItems,
+          },
+          $pull: { invoices: invoice._id },
+        },
         { session }
       );
-      await Client.updateOne(
-        { _id: invoice.clientId },
-        { $pullAll: { orders: invoice.orders } },
-        { session }
-      );
-      await Order.deleteMany({ _id: { $in: invoice.orders } }, { session });
+    } else {
+      if (removeOrders === 'true') {
+        await User.updateOne(
+          { _id: invoice.userId },
+          {
+            $pullAll: {
+              orders: invoice.orders,
+              addedItems: invoice.addedItems,
+            },
+            $pull: { invoices: invoice._id },
+          },
+          { session }
+        );
+        await Client.updateOne(
+          { _id: invoice.clientId },
+          {
+            $pullAll: {
+              orders: invoice.orders,
+              addedItems: invoice.addedItems,
+            },
+            $pull: { invoices: invoice._id },
+          },
+          { session }
+        );
+        await Order.deleteMany({ _id: { $in: invoice.orders } }, { session });
+      } else {
+        await Order.updateMany(
+          { _id: { $in: invoice.orders } },
+          { $set: { status: 'completed' } },
+          { session }
+        );
+        await User.updateOne(
+          { _id: invoice.userId },
+          {
+            $pullAll: { addedItems: invoice.addedItems },
+          },
+          { session }
+        );
+        await Client.updateOne(
+          { _id: invoice.clientId },
+          {
+            $pullAll: { addedItems: invoice.addedItems },
+          },
+          { session }
+        );
+      }
     }
 
-    if (removeOrders === 'false') {
-      await Order.updateMany(
-        { _id: { $in: invoice.orders } },
-        { $set: { status: 'completed' } },
-        { session }
-      );
-    }
+    await AddedItem.deleteMany(
+      { _id: { $in: invoice.addedItems } },
+      { session }
+    );
+
+    await invoice.remove({ session });
 
     session.commitTransaction();
   } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.invoicing.cancel_failed'), 500));
   }
 

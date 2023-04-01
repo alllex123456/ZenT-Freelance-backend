@@ -238,7 +238,7 @@
       "summary": "Sumar",
       "quantity": "Cantitate",
       "amount": "Valoare",
-      "footer": "Pentru întrebări, puteți răspunde acestui mesaj sau ne puteți contacta la"
+      "footer": "Pentru întrebări, puteți răspunde la acest mesaj sau ne puteți contacta la"
     },
     "invoice": {
       "h1": "Stimate client",
@@ -246,7 +246,22 @@
       "summary": "Sumar",
       "amount": "Valoare",
       "dueBy": "Data scadentă",
-      "footer": "Pentru întrebări, puteți răspunde acestui mesaj sau ne puteți contacta la"
+      "footer": "Pentru întrebări, puteți răspunde la acest mesaj sau ne puteți contacta la"
+    },
+    "reminders": {
+      "invoice": {
+        "subject": "Factura dvs.",
+        "h1": "Stimate client",
+        "h2": "Vă reamintim că factura dvs.",
+        "issued": "emisă pe",
+        "inAmountOf": "în valoare de",
+        "dueTomorrow": "este scadentă mâine",
+        "twoDaysOutstanding": "a depășit termenul de plată cu două zile",
+        "fourDaysOutstanding": "a depășit termenul de plată cu 4 zile",
+        "sixDaysOutstanding": "a depășit termenul de plată cu 6 zile",
+        "findDocumentAttached": "Documentul se regăsește atașat la acest mesaj",
+        "thankYou": "Vă mulțumim pentru colaborare"
+      }
     }
   },
   "signature": "Document generat cu Zent"

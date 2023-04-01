@@ -35,7 +35,9 @@ exports.getClient = async (req, res, next) => {
 
   let client;
   try {
-    client = await Client.findById(clientId).populate({
+    client = await Client.findOne({
+      _id: clientId,
+    }).populate({
       path: 'invoices',
       populate: {
         path: 'orders addedItems payments receipts',
@@ -45,7 +47,7 @@ exports.getClient = async (req, res, next) => {
     return next(new HttpError(req.t('errors.clients.not_found'), 500));
   }
 
-  if (client.userId.toString() !== req.userData.userId) {
+  if (client && client.userId.toString() !== req.userData.userId) {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
 
@@ -59,23 +61,24 @@ exports.addClient = async (req, res, next) => {
   try {
     user = await User.findById(userId);
   } catch (error) {
+    console.log(error);
     return next(new HttpError(req.t('errors.user.not_found'), 500));
   }
 
   let userClients;
   try {
-    userClients = await Client.find();
+    userClients = await Client.find({
+      userId,
+      archived: { $exists: false } || false,
+      taxNumber: req.body.taxNumber,
+    });
   } catch (error) {
     return next(new HttpError(req.t('errors.clients.not_found'), 500));
   }
 
-  userClients.forEach((client) => {
-    if (client.taxNumber === req.body.taxNumber) {
-      return next(
-        new HttpError(req.t('errors.clients.already_registered'), 401)
-      );
-    }
-  });
+  if (userClients.length !== 0) {
+    return next(new HttpError(req.t('errors.clients.already_registered'), 401));
+  }
 
   const newClient = new Client({
     userId,
@@ -99,6 +102,7 @@ exports.addClient = async (req, res, next) => {
       primary: { name: '', email: '', phone: '', mobile: '' },
       secondary: { name: '', email: '', phone: '', mobile: '' },
     },
+    archived: false,
     ...req.body,
   });
   user.clients.push(newClient);
@@ -156,17 +160,45 @@ exports.deleteClient = async (req, res, next) => {
     return next(new HttpError(req.t('errors.clients.not_found'), 500));
   }
 
-  if (client.userId.id.toString() !== req.userData.userId) {
+  if (client && client.userId.id.toString() !== req.userData.userId) {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
+
+  let pendingOrders, completedOrders;
+  try {
+    pendingOrders = await Order.find({
+      clientId,
+      status: 'queue',
+    });
+    completedOrders = await Order.find({
+      clientId,
+      status: 'completed',
+    });
+  } catch (error) {}
+
+  const uninvoicedOrdersIds = pendingOrders
+    .concat(completedOrders)
+    .map((order) => order._id);
 
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
-    await Order.deleteMany({ _id: { $in: client.orders } }, { session });
-    await client.remove({ session });
-    client.userId.clients.pull(client);
-    await client.userId.save({ session });
+
+    await User.findByIdAndUpdate(
+      req.userData.userId,
+      {
+        $pullAll: { orders: uninvoicedOrdersIds },
+        $pull: { clients: clientId },
+      },
+      { session }
+    );
+    await Client.findByIdAndUpdate(clientId, {
+      $pullAll: { orders: uninvoicedOrdersIds },
+      archived: true,
+    }),
+      { session };
+    await Order.deleteMany({ _id: { $in: uninvoicedOrdersIds } }, { session });
+
     session.commitTransaction();
   } catch (error) {
     console.log(error);

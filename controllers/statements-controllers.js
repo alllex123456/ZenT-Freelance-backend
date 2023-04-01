@@ -22,12 +22,14 @@ exports.getAllStatements = async (req, res, next) => {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
 
-  const clientStatement = clients.map((client) => ({
-    ...client.toObject({ getters: true }),
-    orders: client.orders
-      .filter((order) => order.status === 'completed')
-      .map((order) => order.toObject({ getters: true })),
-  }));
+  const clientStatement = clients
+    .filter((client) => !client.archived)
+    .map((client) => ({
+      ...client.toObject({ getters: true }),
+      orders: client.orders
+        .filter((order) => order.status === 'completed')
+        .map((order) => order.toObject({ getters: true })),
+    }));
 
   res.json({
     message: clientStatement,

@@ -1,7 +1,7 @@
 const { InvoicePDF } = require('../services/pdf-invoice');
 const User = require('../models/user');
 const cron = require('node-cron');
-const { isTomorrow } = require('date-fns');
+const { isTomorrow, addDays } = require('date-fns');
 const { invoiceOutstandingMail } = require('../services/mailer/reminders');
 
 const invoiceOutstanding = (users) => {
@@ -13,74 +13,58 @@ const invoiceOutstanding = (users) => {
     // offset local user time
     const date = new Date().toLocaleString('en-US', user.timeZone);
     const tzoffset = new Date(date).getTimezoneOffset() * 60000;
-    const userLocalTime = new Date(new Date(date) - tzoffset);
+    const userLocalTime = new Date(new Date(date) - tzoffset)
+      .toISOString()
+      .slice(0, 10);
 
     user.invoices.forEach((invoice) => {
+      const setDelay = (invoice, delay) => {
+        return (
+          new Date(userLocalTime).toISOString().slice(0, 10) ===
+          addDays(new Date(invoice.dueDate.toISOString().slice(0, 10)), delay)
+            .toISOString()
+            .slice(0, 10)
+        );
+      };
+
       if (isTomorrow(new Date(invoice.dueDate))) {
-        InvoicePDF(null, null, invoice, invoice.totalInvoice, 'duetomorrow');
-        invoiceOutstandingMail(
-          user,
-          invoice.clientId,
+        InvoicePDF(
+          { body: { reminder: true } },
           null,
           invoice,
-          'duetomorrow'
+          null,
+          null,
+          'dueTomorrow'
         );
       }
-      if (
-        userLocalTime - invoice.dueDate > 172800000 &&
-        userLocalTime - invoice.dueDate < 259200000
-      ) {
+      if (setDelay(invoice, 2)) {
         InvoicePDF(
-          null,
-          null,
-          invoice,
-          invoice.totalInvoice,
-          'twodaysoutstanding'
-        );
-        invoiceOutstandingMail(
-          user,
-          invoice.clientId,
+          { body: { reminder: true } },
           null,
           invoice,
-          'twodaysoutstanding'
+          null,
+          null,
+          'twoDaysOutstanding'
         );
       }
-      if (
-        userLocalTime - invoice.dueDate > 345600000 &&
-        userLocalTime - invoice.dueDate < 432000000
-      ) {
+      if (setDelay(invoice, 4)) {
         InvoicePDF(
-          null,
-          null,
-          invoice,
-          invoice.totalInvoice,
-          'fourdaysoutstanding'
-        );
-        invoiceOutstandingMail(
-          user,
-          invoice.clientId,
+          { body: { reminder: true } },
           null,
           invoice,
-          'fourdaysoutstanding'
+          null,
+          null,
+          'fourDaysOutstanding'
         );
       }
-      if (
-        userLocalTime - invoice.dueDate > 518400000 &&
-        userLocalTime - invoice.dueDate < 604800000
-      ) {
+      if (setDelay(invoice, 7)) {
         InvoicePDF(
-          null,
-          null,
-          invoice,
-          invoice.totalInvoice,
-          'sixdaysoutstanding'
-        );
-        invoiceOutstandingMail(
-          user,
-          invoice.clientId,
+          { body: { reminder: true } },
           null,
           invoice,
-          'sixdaysoutstanding'
+          null,
+          null,
+          'sixDaysOutstanding'
         );
       }
     });
@@ -102,7 +86,7 @@ const getUsers = async (callbackFn) => {
 
 module.exports = () => {
   cron.schedule(
-    `35 10 * * *`,
+    `00 07 * * *`,
     () => {
       getUsers(invoiceOutstanding);
     },
