@@ -5,9 +5,9 @@ const { sendStatement } = require('./mailer/html-contents');
 const { computePages } = require('../utils/compute-pages');
 
 const margin = 20;
-const textDarkPrimary = '#757575';
-const textDarkSecondary = '#006e1e';
-const divider = '#2ecc71';
+const textDarkPrimary = '#495057';
+const textDarkSecondary = '#606A73';
+const divider = '#dfedff';
 
 exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
   const CLIENT_LNG = (args) => {
@@ -228,7 +228,7 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
       sendSmtpEmail.attachment = [
         {
           content: statementBuffer.toString('base64'),
-          name: `${CLIENT_LNG('invoice.title')}[${client.name}].pdf`,
+          name: `${CLIENT_LNG('statement.title')}[${client.name}].pdf`,
         },
       ];
 
