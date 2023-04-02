@@ -6,10 +6,10 @@ const { translateServices } = require('../utils/translateUnits');
 const { sendInvoice, invoiceReminders } = require('./mailer/html-contents');
 
 const margin = 20;
-const textDarkPrimary = '#757575';
-const textDarkSecondary = '#006e1e';
-const divider = '#2ecc71';
-const dividerLight = '#82e0aa';
+const textDarkPrimary = '#495057';
+const textDarkSecondary = '#606A73';
+const divider = '#d4e7ff';
+const dividerLight = '#e9f3ff';
 const tableHeaderBackground = '#fff';
 
 exports.InvoicePDF = async (
@@ -630,8 +630,6 @@ exports.InvoicePDF = async (
       );
 
   if (Object.keys(req.body).length !== 0) {
-    if (!client.email || !user.email)
-      return HttpError(CLIENT_LNG('errors.invoice.send_failed'), 500);
     const invoiceChunks = [];
     const statementChunks = [];
     invoice.on('data', invoiceChunks.push.bind(invoiceChunks));

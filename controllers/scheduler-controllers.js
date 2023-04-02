@@ -2,7 +2,6 @@ const { InvoicePDF } = require('../services/pdf-invoice');
 const User = require('../models/user');
 const cron = require('node-cron');
 const { isTomorrow, addDays } = require('date-fns');
-const { invoiceOutstandingMail } = require('../services/mailer/reminders');
 
 const invoiceOutstanding = (users) => {
   if (!users || users.length === 0) return;

@@ -5,43 +5,43 @@ exports.userSignUp = (req) => `<!DOCTYPE html>
 <body>
 
 <header>
-<h1 style="text-align:center"><span style="color:#006e1e"><strong><span style="font-size:18px">${req.t(
+<h1 style="text-align:center"><span style="color:#495057"><strong><span style="font-size:18px">${req.t(
   'mail.userSignUp.h1'
 )}</span></strong></span></h1>
 
-<div style="text-align:center"><img alt="" src="https://zent.s3.eu-west-3.amazonaws.com/zent-logo-transparent-bk.svg" height="90"; width="170" /></div>
+<div style="text-align:center"><img alt="" src="https://zent.s3.eu-west-3.amazonaws.com/zent-logo-blue.svg" height="90"; width="170" /></div>
 </header>
 
 <main>
-<h2 style="text-align:center"><span style="color:#006e1e"><span style="font-size:14px">${req.t(
+<h2 style="text-align:center"><span style="color:#495057"><span style="font-size:14px">${req.t(
   'mail.userSignUp.h2'
 )}:</span></span></h2>
 
-<p style="text-align:center"><span style="color:#006e1e"><em>- <strong>${req.t(
+<p style="text-align:center"><span style="color:#495057"><em>- <strong>${req.t(
   'mail.userSignUp.clientRegistration'
 )}</strong>: ${req.t('mail.userSignUp.listLineOne')},</em></span></p>
 
-<p style="text-align:center"><span style="color:#006e1e"><em>- <strong>${req.t(
+<p style="text-align:center"><span style="color:#495057"><em>- <strong>${req.t(
   'mail.userSignUp.orderRegistration'
 )}</strong>: ${req.t('mail.userSignUp.listLineTwo')},</em></span></p>
 
-<p style="text-align:center"><span style="color:#006e1e"><em>- <strong>${req.t(
+<p style="text-align:center"><span style="color:#495057"><em>- <strong>${req.t(
   'mail.userSignUp.workStatement'
 )}</strong> ${req.t('mail.userSignUp.listLineThree')},</em></span></p>
 
-<p style="text-align:center"><span style="color:#006e1e"><em>- <strong>${req.t(
+<p style="text-align:center"><span style="color:#495057"><em>- <strong>${req.t(
   'mail.userSignUp.invoicingAndPayment'
 )}</strong>: ${req.t('mail.userSignUp.listLineFour')},</em></span></p>
 
-<p style="text-align:center"><span style="color:#006e1e"><em>- ${req.t(
+<p style="text-align:center"><span style="color:#495057"><em>- ${req.t(
   'mail.userSignUp.invoiceDetails'
 )}: ${req.t('mail.userSignUp.listLineFive')},</em></span></p>
 
-<p style="text-align:center"><span style="color:#006e1e"><em>- ${req.t(
+<p style="text-align:center"><span style="color:#495057"><em>- ${req.t(
   'mail.userSignUp.invoiceFunctionalities'
 )}: ${req.t('mail.userSignUp.listLineSix')},</em></span></p>
 
-<p style="text-align:center"><span style="color:#006e1e"><em>- <strong>${req.t(
+<p style="text-align:center"><span style="color:#495057"><em>- <strong>${req.t(
   'mail.userSignUp.userAccount'
 )}</strong> ${req.t('mail.userSignUp.listLineSeven')}.</em></span></p>
 </main>
@@ -68,24 +68,24 @@ exports.resetPassword = (req, href, user) => `<!DOCTYPE html>
 <body>
 
 <header>
-<h1 style="text-align:center"><span style="color:#006e1e"><strong><span style="font-size:18px">${req.t(
+<h1 style="text-align:center"><span style="color:#495057"><strong><span style="font-size:18px">${req.t(
   'mail.passwordReset.h1'
 )}, ${user.alias}</span></strong></span></h1>
 
-<div style="text-align:center"><img alt="Zent logo" src="https://zent.s3.eu-west-3.amazonaws.com/zent-logo-transparent-bk.svg" height="90"; width="170" /></div>
+<div style="text-align:center"><img alt="Zent logo" src="https://zent.s3.eu-west-3.amazonaws.com/zent-logo-blue.svg" height="90"; width="170" /></div>
 </header>
 
 <main>
-<h2 style="text-align:center"><span style="color:#006e1e"><span style="font-size:14px">${req.t(
+<h2 style="text-align:center"><span style="color:#495057"><span style="font-size:14px">${req.t(
   'mail.passwordReset.h2'
 )}</span></span></h2>
 
-<p style="text-align:center"><span style="color:#006e1e">${req.t(
+<p style="text-align:center"><span style="color:#495057">${req.t(
   'mail.passwordReset.instruction'
 )}</span></p>
 
 <div style="text-align:center">
-<a href=${href} style="padding: 10px 5px; color:#fff; text-decoration:none; background-color:#006e1e">${req.t(
+<a href=${href} style="padding: 10px 5px; color:#fff; text-decoration:none; background-color:#495057">${req.t(
   'mail.passwordReset.button'
 )}</a>
 </div>
@@ -129,7 +129,7 @@ exports.sendStatement = (
 
     <tr style="padding:20px 0">
           <td>
-               <h1 style="text-align:center; color:#006e1e; font-size:18px">${CLIENT_LNG(
+               <h1 style="text-align:center; color:#495057; font-size:18px">${CLIENT_LNG(
                  'mail.statement.h1'
                )},</h1>
           </td>
@@ -137,7 +137,7 @@ exports.sendStatement = (
 
     <tr style="padding:20px 0">
           <td>
-               <h2 style="text-align:center; color:#006e1e; font-size:16px">${CLIENT_LNG(
+               <h2 style="text-align:center; color:#495057; font-size:16px">${CLIENT_LNG(
                  'mail.statement.h2'
                )}</h2>
           </td>
@@ -146,7 +146,7 @@ exports.sendStatement = (
    
     <tr style="background-color:#ecf0f1; margin: 20px 0">
           <td >
-               <p style="text-align:center; color:#006e1e; font-size:14px; font-weight: bold">${CLIENT_LNG(
+               <p style="text-align:center; color:#495057; font-size:14px; font-weight: bold">${CLIENT_LNG(
                  'mail.statement.summary'
                )}</p>
           </td>
@@ -154,7 +154,7 @@ exports.sendStatement = (
 
     <tr style="background-color:#ecf0f1; margin:20px 0">
           <td>
-               <p style="text-align:center; font-size:12px; color:#006e1e">${CLIENT_LNG(
+               <p style="text-align:center; font-size:12px; color:#495057">${CLIENT_LNG(
                  'mail.statement.quantity'
                )}: ${totalCounts.toLocaleString(client.language, {
   maximumFractionDigits: client.decimalPoints,
@@ -164,7 +164,7 @@ exports.sendStatement = (
 
     <tr style="background-color:#ecf0f1; margin:20px 0">
           <td>
-               <p style="text-align:center; color:#006e1e; font-size:12px">${CLIENT_LNG(
+               <p style="text-align:center; color:#495057; font-size:12px">${CLIENT_LNG(
                  'mail.statement.amount'
                )}: ${totalOrders.toLocaleString(client.language, {
   style: 'currency',
@@ -222,7 +222,7 @@ ${
 
     <tr style="padding:20px 0">
           <td>
-               <h1 style="text-align:center; color:#006e1e; font-size:18px">${CLIENT_LNG(
+               <h1 style="text-align:center; color:#495057; font-size:18px">${CLIENT_LNG(
                  'mail.statement.h1'
                )},</h1>
           </td>
@@ -230,7 +230,7 @@ ${
 
     <tr style="padding:20px 0">
           <td>
-               <h2 style="text-align:center; color:#006e1e; font-size:16px">${CLIENT_LNG(
+               <h2 style="text-align:center; color:#495057; font-size:16px">${CLIENT_LNG(
                  'mail.invoice.h2'
                )}: ${invoice.prefix}${invoice.number}</h2>
           </td>
@@ -239,7 +239,7 @@ ${
    
     <tr style="background-color:#ecf0f1; margin: 20px 0">
           <td >
-               <p style="text-align:center; color:#006e1e; font-size:14px; font-weight: bold">${CLIENT_LNG(
+               <p style="text-align:center; color:#495057; font-size:14px; font-weight: bold">${CLIENT_LNG(
                  'mail.invoice.summary'
                )}</p>
           </td>
@@ -247,7 +247,7 @@ ${
 
     <tr style="background-color:#ecf0f1; margin:20px 0">
           <td>
-               <p style="text-align:center; color:#006e1e; font-size:12px">${CLIENT_LNG(
+               <p style="text-align:center; color:#495057; font-size:12px">${CLIENT_LNG(
                  'mail.invoice.amount'
                )}: ${invoice.totalInvoice.toLocaleString(
     invoice.clientData.language,
@@ -263,7 +263,7 @@ ${
 
     <tr style="background-color:#ecf0f1; margin:20px 0">
         <td>
-            <p style="text-align:center; font-size:12px; color:#006e1e">${CLIENT_LNG(
+            <p style="text-align:center; font-size:12px; color:#495057">${CLIENT_LNG(
               'mail.invoice.dueBy'
             )}: ${new Date(invoice.dueDate).toLocaleDateString(
     invoice.clientData.language
@@ -317,7 +317,7 @@ ${
 
     <tr style="padding:20px 0">
           <td>
-               <h1 style="text-align:center; color:#006e1e; font-size:18px">${CLIENT_LNG(
+               <h1 style="text-align:center; color:#495057; font-size:18px">${CLIENT_LNG(
                  'mail.reminders.invoice.h1'
                )},</h1>
           </td>
@@ -325,7 +325,7 @@ ${
 
     <tr style="padding:20px 0">
           <td>
-               <h2 style="text-align:center; color:#006e1e; font-size:16px">${CLIENT_LNG(
+               <h2 style="text-align:center; color:#495057; font-size:16px">${CLIENT_LNG(
                  'mail.reminders.invoice.h2'
                )} ${invoice.prefix}${invoice.number} ${CLIENT_LNG(
     'mail.reminders.invoice.issued'
@@ -344,7 +344,7 @@ ${
    
     <tr style="background-color:#ecf0f1; margin: 20px 0">
           <td >
-               <p style="text-align:center; color:#006e1e; font-size:14px; font-weight: bold">${CLIENT_LNG(
+               <p style="text-align:center; color:#495057; font-size:14px; font-weight: bold">${CLIENT_LNG(
                  'mail.reminders.invoice.findDocumentAttached'
                )}.</p>
           </td>

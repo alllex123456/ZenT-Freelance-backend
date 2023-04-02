@@ -3,7 +3,6 @@ const Order = require('../models/order');
 const User = require('../models/user');
 const Client = require('../models/client');
 const { StatementPDF } = require('../services/pdf-statement');
-const { sendStatement } = require('../services/mailer/documents');
 
 exports.getAllStatements = async (req, res, next) => {
   const { userId } = req.userData;
