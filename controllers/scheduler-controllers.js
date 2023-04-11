@@ -17,6 +17,8 @@ const invoiceOutstanding = (users) => {
       .slice(0, 10);
 
     user.invoices.forEach((invoice) => {
+      if (!invoice.clientData.email || !invoice.userData.email) return;
+
       const setDelay = (invoice, delay) => {
         return (
           new Date(userLocalTime).toISOString().slice(0, 10) ===
