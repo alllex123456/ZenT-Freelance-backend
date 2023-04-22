@@ -469,7 +469,10 @@ exports.deleteInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.invoicing.cancel_failed'), 500));
   }
 
-  res.json({ message: req.t('success.invoicing.canceled') });
+  res.json({
+    message: req.t('success.invoicing.canceled'),
+    invoice,
+  });
 };
 
 exports.cashInvoice = async (req, res, next) => {
