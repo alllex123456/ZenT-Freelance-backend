@@ -24,6 +24,7 @@ exports.convertCurrency = async (req, res, next) => {
   );
 
   const convertedAmount = await responseData.json();
+
   res.json({ message: convertedAmount });
 };
 
