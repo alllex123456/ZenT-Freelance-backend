@@ -16,7 +16,7 @@ exports.getAllClients = async (req, res, next) => {
     user = await User.findById(userId).populate({
       path: 'clients',
       populate: {
-        path: 'orders',
+        path: 'orders invoices',
       },
     });
   } catch (error) {
