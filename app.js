@@ -35,6 +35,7 @@ app.use(bodyParser.json());
 app.use(middleware.handle(i18next));
 
 //CORS
+//issue with alextanase454@gmail.com no access control allow origin??
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
