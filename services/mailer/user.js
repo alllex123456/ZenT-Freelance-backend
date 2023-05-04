@@ -4,6 +4,8 @@ const { userSignUp, resetPassword } = require('./html-contents');
 
 AWS.config.update({ region: 'eu-west-3' });
 
+//need to change to sendinblue
+
 let transporter = nodemailer.createTransport({
   SES: new AWS.SES(),
 });
