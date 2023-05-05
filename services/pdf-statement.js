@@ -1,6 +1,5 @@
 const PDFDocument = require('pdfkit-table');
 const { translateServices } = require('../utils/translateUnits');
-const nodemailer = require('nodemailer');
 const { sendStatement } = require('./mailer/html-contents');
 const { computePages } = require('../utils/compute-pages');
 

@@ -2,6 +2,12 @@ const mongoose = require('mongoose');
 const HttpError = require('../models/http-error');
 const fetch = require('node-fetch');
 
+const Invoice = require('../models/invoice');
+const Order = require('../models/order');
+const AddedItem = require('../models/added-item');
+const Client = require('../models/client');
+const Receipt = require('../models/receipt');
+
 const App = require('../models/application');
 
 exports.getAppSettings = async (req, res, next) => {
@@ -38,4 +44,54 @@ exports.getEntityInfo = async (req, res, next) => {
   const entityInfo = await responseData.json();
 
   res.json({ message: entityInfo });
+};
+
+exports.replaceUserIds = async (req, res, next) => {
+  const { newUserId, oldUserId } = req.body;
+
+  try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+
+    await Order.updateMany(
+      {
+        userId: oldUserId,
+      },
+      { $set: { userId: newUserId } }
+    );
+
+    await AddedItem.updateMany(
+      {
+        userId: oldUserId,
+      },
+      { $set: { userId: newUserId } }
+    );
+
+    await Invoice.updateMany(
+      {
+        userId: oldUserId,
+      },
+      { $set: { userId: newUserId } }
+    );
+
+    await Client.updateMany(
+      {
+        userId: oldUserId,
+      },
+      { $set: { userId: newUserId } }
+    );
+
+    await Receipt.updateMany(
+      {
+        userId: oldUserId,
+      },
+      { $set: { userId: newUserId } }
+    );
+
+    session.commitTransaction();
+  } catch (error) {
+    return next(new HttpError(error, 401));
+  }
+
+  res.json({ message: 'success' });
 };

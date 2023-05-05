@@ -2,27 +2,47 @@ const nodemailer = require('nodemailer');
 const AWS = require('aws-sdk');
 const { userSignUp, resetPassword } = require('./html-contents');
 
-AWS.config.update({ region: 'eu-west-3' });
+const SibApiV3Sdk = require('sib-api-v3-sdk');
+let defaultClient = SibApiV3Sdk.ApiClient.instance;
 
-let transporter = nodemailer.createTransport({
-  SES: new AWS.SES(),
-});
+let apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = process.env.SENDINBLUE_KEY;
+
+let apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+let sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
 
 exports.signupEmail = (recipient, req) => {
-  transporter.sendMail({
-    from: 'Zent <admin@zent-freelance.com>',
-    to: `<${recipient.email}>`,
-    subject: req.t('mail.subjectSignUp'),
-    html: userSignUp(req),
-  });
+  sendSmtpEmail.subject = req.t('mail.subjectSignUp');
+  sendSmtpEmail.htmlContent = userSignUp(req);
+  sendSmtpEmail.sender = {
+    name: 'Zent',
+    email: 'no-reply@zent-freelance.com',
+  };
+  sendSmtpEmail.to = [{ email: recipient.email }];
+
+  return apiInstance.sendTransacEmail(sendSmtpEmail).then(
+    function (data) {},
+    function (error) {
+      console.error(error);
+    }
+  );
 };
 
 exports.resetPasswordLink = (recipient, token, req) => {
   const href = `http://localhost:3000/reset-password?email=${recipient.email}&token=${token}`;
-  transporter.sendMail({
-    from: 'ZenT-Freelance <admin@zent-freelance.com>',
-    to: `<${recipient.email}>`,
-    subject: req.t('mail.subjectResetPassword'),
-    html: resetPassword(req, href, recipient),
-  });
+
+  sendSmtpEmail.subject = req.t('mail.subjectResetPassword');
+  sendSmtpEmail.htmlContent = resetPassword(req, href, recipient);
+  sendSmtpEmail.sender = {
+    name: 'Zent',
+    email: 'no-reply@zent-freelance.com',
+  };
+  sendSmtpEmail.to = [{ email: recipient.email }];
+
+  return apiInstance.sendTransacEmail(sendSmtpEmail).then(
+    function (data) {},
+    function (error) {
+      console.error(error);
+    }
+  );
 };
