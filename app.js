@@ -2,7 +2,6 @@ const express = require('express');
 const aws = require('aws-sdk');
 const dotenv = require('dotenv').config();
 const fs = require('fs');
-const cors = require('cors');
 
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
@@ -31,20 +30,22 @@ i18next
 ///////////////////////
 const app = express();
 
+console.log('before cors');
+
 //CORS
 //issue with alextanase454@gmail.com no access control allow origin??
-// app.use((req, res, next) => {
-//   res.setHeader('Access-Control-Allow-Origin', '*');
-//   res.setHeader(
-//     'Access-Control-Allow-Headers',
-//     'Origin, Content-Type, X-Requested-With, Accept, Authorization, Payload, listedOrders, invoiceId'
-//   );
-//   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, Content-Type, X-Requested-With, Accept, Authorization, Payload, listedOrders, invoiceId'
+  );
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
 
-//   next();
-// });
+  next();
+});
 
-app.use(cors());
+console.log('after cors');
 
 app.use(bodyParser.json());
 app.use(middleware.handle(i18next));
