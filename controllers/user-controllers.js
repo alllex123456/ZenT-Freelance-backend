@@ -207,7 +207,7 @@ exports.changePassword = async (req, res, next) => {
 
   user.alias = alias;
 
-  if (currentPassword && newPassword && currentPassword === newPassword) {
+  if (currentPassword && newPassword) {
     let isValidPassword = false;
     let hashedPassword;
     try {
