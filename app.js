@@ -83,11 +83,11 @@ app.use((error, req, res, next) => {
   });
 });
 
-const port = process.env.port || 3000;
+const port = process.env.PORT || 3000;
 
 mongoose
   .connect(
     `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.vndt4.mongodb.net/${process.env.DATABASE}?retryWrites=true&w=majority`
   )
-  .then(() => app.listen(port)
+  .then(() => app.listen(port))
   .catch((error) => console.log(error));
