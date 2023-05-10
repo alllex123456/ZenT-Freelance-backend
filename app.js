@@ -30,10 +30,7 @@ i18next
 ///////////////////////
 const app = express();
 
-console.log('before cors');
-
 //CORS
-//issue with alextanase454@gmail.com no access control allow origin??
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader(
@@ -44,8 +41,6 @@ app.use((req, res, next) => {
 
   next();
 });
-
-console.log('after cors');
 
 app.use(bodyParser.json());
 app.use(middleware.handle(i18next));
@@ -88,9 +83,11 @@ app.use((error, req, res, next) => {
   });
 });
 
+const port = process.env.port || 3000;
+
 mongoose
   .connect(
     `mongodb+srv://${process.env.USER}:${process.env.PASSWORD}@cluster0.vndt4.mongodb.net/${process.env.DATABASE}?retryWrites=true&w=majority`
   )
-  .then(() => app.listen(process.env.PORT || 8000))
+  .then(() => app.listen(port)
   .catch((error) => console.log(error));
