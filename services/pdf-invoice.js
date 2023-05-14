@@ -152,15 +152,15 @@ exports.InvoicePDF = async (
     .text(`${CLIENT_LNG('invoice.supplier')}:`, margin, invoice.y)
     .fillColor(textDarkPrimary)
     .fontSize(10)
-    .text(user.name.toUpperCase(), { width: 270 })
+    .text(user.name.toUpperCase())
     .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
     .fontSize(8)
     .fillColor(textDarkSecondary)
-    .text(user.registeredOffice, { width: 270 })
-    .text(user.registrationNumber, { width: 270 })
-    .text(user.taxNumber, { width: 270 })
-    .text(user.email, { width: 270 })
-    .text(user.phone, { width: 270 });
+    .text(user.registeredOffice)
+    .text(user.registrationNumber)
+    .text(user.taxNumber)
+    .text(user.email)
+    .text(user.phone);
 
   invoice.moveDown();
 
@@ -174,17 +174,17 @@ exports.InvoicePDF = async (
     .text(`${CLIENT_LNG('invoice.client')}:`, 20, invoice.y)
     .fillColor(textDarkPrimary)
     .fontSize(10)
-    .text(client.name.toUpperCase(), { width: 270 })
+    .text(client.name.toUpperCase())
     .fillColor(textDarkSecondary)
     .font('services/fonts/Ubuntu/Ubuntu-Regular.ttf')
     .fontSize(8)
-    .text(client.registeredOffice, { width: 270 })
-    .text(client.registrationNumber, { width: 270 })
-    .text(client.taxNumber, { width: 270 })
-    .text(client.bank, { width: 270 })
-    .text(client.iban, { width: 270 })
-    .text(client.email, { width: 270 })
-    .text(client.phone, { width: 270 });
+    .text(client.registeredOffice)
+    .text(client.registrationNumber)
+    .text(client.taxNumber)
+    .text(client.bank)
+    .text(client.iban)
+    .text(client.email)
+    .text(client.phone);
 
   invoice.moveDown(3);
 
@@ -330,7 +330,7 @@ exports.InvoicePDF = async (
   invoice.moveDown(2);
 
   invoice
-    .fontSize(10)
+    .fontSize(8)
     .fillColor(textDarkPrimary)
     .text(
       `${CLIENT_LNG('invoice.subTotal')}: ${subTotalInvoice.toLocaleString(
@@ -352,8 +352,10 @@ exports.InvoicePDF = async (
         maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
       })}`,
       { align: 'right' }
-    )
-    .text(
+    );
+
+  if (totalDiscount !== 0) {
+    invoice.text(
       `${CLIENT_LNG('invoice.discount')}: ${totalDiscount.toLocaleString(
         client.language,
         {
@@ -364,6 +366,7 @@ exports.InvoicePDF = async (
       )}`,
       { align: 'right' }
     );
+  }
 
   if (user.VATpayer) {
     invoice
@@ -390,17 +393,22 @@ exports.InvoicePDF = async (
       );
   }
 
-  invoice.font('services/fonts/Ubuntu/Ubuntu-Medium.ttf').text(
-    `${CLIENT_LNG('invoice.toPay')}: ${totalInvoice.toLocaleString(
-      client.language,
-      {
-        style: 'currency',
-        currency: client.currency,
-        maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
-      }
-    )}`,
-    { align: 'right' }
-  );
+  invoice.moveDown();
+
+  invoice
+    .font('services/fonts/Ubuntu/Ubuntu-Medium.ttf')
+    .fontSize(10)
+    .text(
+      `${CLIENT_LNG('invoice.toPay')}: ${totalInvoice.toLocaleString(
+        client.language,
+        {
+          style: 'currency',
+          currency: client.currency,
+          maximumFractionDigits: user.VATpayer ? 2 : client.decimalPoints,
+        }
+      )}`,
+      { align: 'right' }
+    );
 
   invoice.moveDown();
 
@@ -560,7 +568,7 @@ exports.InvoicePDF = async (
         rows: statementOrders,
       };
 
-      table.rows.push([
+      statementTable.rows.push([
         '',
         '',
         '',
