@@ -26,25 +26,36 @@ const calculatedTotal = (unit, count, rate) => {
 };
 
 exports.getOrders = async (req, res, next) => {
-  const orderIds = JSON.parse(req.headers.payload);
+  let orderIds;
+  if (req.headers.payload) {
+    orderIds = JSON.parse(req.headers.payload);
+  }
 
   let orders;
   let addedItems;
   try {
-    orders = await Order.find({
-      _id: { $in: orderIds },
-    });
-    addedItems = await AddedItem.find({
-      _id: { $in: orderIds },
-    });
+    if (orderIds) {
+      orders = await Order.find({
+        _id: { $in: orderIds },
+      });
+      addedItems = await AddedItem.find({
+        _id: { $in: orderIds },
+      });
+    } else {
+      orders = await Order.find({ userId: req.userData.userId }).populate(
+        'clientId'
+      );
+    }
   } catch (error) {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
 
   res.json({
-    message: orders
-      .concat(addedItems)
-      .map((order) => order.toObject({ getters: true })),
+    message: orderIds
+      ? orders
+          .concat(addedItems)
+          .map((order) => order.toObject({ getters: true }))
+      : orders,
   });
 };
 
@@ -245,8 +256,29 @@ exports.modifyOrder = async (req, res, next) => {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
 
+  const clientChanged = req.body.clientId !== order.clientId.toString();
+
   if (order.userId.toString() !== req.userData.userId) {
     return next(new HttpError(req.t('errors.orders.no_authorization'), 401));
+  }
+
+  let newClient;
+  try {
+    newClient = await Client.findById(req.body.clientId);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.orders.modify_failed'), 500));
+  }
+
+  let oldClient;
+  try {
+    oldClient = await Client.findById(order.clientId);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.orders.modify_failed'), 500));
+  }
+
+  if (clientChanged) {
+    newClient.orders.push(req.body.orderId);
+    oldClient.orders.pull(req.body.orderId);
   }
 
   for (const [key, value] of Object.entries(req.body)) {
@@ -255,19 +287,23 @@ exports.modifyOrder = async (req, res, next) => {
     }
   }
 
-  let client;
   try {
-    client = await Client.findById(req.body.clientId);
-  } catch (error) {}
+    const session = await mongoose.startSession();
+    session.startTransaction();
 
-  try {
     await order.save();
+
+    if (clientChanged) {
+      await oldClient.save();
+      await newClient.save();
+    }
+    session.commitTransaction();
   } catch (error) {
     return next(new HttpError(req.t('errors.orders.modify_failed'), 500));
   }
 
   res.json({
-    order: { ...order._doc, clientId: client._doc },
+    order: { ...order._doc, clientId: newClient._doc },
     confirmation: req.t('success.orders.modified'),
   });
 };
