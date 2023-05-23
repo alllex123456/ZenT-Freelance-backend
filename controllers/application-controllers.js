@@ -7,6 +7,7 @@ const Order = require('../models/order');
 const AddedItem = require('../models/added-item');
 const Client = require('../models/client');
 const Receipt = require('../models/receipt');
+const Transaction = require('../models/transaction');
 
 const App = require('../models/application');
 
@@ -88,10 +89,58 @@ exports.replaceUserIds = async (req, res, next) => {
       { $set: { userId: newUserId } }
     );
 
+    await Transaction.updateMany(
+      {
+        userId: oldUserId,
+      },
+      { $set: { userId: newUserId } }
+    );
+
     session.commitTransaction();
   } catch (error) {
     return next(new HttpError(error, 401));
   }
 
   res.json({ message: 'success' });
+};
+
+exports.createInvoiceReceiptTransactions = async (req, res, next) => {
+  const { userId } = req.body;
+
+  let userInvoices;
+  try {
+    userInvoices = Invoice.find({ userId });
+  } catch (error) {
+    return next(new HttpError('eroare la gasirea facturilor', 404));
+  }
+
+  (await userInvoices).forEach(async (invoice) => {
+    for (const payment of invoice.payments) {
+      const newTransaction = new Transaction({
+        userId: invoice.userId,
+        type: 'payment',
+        method: 'bank',
+        date: payment.dateCashed,
+        amount: payment.cashedAmount,
+        document: 'ordin de plată',
+        description: `contravaloarea facturii ${invoice.prefix}/${
+          invoice.number
+        } emisă pe ${new Date(invoice.issuedDate).toLocaleDateString('ro')}`,
+      });
+
+      try {
+        await newTransaction.save();
+      } catch (error) {
+        return next(new HttpError('eroare la crearea tranzactiilor', 401));
+      }
+    }
+  });
+
+  res.json({ confirmation: 'success' });
+};
+
+exports.addTransactionProperty = async (req, res, next) => {
+  await Transaction.updateMany({}, { $set: { currency: 'RON' } });
+
+  res.json({ confirmation: 'property added to all transactions' });
 };

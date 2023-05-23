@@ -109,6 +109,11 @@
     },
     "PDF": {
       "gen_failed": "There was a problem while generating the PDF file. Please try again."
+    },
+    "transactions": {
+      "saved": "Your operation has been successfully saved.",
+      "edited": "Your operation has been successfully edited.",
+      "deleted": "Your operation has been successfully deleted."
     }
   },
   "database": {
@@ -199,6 +204,12 @@
     "amounting": "amounting",
     "receivedBy": "Received by",
     "signature": "Signature"
+  },
+  "transaction": {
+    "po": "payment order",
+    "receipt": "receipt",
+    "consideration": "payment due on invoice",
+    "issuedOn": "issued on"
   },
   "mail": {
     "cc": "--message copy--",

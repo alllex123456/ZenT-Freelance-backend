@@ -232,7 +232,9 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
       ];
 
       return apiInstance.sendTransacEmail(sendSmtpEmail).then(
-        function (data) {},
+        function (data) {
+          
+        },
         function (error) {
           console.error(error);
         }
