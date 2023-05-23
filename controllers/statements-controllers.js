@@ -157,7 +157,7 @@ exports.sendStatement = async (req, res, next) => {
   } catch (error) {
     return next(new HttpError(req.t('errors.orders.not_found'), 500));
   }
-
+  console.log('sent');
   try {
     StatementPDF(res, client, user, date, req, orders, email);
   } catch (error) {

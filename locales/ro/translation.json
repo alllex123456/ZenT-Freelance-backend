@@ -107,6 +107,11 @@
     },
     "PDF": {
       "gen_failed": "A survenit o problemă la generarea fisierului PDF. Vă rugăm să reîncercați."
+    },
+    "transactions": {
+      "saved": "Operațiunea a fost salvată cu succes.",
+      "edited": "Operațiunea a fost modificată cu succes.",
+      "deleted": "Operațiunea a fost ștearsă cu succes."
     }
   },
   "database": {
@@ -197,6 +202,12 @@
     "amounting": "în valoare de",
     "receivedBy": "Numele",
     "signature": "Semnătura"
+  },
+  "transaction": {
+    "po": "ordin de plată",
+    "receipt": "chitanță",
+    "consideration": "contravaloarea facturii",
+    "issuedOn": "emisă pe"
   },
   "mail": {
     "cc": "--copie mesaj--",

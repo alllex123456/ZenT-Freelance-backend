@@ -56,6 +56,7 @@ const noteRoutes = require('./routes/note-routes');
 const invoiceRoutes = require('./routes/invoice-routes');
 const notificationRoutes = require('./routes/notification-routes');
 const addedItemsroutes = require('./routes/added-items-routes');
+const accountingRoutes = require('./routes/accounting-routes');
 app.use('/app', appRoutes);
 app.use('/user', userRoutes);
 app.use('/orders', orderRoutes);
@@ -66,6 +67,7 @@ app.use('/metrics', metricsRoutes);
 app.use('/notes', noteRoutes);
 app.use('/notifications', notificationRoutes);
 app.use('/added-items', addedItemsroutes);
+app.use('/accounting', accountingRoutes);
 
 app.use((req, res, next) => {
   throw new HttpError('No route found', 500);

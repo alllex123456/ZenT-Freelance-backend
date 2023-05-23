@@ -7,6 +7,7 @@ const User = require('../models/user');
 const Order = require('../models/order');
 const AddedItem = require('../models/added-item');
 const Receipt = require('../models/receipt');
+const Transaction = require('../models/transaction');
 
 const { InvoicePDF } = require('../services/pdf-invoice');
 const { ReceiptPDF } = require('../services/pdf-receipt');
@@ -512,8 +513,29 @@ exports.cashInvoice = async (req, res, next) => {
       invoice.cashed = true;
     }
 
+    const newTransaction = new Transaction({
+      userId: invoice.userId._id,
+      type: 'receipt',
+      method: 'bank',
+      date: req.body.dateCashed,
+      amount: req.body.cashedAmount,
+      currency: invoice.clientData.currency,
+      document: req.body.prefix || req.t('transaction.po'),
+      description: `${req.t('transaction.consideration')} ${invoice.prefix}/${
+        invoice.number
+      } ${req.t('transaction.issuedOn')} ${new Date(
+        invoice.issuedDate
+      ).toLocaleDateString(invoice.userId.language)}`,
+    });
+
     try {
+      const session = await mongoose.startSession();
+      session.startTransaction();
+
       await invoice.save();
+      await newTransaction.save();
+
+      session.commitTransaction();
     } catch (error) {
       return next(new HttpError(req.t('errors.invoicing.update_failed'), 500));
     }
@@ -528,6 +550,23 @@ exports.cashInvoice = async (req, res, next) => {
       number: req.body.receiptStartNumber,
       cashedAmount: req.body.cashedAmount,
       dateCashed: req.body.dateCashed,
+    });
+
+    const newTransaction = new Transaction({
+      userId: invoice.userId._id,
+      type: 'receipt',
+      method: 'cash',
+      date: req.body.dateCashed,
+      amount: req.body.cashedAmount,
+      currency: invoice.clientData.currency,
+      document: `${req.t('transaction.receipt')} ${req.body.receiptPrefix}/${
+        req.body.receiptStartNumber
+      }`,
+      description: `${req.t('transaction.consideration')} ${invoice.prefix}/${
+        invoice.number
+      } ${req.t('transaction.issuedOn')} ${new Date(
+        invoice.issuedDate
+      ).toLocaleDateString(invoice.userId.language)}`,
     });
 
     try {
@@ -550,6 +589,7 @@ exports.cashInvoice = async (req, res, next) => {
       }
 
       await newReceipt.save({ session });
+      await newTransaction.save();
       await invoice.save({ session });
       await invoice.userId.save({ session });
       await invoice.clientId.save({ session });
