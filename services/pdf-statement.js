@@ -194,8 +194,8 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
   });
 
   if (Object.keys(req.body).length !== 0) {
-    if (!client.email || !user.email)
-      return HttpError(CLIENT_LNG('errors.statement.send_failed'), 500);
+    // if (!client.email || !user.email)
+    //   return HttpError(CLIENT_LNG('errors.statement.send_failed'), 500);
     const buffers = [];
     statement.on('data', buffers.push.bind(buffers));
     statement.on('end', () => {
@@ -232,9 +232,7 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
       ];
 
       return apiInstance.sendTransacEmail(sendSmtpEmail).then(
-        function (data) {
-          
-        },
+        function (data) {},
         function (error) {
           console.error(error);
         }
