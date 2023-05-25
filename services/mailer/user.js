@@ -16,7 +16,7 @@ exports.signupEmail = (recipient, req) => {
   sendSmtpEmail.htmlContent = userSignUp(req);
   sendSmtpEmail.sender = {
     name: 'Zent',
-    email: 'no-reply@zent-freelance.com',
+    email: 'admin@zent-freelance.com',
   };
   sendSmtpEmail.to = [{ email: recipient.email }];
 
@@ -35,7 +35,7 @@ exports.resetPasswordLink = (recipient, token, req) => {
   sendSmtpEmail.htmlContent = resetPassword(req, href, recipient);
   sendSmtpEmail.sender = {
     name: 'Zent',
-    email: 'no-reply@zent-freelance.com',
+    email: 'admin@zent-freelance.com',
   };
   sendSmtpEmail.to = [{ email: recipient.email }];
 
