@@ -24,15 +24,26 @@ exports.getAppSettings = async (req, res, next) => {
 };
 
 exports.convertCurrency = async (req, res, next) => {
-  const { originalCurrency, targetCurrency, amount } = req.body;
+  const { originalCurrency, targetCurrency, amount, date } = req.body;
 
-  const responseData = await fetch(
-    `https://api.getgeoapi.com/v2/currency/convert?api_key=${process.env.CURRENCY_CONVERTER_KEY}&from=${originalCurrency}&to=${targetCurrency}&amount=${amount}&format=json`
-  );
+  if (date) {
+    const formattedDate = new Date(date).toISOString().slice(0, 10);
 
-  const convertedAmount = await responseData.json();
+    const responseData = await fetch(
+      `https://api.getgeoapi.com/v2/currency/historical/${formattedDate}?api_key=${process.env.CURRENCY_CONVERTER_KEY}&from=${originalCurrency}&to=${targetCurrency}&amount=${amount}&format=json`
+    );
+    const convertedAmount = await responseData.json();
 
-  res.json({ message: convertedAmount });
+    res.json({ message: convertedAmount });
+  } else {
+    const responseData = await fetch(
+      `https://api.getgeoapi.com/v2/currency/convert?api_key=${process.env.CURRENCY_CONVERTER_KEY}&from=${originalCurrency}&to=${targetCurrency}&amount=${amount}&format=json`
+    );
+
+    const convertedAmount = await responseData.json();
+
+    res.json({ message: convertedAmount });
+  }
 };
 
 exports.getEntityInfo = async (req, res, next) => {
