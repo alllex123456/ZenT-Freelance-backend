@@ -664,7 +664,7 @@ exports.InvoicePDF = async (
       sendSmtpEmail.htmlContent = messageHtml;
       sendSmtpEmail.sender = {
         name: user.name || user.email,
-        email: user.email,
+        email: 'admin@zent-freelance.com',
       };
       sendSmtpEmail.to = [{ email: email || client.email }];
       sendSmtpEmail.cc = [{ email: user.email }];

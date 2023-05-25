@@ -220,7 +220,7 @@ exports.StatementPDF = (res, client, user, time, req, invoiceOrders, email) => {
       );
       sendSmtpEmail.sender = {
         name: user.name || user.email,
-        email: user.email,
+        email: 'admin@zent-freelance.com',
       };
       sendSmtpEmail.to = [{ email: email || client.email }];
       sendSmtpEmail.replyTo = { email: user.email };
