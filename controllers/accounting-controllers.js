@@ -20,30 +20,6 @@ exports.getTransactions = async (req, res, next) => {
   });
 };
 
-exports.printTransactions = async (req, res, next) => {
-  const { userId } = req.userData;
-
-  const { printWhat } = req.body;
-
-  let transactions;
-  try {
-    transactions = await Transaction.find({ userId });
-  } catch (error) {
-    return next(new HttpError(req.t('!!'), 404));
-
-    if (printWhat === 'all') {
-    }
-    if (printWhat === 'payments') {
-    }
-    if (printWhat === 'receipts') {
-    }
-    if (printWhat === 'specific') {
-    }
-  }
-
-  // scrie un serviciu pdf sa trimit blob-ul inapoi la frontend
-};
-
 exports.addTransaction = async (req, res, next) => {
   const { userId } = req.userData;
 
@@ -68,7 +44,7 @@ exports.addTransaction = async (req, res, next) => {
 exports.editTransaction = async (req, res, next) => {
   let transaction;
   try {
-    transaction = await Transaction.findById(req.body.transactionId);
+    transaction = await Transaction.findById(req.body._id);
   } catch (error) {
     return next(new HttpError(req.t('!!'), 404));
   }
@@ -92,7 +68,7 @@ exports.editTransaction = async (req, res, next) => {
 exports.deleteTransaction = async (req, res, next) => {
   let transaction;
   try {
-    transaction = await Transaction.findById(req.body.transactionId);
+    transaction = await Transaction.findById(req.body._id);
   } catch (error) {
     return next(new HttpError(req.t('errors.user.no_authorization'), 404));
   }
