@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 
 const HttpError = require('../models/http-error');
 
-const User = require('../models/user');
 const Transaction = require('../models/transaction');
 
 exports.getTransactions = async (req, res, next) => {
