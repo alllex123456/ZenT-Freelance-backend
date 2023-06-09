@@ -134,6 +134,11 @@
     "proofreading": "corectura",
     "postediting": "post-editare"
   },
+  "accounting": {
+    "healthInsurance": "CASS",
+    "socialSecurity": "CAS",
+    "incomeTax": "Impozit pe venit"
+  },
   "statement": {
     "title": "Evidență lucrări",
     "clientCode": "Cod client",

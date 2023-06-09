@@ -136,6 +136,11 @@
     "proofreading": "proofreading",
     "postediting": "post-editing"
   },
+  "accounting": {
+    "healthInsurance": "Health insurance",
+    "socialSecurity": "Social security",
+    "incomeTax": "Income tax"
+  },
   "statement": {
     "title": "Work statement",
     "clientCode": "Client code",

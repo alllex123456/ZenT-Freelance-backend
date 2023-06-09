@@ -194,7 +194,6 @@ exports.addOrder = async (req, res, next) => {
     await client.save({ session });
     session.commitTransaction();
   } catch (error) {
-    console.log(error);
     return next(new HttpError(req.t('errors.orders.save_failed'), 500));
   }
 
@@ -230,11 +229,7 @@ exports.completeOrder = async (req, res, next) => {
   order.rate = req.body.rate;
   order.count = req.body.count;
   order.notes = req.body.notes;
-  order.total = calculatedTotal(
-    order.unit,
-    req.body.count,
-    req.body.rate
-  ).toFixed(client.decimalPoints);
+  order.total = req.body.total;
   order.deliveredDate = req.body.deliveredDate;
 
   try {

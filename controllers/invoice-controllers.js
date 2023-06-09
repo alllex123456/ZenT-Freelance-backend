@@ -12,6 +12,9 @@ const Transaction = require('../models/transaction');
 const { InvoicePDF } = require('../services/pdf-invoice');
 const { ReceiptPDF } = require('../services/pdf-receipt');
 
+const fetch = require('node-fetch');
+const getTotalInvoice = require('../utils/get-total-invoice');
+
 exports.getAllInvoices = async (req, res, next) => {
   let user;
   try {
@@ -34,7 +37,10 @@ exports.getAllInvoices = async (req, res, next) => {
     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
   }
 
-  res.json({ message: user, invoicesOnly: invoices });
+  res.json({
+    message: user,
+    invoicesOnly: invoices,
+  });
 };
 
 exports.getClientInvoices = async (req, res, next) => {

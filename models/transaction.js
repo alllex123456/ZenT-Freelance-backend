@@ -12,6 +12,11 @@ const transactionSchema = new Schema(
     currency: { type: String, required: true },
     document: { type: String, required: true },
     description: { type: String, required: true },
+    deductible: {
+      type: String,
+      required: false,
+    },
+    percent: { type: Number, required: false },
   },
   { timestamps: true }
 );
