@@ -83,22 +83,46 @@ exports.addInventoryItems = async (req, res, next) => {
 };
 
 exports.editInventoryItems = async (req, res, next) => {
+  const { userId } = req.userData;
+
   let inventory;
   try {
     inventory = await Inventory.findById(req.body.inventoryId);
   } catch (error) {}
 
-  const foundObject = editItemById(inventory, req.body.itemId);
-
-  if (foundObject) {
-    for (const [key, value] of Object.entries(req.body.inputBody)) {
-      foundObject[key] = value;
-    }
+  if (!inventory) {
+    inventory = new Inventory({
+      userId,
+      year: req.body.year,
+      assets: [],
+      payables: [],
+      taxes: [
+        { designation: req.t('accounting.incomeTax'), amount: 0 },
+        { designation: req.t('accounting.socialSecurity'), amount: 0 },
+        { designation: req.t('accounting.healthInsurance'), amount: 0 },
+      ],
+    });
+    let editedItem = inventory.taxes.find(
+      (item) => item.designation === req.body.item.designation
+    );
+    editedItem = {
+      designation: req.body.item.designation,
+      amount: req.body.item.amount,
+    };
+    await inventory.save();
   } else {
-    return next(new HttpError('item not found', 500));
-  }
+    const foundObject = editItemById(inventory, req.body.itemId);
 
-  await inventory.save();
+    if (foundObject) {
+      for (const [key, value] of Object.entries(req.body.inputBody)) {
+        foundObject[key] = value;
+      }
+    } else {
+      return next(new HttpError('item not found', 500));
+    }
+
+    await inventory.save();
+  }
 
   res.json({ inventory });
 };

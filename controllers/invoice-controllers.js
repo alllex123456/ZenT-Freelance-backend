@@ -495,12 +495,13 @@ exports.cashInvoice = async (req, res, next) => {
   const invoicedItems = invoice.detailedOrders
     ? invoice.orders.concat(invoice.addedItems)
     : invoice.addedItems;
-  const totalInvoice =
+  const totalInvoice = +(
     invoicedItems.reduce(
       (acc, item) =>
         (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
       0
-    ) + invoice.previousClientBalance;
+    ) + invoice.previousClientBalance
+  ).toFixed(invoice.clientData.decimalPoints);
 
   if (!req.body.cashReceipt) {
     invoice.payments.push({
