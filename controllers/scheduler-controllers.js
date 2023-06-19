@@ -31,6 +31,7 @@ const invoiceOutstanding = (users) => {
       };
 
       if (isTomorrow(new Date(invoice.dueDate))) {
+        if (user.emailAlerts && !user.emailAlerts.beforeMaturity) return;
         InvoicePDF(
           { body: { reminder: true } },
           null,
@@ -41,6 +42,7 @@ const invoiceOutstanding = (users) => {
         );
       }
       if (setDelay(invoice, 2)) {
+        if (user.emailAlerts && !user.emailAlerts.twoDays) return;
         InvoicePDF(
           { body: { reminder: true } },
           null,
@@ -51,6 +53,7 @@ const invoiceOutstanding = (users) => {
         );
       }
       if (setDelay(invoice, 4)) {
+        if (user.emailAlerts && !user.emailAlerts.fourDays) return;
         InvoicePDF(
           { body: { reminder: true } },
           null,
@@ -61,6 +64,7 @@ const invoiceOutstanding = (users) => {
         );
       }
       if (setDelay(invoice, 7)) {
+        if (user.emailAlerts && !user.emailAlerts.sixDays) return;
         InvoicePDF(
           { body: { reminder: true } },
           null,
