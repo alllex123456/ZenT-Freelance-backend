@@ -539,8 +539,8 @@ exports.cashInvoice = async (req, res, next) => {
       const session = await mongoose.startSession();
       session.startTransaction();
 
-      await invoice.save();
-      await newTransaction.save();
+      await invoice.save({ session });
+      await newTransaction.save({ session });
 
       session.commitTransaction();
     } catch (error) {
