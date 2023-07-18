@@ -495,13 +495,15 @@ exports.cashInvoice = async (req, res, next) => {
   const invoicedItems = invoice.detailedOrders
     ? invoice.orders.concat(invoice.addedItems)
     : invoice.addedItems;
-  const totalInvoice = +(
-    invoicedItems.reduce(
-      (acc, item) =>
-        (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
-      0
-    ) + invoice.previousClientBalance
-  ).toFixed(invoice.clientData.decimalPoints);
+  const totalInvoice = Number(
+    (
+      invoicedItems.reduce(
+        (acc, item) =>
+          (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
+        0
+      ) + invoice.previousClientBalance
+    ).toFixed(invoice.clientData.decimalPoints)
+  );
 
   if (!req.body.cashReceipt) {
     invoice.payments.push({
@@ -510,9 +512,12 @@ exports.cashInvoice = async (req, res, next) => {
       prefix: req.body.prefix,
     });
 
-    const totalPaid = invoice.payments
-      .concat(invoice.receipts)
-      .reduce((acc, payment) => (acc += payment.cashedAmount), 0);
+    const totalPaid = Number(
+      invoice.payments
+        .concat(invoice.receipts)
+        .reduce((acc, payment) => (acc += payment.cashedAmount), 0)
+        .toFixed(invoice.clientData.decimalPoints)
+    );
 
     if (totalPaid < totalInvoice) {
       invoice.cashed = false;
