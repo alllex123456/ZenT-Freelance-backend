@@ -29,6 +29,7 @@ exports.getUserData = async (req, res, next) => {
 
 exports.signup = async (req, res, next) => {
   return;
+
   const { timeZone, email, password, language, currency, name } = req.body;
 
   const errors = validationResult(req);

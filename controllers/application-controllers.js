@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const HttpError = require('../models/http-error');
 const fetch = require('node-fetch');
 
+const User = require('../models/user');
 const Invoice = require('../models/invoice');
 const Order = require('../models/order');
 const AddedItem = require('../models/added-item');
@@ -58,12 +59,51 @@ exports.getEntityInfo = async (req, res, next) => {
   res.json({ message: entityInfo });
 };
 
-exports.replaceUserIds = async (req, res, next) => {
+exports.replaceUser = async (req, res, next) => {
   const { newUserId, oldUserId } = req.body;
+
+  // let oldUser;
+  // try {
+  //   oldUser = await User.findById(oldUserId);
+  // } catch (error) {}
 
   try {
     const session = await mongoose.startSession();
     session.startTransaction();
+
+    // await User.updateMany(
+    //   {
+    //     _id: newUserId,
+    //   },
+    //   {
+    //     $set: {
+    //       timeZone: oldUser.timeZone,
+    //       alias: oldUser.alias,
+    //       phone: oldUser.phone,
+    //       avatar: oldUser.avatar,
+    //       name: oldUser.name,
+    //       registeredOffice: oldUser.registeredOffice,
+    //       registrationNumber: oldUser.registrationNumber,
+    //       taxNumber: oldUser.taxNumber,
+    //       VATpayer: oldUser.VATpayer,
+    //       VATrate: oldUser.VATrate,
+    //       invoiceNotes: oldUser.invoiceNotes,
+    //       invoicePrefix: oldUser.invoicePrefix,
+    //       invoiceStartNumber: oldUser.invoiceStartNumber,
+    //       invoiceDefaultDue: oldUser.invoiceDefaultDue,
+    //       invoiceLogo: oldUser.invoiceLogo,
+    //       orders: oldUser.orders,
+    //       invoices: oldUser.invoices,
+    //       clients: oldUser.clients,
+    //       addedItems: oldUser.addedItems,
+    //       receipts: oldUser.receipts,
+    //       notes: oldUser.notes,
+    //       bankAccounts: oldUser.bankAccounts,
+    //       emailAlerts: oldUser.emailAlerts,
+    //       receiptPrefix: oldUser.receiptPrefix,
+    //     },
+    //   }
+    // );
 
     await Order.updateMany(
       {
@@ -154,4 +194,32 @@ exports.addTransactionProperty = async (req, res, next) => {
   await Transaction.updateMany({}, { $set: { currency: 'RON' } });
 
   res.json({ confirmation: 'property added to all transactions' });
+};
+
+exports.setUserArrays = async (req, res) => {
+  const { userId } = req.body;
+
+  const userInvoices = await Invoice.find({ userId });
+  const invoiceIds = userInvoices.map((invoice) => invoice._id);
+
+  const userClients = await Client.find({ userId });
+  const clientIds = userClients.map((invoice) => invoice._id);
+
+  const userAddedItems = await Client.find({ userId });
+  const addedItemIds = userAddedItems.map((invoice) => invoice._id);
+
+  try {
+    await User.updateMany(
+      { _id: userId },
+      {
+        $set: {
+          invoices: invoiceIds,
+          clients: clientIds,
+          addedItems: addedItemIds,
+        },
+      }
+    );
+  } catch (error) {}
+
+  res.json({ message: 'success' });
 };

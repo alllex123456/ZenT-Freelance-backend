@@ -3,9 +3,10 @@ const {
   getAppSettings,
   convertCurrency,
   getEntityInfo,
-  replaceUserIds,
+  replaceUser,
   createInvoiceReceiptTransactions,
   addTransactionProperty,
+  setUserArrays,
 } = require('../controllers/application-controllers');
 const router = express.Router();
 const authGuard = require('../middleware/auth-guard');
@@ -13,6 +14,8 @@ const authGuard = require('../middleware/auth-guard');
 router.get('/app-settings', getAppSettings);
 
 router.use(authGuard);
+router.post('/replace-user', replaceUser);
+router.post('/set-user-arrays', setUserArrays);
 router.post('/add-transaction-property', addTransactionProperty);
 router.post(
   '/create-transactions-from-invoices',
@@ -20,6 +23,5 @@ router.post(
 );
 router.get('/get-entity-info/:taxNumber', getEntityInfo);
 router.post('/convert-currency', convertCurrency);
-router.post('/replace-userids', replaceUserIds);
 
 module.exports = router;
