@@ -8,15 +8,15 @@ const HttpError = require('../models/http-error');
 exports.getMetrics = async (req, res, next) => {
   const { userId } = req.userData;
 
-  let user, pendingOrders, completedOrders;
+  let orders, pendingOrders, completedOrders;
   try {
-    user = await User.findById(userId).populate('orders');
+    orders = await Order.find({ userId });
   } catch (error) {
     return next(new HttpError(req.t('errors.user.not_found'), 500));
   }
 
-  pendingOrders = user.orders.filter((order) => order.status === 'queue');
-  completedOrders = user.orders.filter(
+  pendingOrders = orders.filter((order) => order.status === 'queue');
+  completedOrders = orders.filter(
     (order) => order.status === 'completed' || order.status === 'invoiced'
   );
 
