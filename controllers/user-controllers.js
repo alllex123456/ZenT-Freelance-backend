@@ -28,7 +28,7 @@ exports.getUserData = async (req, res, next) => {
 };
 
 exports.signup = async (req, res, next) => {
-  return;
+  if (req.body.email !== 'demo@test.test') return;
 
   const { timeZone, email, password, language, currency, name } = req.body;
 
