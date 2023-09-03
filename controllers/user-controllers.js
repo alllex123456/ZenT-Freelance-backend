@@ -28,7 +28,9 @@ exports.getUserData = async (req, res, next) => {
 };
 
 exports.signup = async (req, res, next) => {
-  if (req.body.email !== 'demo@test.test') return;
+  if (req.body.email !== 'demo@test.test') {
+    return next(new HttpError('Registrations are closed!', 500));
+  }
 
   const { timeZone, email, password, language, currency, name } = req.body;
 
