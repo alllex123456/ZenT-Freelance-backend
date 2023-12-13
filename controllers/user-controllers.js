@@ -28,7 +28,7 @@ exports.getUserData = async (req, res, next) => {
 };
 
 exports.signup = async (req, res, next) => {
-  if (req.body.email !== 'demo@test.test') {
+  if (req.body.email !== 'demo@user.zent') {
     return next(new HttpError('Registrations are closed!', 500));
   }
 
