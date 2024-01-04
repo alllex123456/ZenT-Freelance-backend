@@ -9,6 +9,33 @@ const User = require('../models/user');
 const Client = require('../models/client');
 const { signupEmail, resetPasswordLink } = require('../services/mailer/user');
 
+exports.saveAccessToken = async (req, res, next) => {
+  const { userId, token } = req.userData;
+
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.user.check_failed'), 500));
+  }
+
+  if (!user) {
+    return next(new HttpError(req.t('errors.user.no_user'), 404));
+  }
+
+  user[eFacturaToken] = token;
+
+  try {
+    await user.save();
+  } catch (error) {
+    return next(new HttpError(req.t('errors.user.update_failed'), 500));
+  }
+
+  res.json({
+    confirmation: req.t('success.user.updated'),
+  });
+};
+
 exports.getUserData = async (req, res, next) => {
   const { userId } = req.userData;
 

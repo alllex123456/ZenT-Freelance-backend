@@ -45,6 +45,7 @@ const userSchema = new Schema(
     notes: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Note' }],
     bankAccounts: { type: Array, required: false },
     emailAlerts: { type: Object, required: false },
+    eFacturaToken: { type: String, required: false },
   },
   { timestamps: true }
 );

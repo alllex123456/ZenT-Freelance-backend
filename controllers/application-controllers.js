@@ -59,6 +59,18 @@ exports.getEntityInfo = async (req, res, next) => {
   res.json({ message: entityInfo });
 };
 
+exports.getEfacturaClient = async (req, res, next) => {
+  let app;
+
+  try {
+    app = await App.find();
+  } catch (error) {
+    return next(new HttpError(req.t('database.connection_failed'), 500));
+  }
+
+  res.json(app);
+};
+
 exports.replaceUser = async (req, res, next) => {
   const { newUserId, oldUserId } = req.body;
 

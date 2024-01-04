@@ -53,6 +53,7 @@ router.post(
 );
 
 router.use(authGuard);
+router.post('/saveAccessToken');
 router.get('/', getUserData);
 router.get('/sign-s3', signS3);
 router.post('/update', updateUser);
