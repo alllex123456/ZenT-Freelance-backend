@@ -7,6 +7,7 @@ const {
   createInvoiceReceiptTransactions,
   addTransactionProperty,
   setUserArrays,
+  getEfacturaClient,
 } = require('../controllers/application-controllers');
 const router = express.Router();
 const authGuard = require('../middleware/auth-guard');
@@ -14,6 +15,7 @@ const authGuard = require('../middleware/auth-guard');
 router.get('/app-settings', getAppSettings);
 
 router.use(authGuard);
+router.get('/get-e-factura-client', getEfacturaClient);
 router.post('/replace-user', replaceUser);
 router.post('/set-user-arrays', setUserArrays);
 router.post('/add-transaction-property', addTransactionProperty);
