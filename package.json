@@ -32,7 +32,8 @@
     "pdfkit": "^0.13.0",
     "pdfkit-table": "^0.1.99",
     "sib-api-v3-sdk": "^8.5.0",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.19"
