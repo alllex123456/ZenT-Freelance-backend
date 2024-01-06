@@ -12,6 +12,7 @@ const {
   postRecoverPassword,
   changePassword,
   saveAccessToken,
+  checkInvoiceStatus,
 } = require('../controllers/user-controllers');
 const { signS3 } = require('../middleware/aws-s3');
 
@@ -54,6 +55,7 @@ router.post(
 );
 
 router.use(authGuard);
+router.get('/check-efactura-status', checkInvoiceStatus);
 router.post('/save-access-token', saveAccessToken);
 router.get('/', getUserData);
 router.get('/sign-s3', signS3);

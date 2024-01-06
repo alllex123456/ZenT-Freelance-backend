@@ -91,15 +91,15 @@ const getUsers = async (callbackFn) => {
   callbackFn(users);
 };
 
-module.exports = () => {
-  cron.schedule(
-    `00 07 * * *`,
-    () => {
-      getUsers(invoiceOutstanding);
-    },
-    {
-      scheduled: true,
-      timezone: 'Europe/Bucharest',
-    }
-  );
-};
+// module.exports = () => {
+//   cron.schedule(
+//     `00 07 * * *`,
+//     () => {
+//       getUsers(invoiceOutstanding);
+//     },
+//     {
+//       scheduled: true,
+//       timezone: 'Europe/Bucharest',
+//     }
+//   );
+// };
