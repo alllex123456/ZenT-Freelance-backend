@@ -26,6 +26,7 @@ const userSchema = new Schema(
     city: { type: String, required: false },
     registrationNumber: { type: String, required: false },
     taxNumber: { type: String, required: false },
+    cnp: { type: Number, required: false },
     VATpayer: { type: Boolean, required: false },
     VATrate: { type: Number, required: false },
     receiptPrefix: { type: String, required: false },
