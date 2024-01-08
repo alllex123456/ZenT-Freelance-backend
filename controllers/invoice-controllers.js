@@ -172,6 +172,7 @@ exports.createInvoice = async (req, res, next) => {
       country: user._doc.country,
       county: user._doc.county,
       streetAddress: user._doc.streetAddress,
+      city: user._doc.city,
     },
     clientData: {
       _id: client._doc._id,
@@ -190,6 +191,7 @@ exports.createInvoice = async (req, res, next) => {
       country: client._doc.country,
       county: client._doc.county,
       streetAddress: client._doc.streetAddress,
+      city: client._doc.city,
     },
     clientId,
     prefix,
