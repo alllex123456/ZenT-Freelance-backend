@@ -8,6 +8,19 @@ const Order = require('../models/order');
 
 const HttpError = require('../models/http-error');
 
+// TEMPORARY
+
+exports.addClientProperties = async (req, res, next) => {
+  let clients;
+  try {
+    clients = await Client.find();
+  } catch (error) {}
+
+  console.log(clients);
+};
+
+// TEMPORARY
+
 exports.getAllClients = async (req, res, next) => {
   const { userId } = req.userData;
 

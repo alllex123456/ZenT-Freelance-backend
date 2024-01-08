@@ -9,6 +9,7 @@ const HttpError = require('./models/http-error');
 
 // SCHEDULED TASKS
 // require('./controllers/scheduler-controllers')();
+// require('./controllers/clients-controllers').addClientProperties();
 
 // aws bucket
 aws.config.region = 'eu-west-3';
