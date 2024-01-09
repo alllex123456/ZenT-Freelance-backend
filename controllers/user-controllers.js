@@ -10,26 +10,10 @@ const { signupEmail, resetPasswordLink } = require('../services/mailer/user');
 const { generateXMLInvoice } = require('../utils/generateXMLInvoice');
 
 exports.checkInvoiceStatus = async (req, res, next) => {
-  const userId = '';
-
-  if (userId.toString() !== req.userData.userId) {
-    return next(new HttpError(req.t('errors.user.no_authorization'), 401));
-  }
-
-  let user;
-
-  try {
-    user = await User.findById(userId);
-  } catch (error) {
-    return next(new HttpError(req.t('errors.user.not_found'), 500));
-  }
-
-  if (!user) {
-    return next(new HttpError(req.t('errors.user.no_user'), 401));
-  }
+  const { id } = req.params;
 
   // Construct the URL with the provided val1 parameter
-  const apiUrl = `https://api.anaf.ro/test/FCTEL/rest/stareMesaj?id_incarcare=5500`;
+  const apiUrl = ` https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=${id}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -84,7 +68,7 @@ exports.uploadXMLInvoice = async (req, res, next) => {
 
   const cif = req.body.userId.cnp || req.body.userId.taxNumber;
 
-  const apiUrl = `https://api.anaf.ro/test/FCTEL/rest/upload?cif=${cif}&standard=UBL`;
+  const apiUrl = `https://api.anaf.ro/prod/ FCTEL/rest/upload?standard=UBL&cif=${cif}`;
 
   try {
     const response = await fetch(apiUrl, {
