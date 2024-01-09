@@ -17,7 +17,7 @@ exports.generateXMLInvoice = (invoice) => {
   const clientStreetAddress = invoice.clientData.streetAddress;
   const clientCity = invoice.clientData.city;
   const clientCountry = invoice.clientData.country;
-  const clientCountryCounty = `${invoice.userData.country}-${invoice.userData.county}`;
+  const clientCountryCounty = `${invoice.clientData.country}-${invoice.clientData.county}`;
   const clientName = invoice.clientData.name;
   const clientTaxNumber = invoice.clientData.taxNumber;
   const clientPhone = invoice.clientData.phone;
