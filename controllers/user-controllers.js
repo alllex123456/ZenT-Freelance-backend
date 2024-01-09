@@ -7,7 +7,6 @@ const HttpError = require('../models/http-error');
 const User = require('../models/user');
 const Client = require('../models/client');
 const { signupEmail, resetPasswordLink } = require('../services/mailer/user');
-const { generateXMLInvoice } = require('../utils/generateXMLInvoice');
 
 exports.checkInvoiceStatus = async (req, res, next) => {
   const { id } = req.params;
@@ -21,63 +20,6 @@ exports.checkInvoiceStatus = async (req, res, next) => {
       headers: {
         Authorization: `Bearer ${user.efacturaToken}`, // Include the Authorization token in the headers
       },
-    });
-
-    // Check if the response is successful
-    if (response.ok) {
-      const xmlData = await response.text(); // Get the XML response text
-      xml2js.parseString(xmlData, (err, result) => {
-        // Parse XML to JSON
-        if (err) {
-          console.error('Error parsing XML:', err);
-          res.status(500).json({ error: 'Error parsing XML response' });
-        } else {
-          res.json(result); // Send the parsed JSON response
-        }
-      });
-    } else {
-      // Handle the error if the response is not successful
-      console.error('Failed to fetch message status:', response.statusText);
-      throw new Error(`Failed to fetch message status: ${response.statusText}`);
-    }
-  } catch (error) {
-    // Handle any errors that occur during the fetch operation
-    console.error('Error fetching message status:', error);
-    throw error; // Throw the error if needed
-  }
-};
-
-exports.uploadXMLInvoice = async (req, res, next) => {
-  const userId = req.body.userId._id;
-
-  if (userId.toString() !== req.userData.userId) {
-    return next(new HttpError(req.t('errors.user.no_authorization'), 401));
-  }
-
-  let user;
-
-  try {
-    user = await User.findById(userId);
-  } catch (error) {
-    return next(new HttpError(req.t('errors.user.not_found'), 500));
-  }
-
-  if (!user) {
-    return next(new HttpError(req.t('errors.user.no_user'), 401));
-  }
-
-  const cif = req.body.userId.cnp || req.body.userId.taxNumber;
-
-  const apiUrl = `https://api.anaf.ro/prod/ FCTEL/rest/upload?standard=UBL&cif=${cif}`;
-
-  try {
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/xml',
-        Authorization: `Bearer ${user.efacturaToken}`, // Include the Authorization token in the headers
-      },
-      body: generateXMLInvoice(req.body),
     });
 
     // Check if the response is successful

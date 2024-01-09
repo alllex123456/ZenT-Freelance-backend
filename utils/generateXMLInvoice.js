@@ -1,5 +1,8 @@
+const formattedNumber = (number) => String(number).padStart(4, '0');
+
 exports.generateXMLInvoice = (invoice) => {
-  const { prefix, number, issuedDate, dueDate, notes } = invoice;
+  const { prefix, issuedDate, dueDate, notes } = invoice;
+  const number = formattedNumber(invoice.number);
   const providerStreetAddress = invoice.userData.streetAddress;
   const providerCity = invoice.userData.city;
   const providerCountry = invoice.userData.country.slice(0, 2);
@@ -40,8 +43,8 @@ exports.generateXMLInvoice = (invoice) => {
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:ns4="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
  <cbc:CustomizationID>urn:cen.eu:en16931:2017#compliant#urn:efactura.mfinante.ro:CIUS-RO:1.0.1</cbc:CustomizationID>
 <cbc:ID>${prefix}${number}</cbc:ID>
-<cbc:IssueDate>${issuedDate.slice(0, 10)}</cbc:IssueDate>
-<cbc:DueDate>${dueDate.slice(0, 10)}</cbc:DueDate>
+<cbc:IssueDate>${issuedDate.toISOString().slice(0, 10)}</cbc:IssueDate>
+<cbc:DueDate>${dueDate.toISOString().slice(0, 10)}</cbc:DueDate>
 <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
 <cbc:Note>${notes}</cbc:Note>
 <cbc:DocumentCurrencyCode>${currency}</cbc:DocumentCurrencyCode>
