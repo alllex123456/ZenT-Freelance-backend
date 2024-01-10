@@ -1,50 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const fetch = require('node-fetch');
-const xml2js = require('xml2js');
 const { validationResult } = require('express-validator');
 const HttpError = require('../models/http-error');
 const User = require('../models/user');
 const Client = require('../models/client');
 const { signupEmail, resetPasswordLink } = require('../services/mailer/user');
-
-exports.checkInvoiceStatus = async (req, res, next) => {
-  const { id } = req.params;
-
-  // Construct the URL with the provided val1 parameter
-  const apiUrl = ` https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=${id}`;
-
-  try {
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        Authorization: `Bearer ${user.efacturaToken}`, // Include the Authorization token in the headers
-      },
-    });
-
-    // Check if the response is successful
-    if (response.ok) {
-      const xmlData = await response.text(); // Get the XML response text
-      xml2js.parseString(xmlData, (err, result) => {
-        // Parse XML to JSON
-        if (err) {
-          console.error('Error parsing XML:', err);
-          res.status(500).json({ error: 'Error parsing XML response' });
-        } else {
-          res.json(result); // Send the parsed JSON response
-        }
-      });
-    } else {
-      // Handle the error if the response is not successful
-      console.error('Failed to fetch message status:', response.statusText);
-      throw new Error(`Failed to fetch message status: ${response.statusText}`);
-    }
-  } catch (error) {
-    // Handle any errors that occur during the fetch operation
-    console.error('Error fetching message status:', error);
-    throw error; // Throw the error if needed
-  }
-};
 
 exports.saveAccessToken = async (req, res, next) => {
   const { userId, token } = req.userData;

@@ -2,6 +2,7 @@ const User = require('../models/user');
 const Invoice = require('../models/invoice');
 const xml2js = require('xml2js');
 const { generateXMLInvoice } = require('../utils/generateXMLInvoice');
+const HttpError = require('../models/http-error');
 
 exports.checkEfacturaMessages = async (req, res, next) => {
   const userId = req.body.user;
@@ -21,6 +22,8 @@ exports.checkEfacturaMessages = async (req, res, next) => {
   if (!user) {
     return next(new HttpError(req.t('errors.user.no_user'), 401));
   }
+  if (!user.efacturaToken) return;
+
   const cif = user.cnp || user.taxNumber;
 
   const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=30&cif=${cif}`;
@@ -37,6 +40,48 @@ exports.checkEfacturaMessages = async (req, res, next) => {
     res.json(data);
   } catch (error) {
     console.error('Error fetching message status:', error);
+    throw error;
+  }
+};
+
+exports.checkEfacturaStatus = async (req, res, next) => {
+  const { eFacturaIndex, userId } = req.headers.payload;
+
+  let user;
+
+  try {
+    user = await User.findById(userId);
+  } catch (error) {
+    return next(new HttpError(req.t('errors.user.not_found'), 500));
+  }
+
+  if (!user) {
+    return next(new HttpError(req.t('errors.user.no_user'), 401));
+  }
+
+  const apiUrl = ` https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=${eFacturaIndex}`;
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${user.efacturaToken}`,
+      },
+    });
+
+    if (response.ok) {
+      const xmlData = await response.text();
+      xml2js.parseString(xmlData, (err, result) => {
+        if (err) {
+          res.status(500).json({ error: 'Error parsing XML response' });
+        } else {
+          res.json(result);
+        }
+      });
+    } else {
+      throw new Error(`Failed to fetch message status: ${response.statusText}`);
+    }
+  } catch (error) {
     throw error;
   }
 };
@@ -74,7 +119,7 @@ exports.uploadXMLInvoice = async (req, res, next) => {
 
   const cif = invoice.userId.cnp || invoice.userId.taxNumber;
 
-  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif=${cif}`;
+  const apiUrl = `https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif=${cif}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -88,20 +133,64 @@ exports.uploadXMLInvoice = async (req, res, next) => {
 
     if (response.ok) {
       const xmlData = await response.text();
-      xml2js.parseString(xmlData, (err, result) => {
+      xml2js.parseString(xmlData, async (err, result) => {
         if (err) {
-          console.error('Error parsing XML:', err);
           res.status(500).json({ error: 'Error parsing XML response' });
         } else {
+          if (!result.header.Errors) {
+            invoice.eFacturaStatus = 'sent';
+            invoice.eFacturaIndex = result.header.index_incarcare;
+            try {
+              await invoice.save();
+            } catch (error) {
+              return next(
+                new HttpError(req.t('errors.invoicing.update_failed'), 401)
+              );
+            }
+          } else {
+            invoice.eFacturaStatus = 'failed';
+            try {
+              await invoice.save();
+            } catch (error) {
+              return next(
+                new HttpError(req.t('errors.invoicing.update_failed'), 401)
+              );
+            }
+          }
           res.json(result);
         }
       });
     } else {
-      console.error('Failed to fetch message status:', response.statusText);
       throw new Error(`Failed to fetch message status: ${response.statusText}`);
     }
   } catch (error) {
-    console.error('Error fetching message status:', error);
+    throw error;
+  }
+};
+
+exports.XMLtoPDF = async (req, res, next) => {
+  const { invoiceId } = req.headers.payload;
+
+  let invoice;
+  try {
+    invoice = await Invoice.findById(invoiceId).populate('userId clientId');
+  } catch (error) {
+    return next(new HttpError('Factura nu exista'), 404);
+  }
+
+  const apiUrl =
+    'https://webservicesp.anaf.ro/prod/FCTEL/rest/transformare/FACT1/DA';
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text-/plain',
+      },
+      body: generateXMLInvoice(invoice),
+    });
+    res.send(response);
+  } catch (error) {
     throw error;
   }
 };
