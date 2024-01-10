@@ -92,7 +92,7 @@ exports.generateEfacturaXML = async (req, res, next) => {
   let invoice;
   try {
     invoice = await Invoice.findById(req.headers.payload).populate(
-      'userId clientId'
+      'userId clientId orders addedItems'
     );
   } catch (error) {
     return next(new HttpError('Factura nu exista'), 404);
@@ -110,7 +110,9 @@ exports.uploadXMLInvoice = async (req, res, next) => {
 
   let invoice;
   try {
-    invoice = await Invoice.findById(invoiceId).populate('userId clientId');
+    invoice = await Invoice.findById(invoiceId).populate(
+      'userId clientId orders addedItems'
+    );
   } catch (error) {
     return next(new HttpError('Factura nu exista'), 404);
   }
@@ -150,6 +152,7 @@ exports.uploadXMLInvoice = async (req, res, next) => {
               );
             }
           } else {
+            // console.log(JSON.stringify(result));
             invoice.eFacturaStatus = 'failed';
             try {
               await invoice.save();

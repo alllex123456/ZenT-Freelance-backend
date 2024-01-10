@@ -46,7 +46,6 @@ exports.generateXMLInvoice = (invoice) => {
 <cbc:IssueDate>${issuedDate.toISOString().slice(0, 10)}</cbc:IssueDate>
 <cbc:DueDate>${dueDate.toISOString().slice(0, 10)}</cbc:DueDate>
 <cbc:InvoiceTypeCode>380</cbc:InvoiceTypeCode>
-<cbc:Note>${notes}</cbc:Note>
 <cbc:DocumentCurrencyCode>${currency}</cbc:DocumentCurrencyCode>
 <cac:AccountingSupplierParty>
 <cac:Party>
