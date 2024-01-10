@@ -18,6 +18,8 @@ const invoiceSchema = new Schema(
     ],
     prefix: { type: String, required: true },
     number: { type: Number, required: true },
+    eFacturaStatus: { type: String, required: false },
+    eFacturaIndex: { type: String, required: false },
     detailedOrders: { type: Boolean, required: true },
     orders: [
       {
