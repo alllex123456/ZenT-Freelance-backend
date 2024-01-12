@@ -420,6 +420,7 @@ exports.deleteInvoice = async (req, res, next) => {
             addedItems: invoice.addedItems,
           },
           $pull: { invoices: invoice._id },
+          invoiceStartNumber: invoice.userId.invoiceStartNumber - 1,
         },
         { session }
       );
@@ -433,6 +434,7 @@ exports.deleteInvoice = async (req, res, next) => {
               addedItems: invoice.addedItems,
             },
             $pull: { invoices: invoice._id },
+            invoiceStartNumber: invoice.userId.invoiceStartNumber - 1,
           },
           { session }
         );
@@ -458,6 +460,7 @@ exports.deleteInvoice = async (req, res, next) => {
           { _id: invoice.userId },
           {
             $pullAll: { addedItems: invoice.addedItems },
+            invoiceStartNumber: invoice.userId.invoiceStartNumber - 1,
           },
           { session }
         );
