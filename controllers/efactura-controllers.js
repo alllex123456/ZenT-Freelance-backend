@@ -4,8 +4,6 @@ const xml2js = require('xml2js');
 const { generateXMLInvoice } = require('../utils/generateXMLInvoice');
 const HttpError = require('../models/http-error');
 
-// plm
-
 exports.checkEfacturaMessages = async (req, res, next) => {
   const userId = req.body.user;
 
@@ -195,6 +193,55 @@ exports.XMLtoPDF = async (req, res, next) => {
       body: generateXMLInvoice(invoice),
     });
     res.send(response);
+  } catch (error) {
+    throw error;
+  }
+};
+
+exports.downloadXMLInvoice = async (req, res, next) => {
+  const invoiceId = req.headers.payload;
+
+  let invoice;
+  try {
+    invoice = await Invoice.findById(invoiceId).populate('userId');
+  } catch (error) {
+    return next(new HttpError('Factura nu exista'), 404);
+  }
+
+  if (invoice.userId._id.toString() !== req.userData.userId) {
+    return next(new HttpError(req.t('errors.user.no_authorization'), 401));
+  }
+
+  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/descarcare?id=${invoice.eFacturaIndex}`;
+
+  if (!invoice.eFacturaIndex) {
+    return next(new HttpError('Factura nu a fost incarcata in SPV!', 401));
+  }
+
+  try {
+    const response = await fetch(apiUrl, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${invoice.userId.efacturaToken}`,
+      },
+    });
+
+    res.setHeader('Content-Type', 'application/xml');
+
+    const reader = response.body.getReader();
+
+    const pump = () => {
+      return reader.read().then(({ done, value }) => {
+        if (done) {
+          res.end();
+          return;
+        }
+        res.write(value);
+        return pump();
+      });
+    };
+
+    pump();
   } catch (error) {
     throw error;
   }

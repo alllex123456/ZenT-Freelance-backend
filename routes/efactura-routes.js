@@ -7,11 +7,13 @@ const {
   uploadXMLInvoice,
   checkEfacturaStatus,
   XMLtoPDF,
+  downloadXMLInvoice,
 } = require('../controllers/efactura-controllers');
 
 router.use(authGuard);
 router.get('/generate-xml', generateEfacturaXML);
 router.get('/check-efactura', checkEfacturaStatus);
+router.get('/download-efactura', downloadXMLInvoice);
 router.get('/xml-to-pdf', XMLtoPDF);
 router.post('/upload-efactura', uploadXMLInvoice);
 router.post('/efactura-messages', checkEfacturaMessages);
