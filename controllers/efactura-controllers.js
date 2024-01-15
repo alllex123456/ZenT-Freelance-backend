@@ -99,6 +99,7 @@ exports.generateEfacturaXML = async (req, res, next) => {
   const xmlContent = generateXMLInvoice(invoice);
 
   res.setHeader('Content-Type', 'application/xml');
+  res.setHeader('Content-Disposition', `attachment; filename=invoice.xml`);
 
   res.send(xmlContent);
 };
@@ -121,7 +122,7 @@ exports.uploadXMLInvoice = async (req, res, next) => {
 
   const cif = invoice.userId.cnp || invoice.userId.taxNumber;
 
-  const apiUrl = `https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif=${cif}`;
+  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif=${cif}`;
 
   try {
     const response = await fetch(apiUrl, {
