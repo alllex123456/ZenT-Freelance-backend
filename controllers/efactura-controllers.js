@@ -138,11 +138,14 @@ exports.uploadXMLInvoice = async (req, res, next) => {
       const xmlData = await response.text();
       xml2js.parseString(xmlData, async (err, result) => {
         if (err) {
-          res.status(500).json({ error: 'Error parsing XML response' });
+          res.status(500).json({
+            error: 'Error parsing XML response',
+          });
         } else {
           if (!result.header.Errors) {
             invoice.eFacturaStatus = 'sent';
             invoice.eFacturaIndex = result.header.index_incarcare;
+            console.log(result.header.index_incarcare);
             try {
               await invoice.save();
             } catch (error) {
@@ -213,11 +216,40 @@ exports.downloadXMLInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
 
-  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/descarcare?id=${invoice.eFacturaIndex}`;
-
   if (!invoice.eFacturaIndex) {
     return next(new HttpError('Factura nu a fost incarcata in SPV!', 401));
   }
+
+  // GET ID_DESCARCARE
+  let downloadId;
+  try {
+    const response = await fetch(
+      `https://api.anaf.ro/prod/FCTEL/rest/stareMesaj?id_incarcare=${invoice.eFacturaIndex}`,
+      {
+        method: 'GET',
+        headers: {
+          Authorization: `Bearer ${invoice.userId.efacturaToken}`,
+        },
+      }
+    );
+
+    if (response.ok) {
+      const xmlData = await response.text();
+      xml2js.parseString(xmlData, (err, result) => {
+        if (err) {
+          res.status(500).json({ error: 'Error parsing XML response' });
+        } else {
+          downloadId = result.header.$.id_descarcare;
+        }
+      });
+    } else {
+      throw new Error(`Failed to fetch message status: ${response.statusText}`);
+    }
+  } catch (error) {
+    throw error;
+  }
+
+  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/descarcare?id=${downloadId}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -227,7 +259,7 @@ exports.downloadXMLInvoice = async (req, res, next) => {
       },
     });
 
-    res.setHeader('Content-Type', 'application/xml');
+    // res.setHeader('Content-Type', 'application/zip');
 
     const reader = response.body.getReader();
 
