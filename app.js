@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 const HttpError = require('./models/http-error');
 
 // SCHEDULED TASKS
-// require('./controllers/scheduler-controllers')();
+require('./controllers/scheduler-controllers')();
 
 // aws bucket
 aws.config.region = 'eu-west-3';
