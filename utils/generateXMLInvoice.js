@@ -26,7 +26,12 @@ exports.generateXMLInvoice = (invoice) => {
   const clientPhone = invoice.clientData.phone;
   const clientEmail = invoice.clientData.email;
 
-  const quantity = 1;
+  let quantity;
+  if (invoice.reversedInvoice) {
+    quantity = -1;
+  } else {
+    quantity = 1;
+  }
 
   const items = invoice.detailedOrders
     ? invoice.orders.concat(invoice.addedItems)
@@ -38,6 +43,12 @@ exports.generateXMLInvoice = (invoice) => {
         (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
       0
     ) + invoice.previousClientBalance;
+  let priceAmount;
+  if (invoice.reversedInvoice) {
+    priceAmount = -totalInvoiced;
+  } else {
+    priceAmount = totalInvoiced;
+  }
 
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Invoice xmlns="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:ns4="urn:oasis:names:specification:ubl:schema:xsd:CommonExtensionComponents-2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="urn:oasis:names:specification:ubl:schema:xsd:Invoice-2 http://docs.oasis-open.org/ubl/os-UBL-2.1/xsd/maindoc/UBL-Invoice-2.1.xsd">
@@ -135,7 +146,7 @@ exports.generateXMLInvoice = (invoice) => {
 </cac:ClassifiedTaxCategory>
 </cac:Item>
 <cac:Price>
-<cbc:PriceAmount currencyID="RON">${totalInvoiced}</cbc:PriceAmount>
+<cbc:PriceAmount currencyID="RON">${priceAmount}</cbc:PriceAmount>
 </cac:Price>
 </cac:InvoiceLine>
 </Invoice>`;
