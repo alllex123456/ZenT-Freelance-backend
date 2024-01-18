@@ -1,3 +1,4 @@
+const { formattedNumber } = require('../../utils/format-efactura-number');
 const { translateUnits } = require('../../utils/translateUnits');
 
 exports.userSignUp = (req) => `<!DOCTYPE html>
@@ -232,7 +233,7 @@ ${
           <td>
                <h2 style="text-align:center; color:#495057; font-size:16px">${CLIENT_LNG(
                  'mail.invoice.h2'
-               )}: ${invoice.prefix}${invoice.number}</h2>
+               )}: ${invoice.prefix}${formattedNumber(invoice.number)}</h2>
           </td>
     </tr>
 
@@ -327,11 +328,11 @@ ${
           <td>
                <h2 style="text-align:center; color:#495057; font-size:16px">${CLIENT_LNG(
                  'mail.reminders.invoice.h2'
-               )} ${invoice.prefix}${invoice.number} ${CLIENT_LNG(
-    'mail.reminders.invoice.issued'
-  )} ${new Date(invoice.issuedDate).toLocaleDateString(
-    invoice.clientData.language
-  )} ${CLIENT_LNG(
+               )} ${invoice.prefix}${formattedNumber(
+    invoice.number
+  )} ${CLIENT_LNG('mail.reminders.invoice.issued')} ${new Date(
+    invoice.issuedDate
+  ).toLocaleDateString(invoice.clientData.language)} ${CLIENT_LNG(
     'mail.reminders.invoice.inAmountOf'
   )} ${invoice.totalInvoice.toLocaleString(invoice.clientData.language, {
     style: 'currency',

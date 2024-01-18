@@ -1,4 +1,4 @@
-const formattedNumber = (number) => String(number).padStart(4, '0');
+const { formattedNumber } = require('../utils/format-efactura-number');
 
 exports.generateXMLInvoice = (invoice) => {
   const { prefix, issuedDate, dueDate, notes } = invoice;
