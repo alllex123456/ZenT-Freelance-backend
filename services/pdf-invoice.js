@@ -63,7 +63,26 @@ exports.InvoicePDF = async (
 
   const userLogo = await fetchImage(user.invoiceLogo);
 
-  const items = detailedOrders ? orders.concat(addedItems) : addedItems;
+  let items;
+  if (reversing) {
+    const positiveOrders = orders.map((order) => ({
+      ...order.toObject(),
+      count: -order.count,
+      total: -order.total,
+    }));
+    const positiveAddedItems = addedItems.map((item) => ({
+      ...item.toObject(),
+      count: -item.count,
+      total: -item.total,
+    }));
+    items = detailedOrders
+      ? positiveOrders.concat(positiveAddedItems)
+      : positiveAddedItems;
+  } else {
+    items = detailedOrders ? orders.concat(addedItems) : addedItems;
+  }
+
+  const tableItems = detailedOrders ? orders.concat(addedItems) : addedItems;
 
   const subTotalInvoice = items.reduce((acc, item) => {
     if (item.discount) {
@@ -127,7 +146,7 @@ exports.InvoicePDF = async (
       { align: 'right' }
     )
     .text(
-      reversing
+      reversedInvoice
         ? `${CLIENT_LNG('invoice.reverseHeading')} ${
             reversedInvoice.prefix
           }/${formattedNumber(reversedInvoice.number)}`

@@ -69,7 +69,7 @@ exports.getInvoice = async (req, res, next) => {
   let invoice;
   try {
     invoice = await Invoice.findById(invoiceId).populate(
-      'userId clientId orders addedItems payments receipts'
+      'userId clientId orders addedItems payments receipts reversedInvoice'
     );
   } catch (error) {
     return next(new HttpError(req.t('errors.user.not_found'), 500));
@@ -116,44 +116,44 @@ exports.createInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.clients.no_client'), 404));
   }
 
-  // if (req.body.reverse) {
-  //   let reversedInvoice;
-  //   try {
-  //     reversedInvoice = await Invoice.findById(req.body.reversedInvoice);
-  //   } catch (error) {
-  //     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
-  //   }
+  if (req.body.reversing) {
+    let reversedInvoice;
+    try {
+      reversedInvoice = await Invoice.findById(req.body.reversedInvoice);
+    } catch (error) {
+      return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
+    }
 
-  //   reversedInvoice.reversed = true;
+    reversedInvoice.reversing = true;
 
-  //   await reversedInvoice.save();
+    await reversedInvoice.save();
 
-  //   const orderIds = orders.filter((order) => !order.addedItem);
-  //   let reversedOrders;
-  //   try {
-  //     reversedOrders = await Order.find({ _id: { $in: orderIds } });
-  //   } catch (error) {
-  //     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
-  //   }
-  //   reversedOrders.forEach(async (order) => {
-  //     order.count = -order.count;
-  //     order.total = -order.total;
-  //     await order.save();
-  //   });
+    const orderIds = orders.filter((order) => !order.addedItem);
+    let reversedOrders;
+    try {
+      reversedOrders = await Order.find({ _id: { $in: orderIds } });
+    } catch (error) {
+      return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
+    }
+    reversedOrders.forEach(async (order) => {
+      order.count = -order.count;
+      order.total = -order.total;
+      await order.save();
+    });
 
-  //   const addedItemIds = orders.filter((order) => !order.addedItem);
-  //   let addedItems;
-  //   try {
-  //     addedItems = await Order.find({ _id: { $in: addedItemIds } });
-  //   } catch (error) {
-  //     return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
-  //   }
-  //   addedItems.forEach(async (item) => {
-  //     item.count = -item.count;
-  //     item.total = -item.total;
-  //     await item.save();
-  //   });
-  // }
+    const addedItemIds = orders.filter((order) => !order.addedItem);
+    let addedItems;
+    try {
+      addedItems = await Order.find({ _id: { $in: addedItemIds } });
+    } catch (error) {
+      return next(new HttpError(req.t('errors.invoicing.not_found'), 500));
+    }
+    addedItems.forEach(async (item) => {
+      item.count = -item.count;
+      item.total = -item.total;
+      await item.save();
+    });
+  }
 
   const newInvoice = new Invoice({
     userId,
@@ -201,7 +201,6 @@ exports.createInvoice = async (req, res, next) => {
     issuedDate,
     cashed: false,
     notes,
-    reversing: req.body.reverse,
     reversedInvoice: req.body.reversedInvoice,
     previousClientBalance: req.body.previousClientBalance,
     detailedOrders,
