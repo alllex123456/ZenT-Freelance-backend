@@ -1,5 +1,6 @@
 const { fetchImage } = require('../utils/generalFunc');
 const PDFDocument = require('pdfkit-table');
+const { formattedNumber } = require('../utils/format-efactura-number');
 const { computeUnits } = require('../utils/compute-units');
 const { translateServices } = require('../utils/translateUnits');
 
@@ -122,14 +123,14 @@ exports.InvoicePDF = async (
     .text(
       `${CLIENT_LNG('invoice.prefix')} ${prefix}/${CLIENT_LNG(
         'invoice.number'
-      )} ${number}`,
+      )} ${formattedNumber(number)}`,
       { align: 'right' }
     )
     .text(
       reversing
-        ? `${CLIENT_LNG('invoice.reverseHeading')} ${reversedInvoice.prefix}/${
-            reversedInvoice.number
-          }`
+        ? `${CLIENT_LNG('invoice.reverseHeading')} ${
+            reversedInvoice.prefix
+          }/${formattedNumber(reversedInvoice.number)}`
         : '',
       { align: 'right' }
     )
