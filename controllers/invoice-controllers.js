@@ -125,6 +125,7 @@ exports.createInvoice = async (req, res, next) => {
     }
 
     reversedInvoice.reversing = true;
+    reversedInvoice.cashed = true;
 
     await reversedInvoice.save();
 
@@ -199,7 +200,7 @@ exports.createInvoice = async (req, res, next) => {
     orders: orders.filter((order) => !order.addedItem),
     dueDate,
     issuedDate,
-    cashed: false,
+    cashed: req.body.reversing ? true : false,
     notes,
     reversedInvoice: req.body.reversedInvoice,
     previousClientBalance: req.body.previousClientBalance,
