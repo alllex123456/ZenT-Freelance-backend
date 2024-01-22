@@ -9,7 +9,6 @@ exports.generateXMLInvoice = (invoice) => {
   const providerCountryCounty = `${invoice.userData.country.slice(0, 2)}-${
     invoice.userData.county
   }`;
-  const providerCNP = invoice.userId.cnp;
   const providerTaxNumber = invoice.userData.taxNumber;
   const providerName = invoice.userData.name;
   const providerPhone = invoice.userData.phone;
@@ -69,7 +68,7 @@ exports.generateXMLInvoice = (invoice) => {
 </cac:Country>
 </cac:PostalAddress>
 <cac:PartyTaxScheme>
-<cbc:CompanyID>${providerCNP || providerTaxNumber}</cbc:CompanyID>
+<cbc:CompanyID>${providerTaxNumber}</cbc:CompanyID>
 <cac:TaxScheme/>
 </cac:PartyTaxScheme>
 <cac:PartyLegalEntity>

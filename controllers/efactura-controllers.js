@@ -24,7 +24,7 @@ exports.checkEfacturaMessages = async (req, res, next) => {
   }
   if (!user.efacturaToken) return;
 
-  const cif = user.cnp || user.taxNumber;
+  const cif = user.taxNumber;
 
   const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=30&cif=${cif}`;
 
@@ -120,7 +120,7 @@ exports.uploadXMLInvoice = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
   }
 
-  const cif = invoice.userId.cnp || invoice.userId.taxNumber;
+  const cif = invoice.userId.taxNumber;
 
   const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif=${cif}`;
 
