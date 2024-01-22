@@ -12,9 +12,6 @@ const Transaction = require('../models/transaction');
 const { InvoicePDF } = require('../services/pdf-invoice');
 const { ReceiptPDF } = require('../services/pdf-receipt');
 
-const fetch = require('node-fetch');
-const getTotalInvoice = require('../utils/get-total-invoice');
-
 exports.getAllInvoices = async (req, res, next) => {
   let user;
   try {
