@@ -122,7 +122,7 @@ exports.uploadXMLInvoice = async (req, res, next) => {
 
   const cif = invoice.userId.taxNumber;
 
-  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif=${cif}`;
+  const apiUrl = `https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif=${cif}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -144,8 +144,8 @@ exports.uploadXMLInvoice = async (req, res, next) => {
         } else {
           if (!result.header.Errors) {
             invoice.eFacturaStatus = 'sent';
-            invoice.eFacturaIndex = result.header.index_incarcare;
-            console.log(result.header.index_incarcare);
+            invoice.eFacturaIndex = result.header.$.index_incarcare;
+
             try {
               await invoice.save();
             } catch (error) {
