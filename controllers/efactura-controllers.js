@@ -26,7 +26,7 @@ exports.checkEfacturaMessages = async (req, res, next) => {
 
   const cif = user.taxNumber;
 
-  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=30&cif=${cif}`;
+  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=60&cif=${cif}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -122,7 +122,7 @@ exports.uploadXMLInvoice = async (req, res, next) => {
 
   const cif = invoice.userId.taxNumber;
 
-  const apiUrl = `https://api.anaf.ro/test/FCTEL/rest/upload?standard=UBL&cif=${cif}`;
+  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/upload?standard=UBL&cif=${cif}`;
 
   try {
     const response = await fetch(apiUrl, {
@@ -154,7 +154,6 @@ exports.uploadXMLInvoice = async (req, res, next) => {
               );
             }
           } else {
-            // console.log(JSON.stringify(result));
             invoice.eFacturaStatus = 'failed';
             try {
               await invoice.save();
@@ -263,6 +262,8 @@ exports.downloadXMLInvoice = async (req, res, next) => {
     // res.setHeader('Content-Type', 'application/zip');
 
     const reader = response.body.getReader();
+
+    console.log(response.body);
 
     const pump = () => {
       return reader.read().then(({ done, value }) => {
