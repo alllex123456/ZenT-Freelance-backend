@@ -36,12 +36,13 @@ exports.generateXMLInvoice = (invoice) => {
     ? invoice.orders.concat(invoice.addedItems)
     : invoice.addedItems;
 
-  const totalInvoiced =
+  const totalInvoiced = (
     items.reduce(
       (acc, item) =>
         (acc += item.total + (item.total * invoice.userData.VATrate) / 100),
       0
-    ) + invoice.previousClientBalance;
+    ) + invoice.previousClientBalance
+  ).toFixed(invoice.clientData.decimalPoints);
   let priceAmount;
   if (invoice.reversedInvoice) {
     priceAmount = -totalInvoiced;
