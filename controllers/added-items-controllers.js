@@ -45,7 +45,7 @@ exports.addAddedItem = async (req, res, next) => {
     ...inputs,
   });
 
-  user.addedItems.push(newAddedItem);
+  // user.addedItems.push(newAddedItem);
   client.addedItems.push(newAddedItem);
   invoice.addedItems.push(newAddedItem);
 

@@ -36,10 +36,10 @@ const userSchema = new Schema(
     invoiceDefaultDue: { type: Number, required: false },
     invoiceLogo: { type: String, required: false },
     clients: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Client' }],
-    orders: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Order' }],
-    addedItems: [
-      { type: mongoose.Types.ObjectId, required: true, ref: 'AddedItem' },
-    ],
+    // orders: [{ type: mongoose.Types.ObjectId, required: true, ref: 'Order' }],
+    // addedItems: [
+    //   { type: mongoose.Types.ObjectId, required: true, ref: 'AddedItem' },
+    // ],
     invoices: [
       { type: mongoose.Types.ObjectId, required: true, ref: 'Invoice' },
     ],
