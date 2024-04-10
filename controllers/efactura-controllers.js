@@ -5,7 +5,7 @@ const { generateXMLInvoice } = require('../utils/generateXMLInvoice');
 const HttpError = require('../models/http-error');
 
 exports.checkEfacturaMessages = async (req, res, next) => {
-  const userId = req.body.user;
+  const { userId } = req.userData;
 
   if (userId.toString() !== req.userData.userId) {
     return next(new HttpError(req.t('errors.user.no_authorization'), 401));
