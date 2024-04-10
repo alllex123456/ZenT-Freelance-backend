@@ -183,7 +183,7 @@ exports.addOrder = async (req, res, next) => {
     total: calculatedTotal(unit, count, rate).toFixed(client.decimalPoints),
   });
 
-  // user.orders.push(newOrder);
+  user.orders.push(newOrder);
   client.orders.push(newOrder);
 
   try {
