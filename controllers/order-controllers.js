@@ -27,8 +27,14 @@ const calculatedTotal = (unit, count, rate) => {
 
 exports.getOrders = async (req, res, next) => {
   let orderIds;
-  if (req.headers.payload) {
-    orderIds = JSON.parse(req.headers.payload);
+  if (req.params.invoice) {
+    let invoice;
+    try {
+      invoice = await Invoice.findById(req.params.invoice);
+      orderIds = invoice.orders;
+    } catch (error) {
+      return next(new HttpError('Invoice not found!', 500));
+    }
   }
 
   let orders;
