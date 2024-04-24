@@ -12,10 +12,7 @@ const app = express();
 
 //CORS
 app.use((req, res, next) => {
-  res.setHeader(
-    'Access-Control-Allow-Origin',
-    'https://zent.alextanase.dev/main'
-  );
+  res.setHeader('Access-Control-Allow-Origin', 'https://zent.alextanase.dev');
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader(
     'Access-Control-Allow-Headers',
