@@ -12,8 +12,11 @@ const app = express();
 
 //CORS
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader(
+    'Access-Control-Allow-Origin',
+    'https://zent.alextanase.dev/main'
+  );
+  res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader(
     'Access-Control-Allow-Headers',
     'Origin, Content-Type, X-Requested-With, Accept, Authorization, Payload, listedOrders, invoiceId'
