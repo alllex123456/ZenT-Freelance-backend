@@ -40,7 +40,7 @@ app.use((req, res, next) => {
     'Access-Control-Allow-Methods',
     'OPTIONS, GET, POST, PATCH, DELETE'
   );
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Origin', 'https://zent.alextanase.dev/');
 
   next();
 });
