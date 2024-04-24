@@ -7,6 +7,24 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const HttpError = require('./models/http-error');
 
+///////////////////////
+const app = express();
+
+//CORS
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader(
+    'Access-Control-Allow-Headers',
+    'Origin, Content-Type, X-Requested-With, Accept, Authorization, Payload, listedOrders, invoiceId'
+  );
+  res.setHeader(
+    'Access-Control-Allow-Methods',
+    'OPTIONS, GET, POST, PATCH, DELETE'
+  );
+
+  next();
+});
+
 // SCHEDULED TASKS
 require('./controllers/scheduler-controllers')();
 
@@ -27,23 +45,6 @@ i18next
       loadPath: `./locales/{{lng}}/translation.json`,
     },
   });
-///////////////////////
-const app = express();
-
-//CORS
-app.use((req, res, next) => {
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Origin, Content-Type, X-Requested-With, Accept, Authorization, Payload, listedOrders, invoiceId'
-  );
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'OPTIONS, GET, POST, PATCH, DELETE'
-  );
-  res.setHeader('Access-Control-Allow-Origin', '*');
-
-  next();
-});
 
 app.use(bodyParser.json());
 app.use(middleware.handle(i18next));
