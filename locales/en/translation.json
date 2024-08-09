@@ -1,0 +1,285 @@
+{
+  "errors": {
+    "user": {
+      "no_authorization": "You are not authorized to do this operation.",
+      "no_token": "You are not logged in or your token has expired. Please log in again.",
+      "not_found": "There was a problem while enquiring the user database. Please retry.",
+      "no_user": "The user does not exist.",
+      "update_failed": "Error in the database while updating the user. Please try again.",
+      "no_user_client": "There was a problem while enquiring the database. The user or client does not exist. Please try again.",
+      "check_failed": "Error in the database while checking the user. Please try again.",
+      "registration_failed": "Error in the database while registering the user. Please try again.",
+      "token_gen_failed": "Server error while generating a token or the server is offline. Please try again.",
+      "pass_email_validation": "The password or e-mail fail the validation requirements: ",
+      "email_validation": "Invalid e-mail.",
+      "pass_check_failed": "Error while checking the password in the database (encryption error). Please try again.",
+      "wrong_pass": "The password is incorrect.",
+      "email_exists": "This e-mail is already registered. Please log in.",
+      "pass_generate_fail": "Could not generate a secured password (encryption error). Please retry.",
+      "reset_link_failed": "Server error while generating a reset link or the server is offline. Please try again.",
+      "invalid_link": "Invalid link.",
+      "reset_link_expired": "The validity of the reset link has expired."
+    },
+    "orders": {
+      "not_found": "There was a problem while enquiring the database. Please try again.",
+      "save_failed": "There was a problem while saving the order in the database. Please try again.",
+      "complete_failed": "There was a problem while completing the order in the database. Please try again.",
+      "modify_failed": "There was a problem while editing the order in the database. Please try again.",
+      "delete_failed": "There was a problem while deleting the order in the database. Please try again."
+    },
+    "items": {
+      "not_found": "There was a problem while enquiring the database. Please try again.",
+      "save_failed": "There was a problem while saving the item in the database. Please try again.",
+      "modify_failed": "There was a problem while editing the item in the database. Please try again.",
+      "delete_failed": "There was a problem while deleting the item in the database. Please try again."
+    },
+    "clients": {
+      "not_found": "There was a problem while enquiring the database. Please try again.",
+      "no_client": "The client does not exist.",
+      "save_failed": "There was a problem while saving the client. Please try again.",
+      "no_delete": "The client has pending or uninvoiced orders. Please complete or remove client's orders before attempting to remove it.",
+      "modify_failed": "There was a problem while editing the client. Please reload the page.",
+      "delete_failed": "There was a problem while removing the client. Please reload the page.",
+      "already_registered": "The client is already registered."
+    },
+    "statement": {
+      "send_failed": "There was a problem while sending the message. Please try again."
+    },
+    "invoicing": {
+      "not_found": "There was a problem while enquiring the database. Please try again.",
+      "no_invoice": "Invoice does not exist.",
+      "issue_fail": "Could not generate the invoice. Please try again",
+      "send_failed": "There was a problem while sending the message. Please try again.",
+      "update_failed": "The invoice could not be updated. Please try again.",
+      "cannot_delete_cashed": "Server error: the invoice is cashed.",
+      "cancel_failed": "There was a problem while cancelling the invoice. Please try again.",
+      "save_failed": "There was a problem while saving the invoice. Please try again.",
+      "reversed_failed": "There was a problem while reversing the invoice. Please try again."
+    },
+    "notes": {
+      "not_found": "There was a problem while enquiring the database. Please try again.",
+      "save_failed": "There was a problem while saving the notes. Please try again.",
+      "delete_failed": "There was a problem while removing the notes. Please try again."
+    },
+    "notifications:": {
+      "not_found": "There was a problem while enquiring the notifications. Please try again.",
+      "save_failed": "There was a problem while saving the notification. Please try again.",
+      "delete_failed": "There was a problem while removing the notification. Please try again."
+    },
+    "miscellaneous": {
+      "mime_type_invalid": "Invalid file type!"
+    }
+  },
+  "success": {
+    "user": {
+      "updated": "The user has been successfully updated!",
+      "reset_link_sent": "Please check your e-mail for the reset link.",
+      "pass_changed": "The password has been successfully changed!"
+    },
+    "orders": {
+      "added": "Order successfully added!",
+      "completed": "Order successfully completed!",
+      "modified": "Order successfully edited!",
+      "deleted": "Order successfully removed!"
+    },
+
+    "items": {
+      "added": "Item successfully added!",
+      "modified": "Item successfully edited!",
+      "deleted": "Item successfully removed!"
+    },
+
+    "clients": {
+      "added": "Client successfully added!",
+      "modified": "Client successfully edited!",
+      "deleted": "CClient successfully removed!"
+    },
+    "statement": {
+      "sent": "The statement has been successfully sent"
+    },
+    "invoicing": {
+      "issued": "The invoice has been successfully issued!",
+      "cashed": "The invoice has been successfully cashed!",
+      "reversed_issued": "The invoice has been reversed!",
+      "sent": "Invoice successfully sent. You will get a copy of the message on your e-mail.",
+      "modified": "Invoice successfully edited!",
+      "canceled": "The invoice has been cancelled!",
+      "saved": "The invoice has been successfully cashed!",
+      "reversed": "The invoice has been successfully reversed!"
+    },
+    "PDF": {
+      "gen_failed": "There was a problem while generating the PDF file. Please try again."
+    },
+    "transactions": {
+      "saved": "Your operation has been successfully saved.",
+      "edited": "Your operation has been successfully edited.",
+      "deleted": "Your operation has been successfully deleted."
+    }
+  },
+  "database": {
+    "connection_failed": "There was a problem while accessing the database. Please try again."
+  },
+  "units": {
+    "2000cw/s": "characters w/ spaces",
+    "1800cw/os": "characters w/o spaces",
+    "word": "word",
+    "300w": "words",
+    "short": {
+      "2000cw/s": "2000ch",
+      "1800cw/os": "1800ch",
+      "word": "word",
+      "300w": "300w"
+    }
+  },
+  "services": {
+    "translation": "translation",
+    "proofreading": "proofreading",
+    "postediting": "post-editing"
+  },
+  "accounting": {
+    "healthInsurance": "Health insurance",
+    "socialSecurity": "Social security",
+    "incomeTax": "Income tax"
+  },
+  "statement": {
+    "title": "Work statement",
+    "clientCode": "Client code",
+    "clientName": "Client name",
+    "generatedAt": "Generated at",
+    "it": "It.",
+    "jobRef": "Job/Reference",
+    "deadline": "Deadline",
+    "receivedDelivered": "Received/Delivered",
+    "qty": "Quantity",
+    "mu": "MU",
+    "rate": "Unit rate",
+    "amount": "Amount",
+    "notes": "Notes",
+    "total": "Total",
+    "previousBalance": "Previous balance"
+  },
+  "invoice": {
+    "title": "Invoice",
+    "prefix": "prefix",
+    "number": "no.",
+    "issuedDate": "Date issued",
+    "maturity": "Due by",
+    "supplier": "Supplier",
+    "client": "Client",
+    "registeredOffice": "Registered office",
+    "registrationNumber": "Registration number",
+    "taxNumber": "Tax number",
+    "bank": "Bank",
+    "iban": "IBAN",
+    "contact": "Contact",
+    "email": "Email",
+    "phone": "Phone",
+    "items": "Items",
+    "clientBalance": "Client balance",
+    "billingUnit": "measurement unit",
+    "it": "It.",
+    "jobRef": "Job/Reference",
+    "description": "Description",
+    "qty": "Quantity",
+    "mu": "MU",
+    "rate": "Unit rate",
+    "amount": "Amount",
+    "vat": "VAT",
+    "amountWithoutVAT": "Amount w/o VAT",
+    "amountWithVAT": "Amount w VAT",
+    "toPay": "Total to pay",
+    "remainder": "Remainder",
+    "deducted": "Deducted",
+    "subTotal": "Subtotal",
+    "discount": "Discount",
+    "notes": "Notes",
+    "reverseHeading": "reversing invoice",
+    "paymentInfo": "Payment methods",
+    "bankAccounts": "Bank accounts"
+  },
+  "receipt": {
+    "title": "Cash Receipt",
+    "number": "Number",
+    "date": "Date",
+    "amount": "Amount",
+    "received": "Received",
+    "from": "from",
+    "for": "for",
+    "invoice": "Invoice",
+    "amounting": "amounting",
+    "receivedBy": "Received by",
+    "signature": "Signature"
+  },
+  "transaction": {
+    "po": "payment order",
+    "receipt": "receipt",
+    "consideration": "payment due on invoice",
+    "issuedOn": "issued on"
+  },
+  "mail": {
+    "cc": "--message copy--",
+    "subjectSignUp": "Your Zent account has been created",
+    "subjectResetPassword": "Reset your Zent password",
+    "subjectInvoice": "You invoice is here",
+    "subjectStatement": "Work statement",
+    "userSignUp": {
+      "h1": "Welcome to Zent!",
+      "h2": "You account has been created. With Zent, you can streamline your work by taking advantage of the following functionalities",
+      "clientRegistration": "client registration",
+      "listLineOne": "company data, contacts, pricing, invoicing preferences",
+      "orderRegistration": "order registration",
+      "listLineTwo": "pending orders are automatically assigned to client work statement on completion",
+      "workStatement": "work statements",
+      "listLineThree": "based on the orders registered with the client",
+      "invoicingAndPayment": "invoicing and payments",
+      "listLineFour": "issue invoices based on the work statements or as a separate invoice, send it directly as an e-mail attachment and possibily include the related work statement",
+      "invoiceDetails": "invoice details",
+      "listLineFive": "invoice-dedicated page, with events and info about payments",
+      "invoiceFunctionalities": "invoice functionalities",
+      "listLineSix": "edit, cash, send, download, cancel, reverse",
+      "userAccount": "user account",
+      "listLineSeven": "with personal, invoicing and communication preferences",
+      "legalNoteTitle": "LEGAL NOTE",
+      "legalNoteText": "Continued and error-free operation of this software is not guaranteed. The user may expect momentary system errors, nevertheless all measures are in place to prevent data loss."
+    },
+    "passwordReset": {
+      "h1": "Hi",
+      "h2": "You have recently requested a password reset for your Zent account.",
+      "instruction": "Please click the button below in order to reset your password.",
+      "button": "RESET",
+      "warning": "If you did not request this reset, please ignore this message."
+    },
+    "statement": {
+      "h1": "Dear Client",
+      "h2": "Please find attached our detailed work statement",
+      "summary": "Summary",
+      "quantity": "Quantity",
+      "amount": "Amount",
+      "footer": "For any questions, please reply to this message or contact us at"
+    },
+    "invoice": {
+      "h1": "Dear Client",
+      "h2": "Please find attached your invoice",
+      "summary": "Summary",
+      "amount": "Amount",
+      "dueBy": "Due by",
+      "footer": "For any questions, please reply to this message or contact us at"
+    },
+    "reminders": {
+      "invoice": {
+        "subject": "Your invoice",
+        "h1": "Dear Client",
+        "h2": "This is a kind remainder that your invoice",
+        "issued": "issued",
+        "inAmountOf": "in amount of",
+        "dueTomorrow": "is due tomorrow",
+        "twoDaysOutstanding": "is two days past due",
+        "fourDaysOutstanding": "is four days past due",
+        "sixDaysOutstanding": "is six days past due",
+        "findDocumentAttached": "You can find the document attached to this message",
+        "thankYou": "Thank you for choosing to work with us"
+      }
+    }
+  },
+  "signature": "Document generated with Zent"
+}
