@@ -171,11 +171,22 @@ exports.login = async (req, res, next) => {
     return next(new HttpError(req.t('errors.user.wrong_pass'), 401));
   }
 
+  // let token;
+  // try {
+  //   token = jwt.sign({ user }, process.env.JWT_KEY, {
+  //     expiresIn: Math.floor(Date.now() / 1000) + 60 * 60 * 168,
+  //   });
+  // } catch (error) {
+  //   return next(new HttpError(req.t('errors.user.token_gen_failed'), 500));
+  // }
+
   let token;
   try {
-    token = jwt.sign({ user }, process.env.JWT_KEY, {
-      expiresIn: Math.floor(Date.now() / 1000) + 60 * 60 * 168,
-    });
+    token = jwt.sign(
+      { userId: user.id, email: user.email },
+      process.env.JWT_KEY
+      // { expiresIn: '7d' }
+    );
   } catch (error) {
     return next(new HttpError(req.t('errors.user.token_gen_failed'), 500));
   }

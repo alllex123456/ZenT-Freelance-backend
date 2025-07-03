@@ -26,7 +26,7 @@ exports.checkEfacturaMessages = async (req, res, next) => {
 
   const cif = user.taxNumber;
 
-  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=30&cif=${cif}`;
+  const apiUrl = `https://api.anaf.ro/prod/FCTEL/rest/listaMesajeFactura?zile=15&cif=${cif}`;
 
   try {
     const response = await fetch(apiUrl, {
